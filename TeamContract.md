@@ -44,6 +44,9 @@ We, therefore, the members of CSC207 LEC0201 Group 14, assembled in lecture, do 
 Team Member Signatures:
 
 Albert Guo
+
 Cynthia Rong
+
 Joshua Iaboni
+
 Sherry Yuehua Wang
