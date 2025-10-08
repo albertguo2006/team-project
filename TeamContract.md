@@ -7,44 +7,42 @@ This contract sets out shared expectations and commitments for how our team will
 
 ### Communication
 
-* Which platform will you use for communication outside of class, when required for work on your course project? (Examples: Text message, Discord, WeChat, etc.)
+All official team communications will be carried out on Discord. All members are expected to respond to direct messages within 24 hours, barring any exigent circumstances that would prevent a prompt response.
 
-* Each teammate agrees to respond to messages in at most how long? 1 day? 2 days? Some other amount of time? 
+All team members are expected to meet agreed upon deadlines. If they are unable to do so, they must inform the team in a reasonably prompt manner. All team members are also expcted to inform the team if they are unable to attend a lab or lecture.
 
-* What things should a teammate notify you about? (Examples: if they think they won't be able to meet a deadline, if they have to miss lecture, etc.)
+Acknowledging Section 15(1) of the Canadian Charter of Rights and Freedoms, all group members are equal before the law, and are subject to equal protection and equal responsibility. We hold firmly that all group members are entitled to certain fundamental rights, including:
+* The right to free speech and expression
+* The right to initiate a group vote regarding any material matter involving the relevant project.
+* The right to choose which parts of the project they wish to work on, subject to reasonable limitations and group demands.
 
-* Respectful and inclusive behaviour are necessary for smooth and productive communication. What are some respectful and inclusive behaviours you expect when communicating with each other during lectures, labs, or outside of class? (Examples: Actively listening to each team members ideas, giving everyone a chance to meaningfully contribute, etc.)
-
+We also agree to respect the rights of other group members, including but not limited to:
+* Listen to others' ideas.
+* Treat everyone equally.
+* Meet agreed-upon expectations.
+* Be open about circumstances that may affect participation.
 ---
 
-### [Other Categories of norms and expectations go here]
+## Decision Making & Conflict resolution
 
-* Based on your previous teamwork experiences, what other behaviours do you agree upon as a team?
-    - some examples of possible additional team norms and expectations are included in the sample team contract in case your team needs some help getting ideas for what else you want to include.
+Any group member may, at reasonable times, bring a reasonable issue to a democratic vote. The vote will be of a simple majority (four out of six members). If needed, the group member or members proposing the vote will be given 5 minutes to argue their perspective in front of the group. A further 2 minutes will be given to any member who wishes to offer an opposing perspective. 
 
----
-
-## Decision Making
-
-* How will decisions about your team project be made? (Examples: By majority vote, by unanimous vote, etc.)
-
----
-## Conflict resolution
-
-* How will your team resolve conflicts? (Example: by listening to each other's side of the issue and attempting to reach a compromise. By consulting a TA or instructor as a team, if a resolution has not yet been reached.)
+If a majority resolution cannot be reached, the group will consult the TA, the course instructor, or the current top LLM on LM Arena. 
 
 ---
 
 ## Accountability
 
-* Reliability and accountability are also important aspects of teamwork. What are the responsibilities of each team member? (Example: completing their share of the work in a timely manner, seeking assistance from teammates/TAs/instructors when required, etc.)
+Each team member is responsible for upholding the contents of this agreement. We recognize that this agreement will be enforced to the fullest extent permitted by the law throughout the duration of the course. We recognize that breaches of this agreement will be subject to penalties, including but not limited to: TA or instructor involvement, reduced marks on the peer review sheet, and dissolution of future connections. 
+
+## Amendments
+
+This agreement may be amended if all team members unanimously agree to the amendment.
 
 ---
 
----
-
-By signing below, we acknowledge that we have read, discussed, and agreed to these terms. We understand that this contract is binding for the duration of the course and may be revised with the agreement of all team members.
+We, therefore, the members of CSC207 LEC0201 Group 14, assembled in lecture, do unanimously agree upon and agree to ratify this agreement. We acknowledge that we have read, discussed, and agreed to these terms. And in assurance of this agreement, we mutually pedge to each other, our time, our course mark, and our sacred GPA.
 
 Team Member Signatures:
 
-(type names here)
+Albert Guo
