@@ -46,3 +46,4 @@ Team Member Signatures:
 Albert Guo
 Cynthia Rong
 Joshua Iaboni
+Sherry Yuehua Wang
