@@ -50,3 +50,7 @@ Cynthia Rong
 Joshua Iaboni
 
 Sherry Yuehua Wang
+
+Anjani Sjariffudin
+
+Jayden Luo
