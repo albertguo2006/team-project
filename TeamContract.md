@@ -9,7 +9,7 @@ This contract sets out shared expectations and commitments for how our team will
 
 All official team communications will be carried out on Discord. All members are expected to respond to direct messages within 24 hours, barring any exigent circumstances that would prevent a prompt response.
 
-All team members are expected to meet agreed upon deadlines. If they are unable to do so, they must inform the team in a reasonably prompt manner. All team members are also expcted to inform the team if they are unable to attend a lab or lecture.
+All team members are expected to meet agreed upon deadlines. If they are unable to do so, they must inform the team in a reasonably prompt manner. All team members are also expected to inform the team if they are unable to attend a lab or lecture.
 
 Acknowledging Section 15(1) of the Canadian Charter of Rights and Freedoms, all group members are equal before the law, and are subject to equal protection and equal responsibility. We hold firmly that all group members are entitled to certain fundamental rights, including:
 * The right to free speech and expression
@@ -25,9 +25,7 @@ We also agree to respect the rights of other group members, including but not li
 
 ## Decision Making & Conflict resolution
 
-Any group member may, at reasonable times, bring a reasonable issue to a democratic vote. The vote will be of a simple majority (four out of six members). If needed, the group member or members proposing the vote will be given 5 minutes to argue their perspective in front of the group. A further 2 minutes will be given to any member who wishes to offer an opposing perspective. 
-
-If a majority resolution cannot be reached, the group will consult the TA, the course instructor, or the current top LLM on LM Arena. 
+Any group member may, at reasonable times, bring a reasonable issue to a democratic vote. The vote will be of a simple majority (four out of six members). 
 
 ---
 
@@ -41,8 +39,9 @@ This agreement may be amended if all team members unanimously agree to the amend
 
 ---
 
-We, therefore, the members of CSC207 LEC0201 Group 14, assembled in lecture, do unanimously agree upon and agree to ratify this agreement. We acknowledge that we have read, discussed, and agreed to these terms. And in assurance of this agreement, we mutually pedge to each other, our time, our course mark, and our sacred GPA.
+We, therefore, the members of CSC207 LEC0201 Group 14, assembled in lecture, do unanimously agree upon and agree to ratify this agreement. We acknowledge that we have read, discussed, and agreed to these terms. And in assurance of this agreement, we mutually pledge to each other, our time, our course mark, and our sacred GPA.
 
 Team Member Signatures:
 
 Albert Guo
+Cynthia Rong
