@@ -1,5 +1,14 @@
 # Team Project
 
+Team member names: 
+Albert Guo
+Joshua Iaboni
+Jayden Luo
+Cynthia Rong
+Anjani Sjariffudin
+Sherry Wang
+
+
 Please keep this up-to-date with information about your project throughout the term.
 
 The readme should include information such as:
