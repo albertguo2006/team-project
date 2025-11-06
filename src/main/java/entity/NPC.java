@@ -49,5 +49,4 @@ public class NPC {
     // added a default score just in case certain NPCs start out with different default relationship
     // scores (for example, some NPCs may start out friendlier than others, thus having higher starting scores).
     // this can be deleted if we decide against this.
-
 }
