@@ -1,24 +1,27 @@
 package use_case.stock_game;
 
+import java.util.List;
+
 /**
  * output data for stock game use case
  **/
 
 public class StockGameOutputData {
 
-    private Double stockPrice;
+    private List<Double> stockPriceHistory;
     private Double shareNumber;
     private Double totalEquity;
+    // TODO should this instead be portfolio?????
 
     // initialise
-    public StockGameOutputData(Double stockPrice, Double shareNumber, Double totalEquity) {
-        this.stockPrice = stockPrice;
+    public StockGameOutputData(List<Double> stockPriceHistory, Double shareNumber, Double totalEquity) {
+        this.stockPriceHistory = stockPriceHistory;
         this.shareNumber = shareNumber;
         this.totalEquity = totalEquity;
     }
 
-    public Double getStockPrice() {
-        return stockPrice;
+    public List<Double> getStockPriceHistory() {
+        return stockPriceHistory;
     }
 
     public Double getShareNumber() {

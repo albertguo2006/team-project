@@ -1,13 +1,13 @@
-package use_case.stock_gane;
+package use_case.stock_game;
 
 /**
  * Input Boundary for actions related to the stock game.
  */
-public interface LoginInputBoundary {
+public interface StockGameInputBoundary {
 
     /**
      * Executes the stock game use case.
-     * @param stockInputData the input data
+     * @param stockGameInputData the input data
      */
-    void execute(StockInputData stockInputData);
+    void execute(StockGameInputData stockGameInputData);
 }

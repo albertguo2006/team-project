@@ -10,6 +10,7 @@ public class Player {
     private double balance;
     private final Map<NPC, Integer> relationships = new HashMap<>();
     private final List<Event> events =  new ArrayList<>();
+    private Portfolio portfolio =  new Portfolio();
 
     public Player(String name) {
         this.name = name;
