@@ -5,7 +5,7 @@ package use_case.stock_game;
  */
 //TODO eventually break this up into multiple interactors?
 // single responsibility or something
-public class StockGameInteractor {
+public class StockGameInteractor implements StockGameInputBoundary{
 
     private final StockGameDataAccessInterface stockGameDataAccessObject;
     private final StockGameOutputBoundary loginPresenter;
@@ -16,6 +16,13 @@ public class StockGameInteractor {
         this.loginPresenter = stockGameOutputBoundary;
     }
 
+    public void execute(StockGameInputData stockGameInputData){
+
+    }
+
+
+
+    // TODO: these methods below need to go somewhere else but i dont know where so thats a later problem
     /**
      * Returns the list of stock prices given the date, gameday.
      * @param //
@@ -30,6 +37,7 @@ public class StockGameInteractor {
      * @param //
      * @return //
      */
+    public int
 
     //TODO
     /**

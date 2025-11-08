@@ -12,7 +12,7 @@ public class StockHistory {
     String companyName;
     private List<Double> pastPrices;
 
-    // also, if priceHistory is just a list, then it will be written over each "day"
+    // also, if pastPrices is just a list, then it will be written over each "day"
     // do we want that? if not, may need to consider doing a Hash Map of some sort
 
 

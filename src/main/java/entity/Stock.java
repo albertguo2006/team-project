@@ -1,6 +1,5 @@
 package entity;
 
-
 // this is a class to represent the stock, which will store info about the stock including the name
 // and CURRENT (in-game) price histories
 public class Stock {
