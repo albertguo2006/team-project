@@ -1,300 +1,232 @@
-# California Prop. 65
+# Project Readme: California Prop. 65
 
 **Team:** TUT0401-14
 **Domain:** Stock Market and IRL Simulator Game
 
+-----
+
 ## 1\. Project Description
 
-**California Prop. 65** is a simulation game that satirizes the financial pressures of everyday life. Players must navigate a comically exaggerated capitalistic world, balancing a draining 9-5 job, paying bills, and managing financial setbacks. The core gameplay loop involves surviving, managing virtual money, and attempting to get ahead by investing in a simulated stock market.
+California Prop. 65 is a 2D simulation game that provides a satirical commentary on the financial pressures of modern life. The player must navigate an exaggerated capitalistic world, managing a 9-5 job, paying bills, and handling unexpected life events. The core gameplay loop involves surviving, managing virtual money, and attempting to build wealth through a simulated stock market.
+
+This project will be developed as a standalone **Java application** using the **Java Swing GUI toolkit**. It will strictly adhere to **Clean Architecture** principles to ensure a maintainable, testable, and scalable codebase.
 
 ### Core MVP Features
 
-The primary goal for our Minimum Viable Product (MVP) is to deliver the core "survive the day" loop. This includes:
+The Minimum Viable Product (MVP) will focus on delivering the core "survive the day" loop. This includes:
 
-1.  **Environment Interaction:** The player can move around a basic 2D/3D environment (e.g., apartment, office).
-2.  **Go to Work:** The player can travel to a "work" location.
-3.  **Stock Minigame:** Arriving at work triggers the core stock trading minigame, which is the primary method of earning money.
-4.  **Core Systems:** Basic save/load functionality, bill payment, and a "go to sleep" mechanic to end the day.
-
-## 2\. Project Architecture: CLEAN Architecture
-
-To ensure our project is **scalable**, **testable**, and **maintainable**, we will follow the principles of **CLEAN Architecture**. This separates our code into distinct layers, where dependencies only point *inward*.
-
-  * **The Problem:** We don't want our *game logic* (like how much a stock price changes) to be mixed up with *engine-specific code* (like how to display a graph in Unity).
-  * **The Solution:** We create layers. The "core" of our game (the rules) knows nothing about the "outside" (Unity, APIs, databases).
-
-Here are our layers, from inside to out:
-
-1.  **Domain (Entities):** The core data structures and objects. Pure C\# classes with no outside dependencies.
-      * *Examples: `Player`, `Stock`, `Event`, `NPC`*
-2.  **Application (Use Cases):** The business logic and rules of the game. This layer orchestrates the Entities. It defines *interfaces* for any outside data it needs (e.t., "I need stock data," but doesn't know *how* we get it).
-      * *Examples: `StockMarketUseCase`, `PlayerMovementUseCase`, `GameSaveUseCase`*
-3.  **Presentation (Controllers/Presenters):** Acts as the bridge. It translates input from the *Frameworks* layer (like a button click) into a call to a *Use Case*. It also takes data from the *Use Case* and formats it for the UI.
-      * *Examples: `PlayerInputController`, `StockMinigamePresenter`*
-4.  **Infrastructure (Frameworks & Drivers):** The "outside world." This is where Unity, our APIs (Alpha Vantage, Gemini), and our save/load system live. This layer *implements* the interfaces defined in the Application layer.
-      * *Examples: `UnityTimeProvider`, `AlphaVantageClient`, `FileSaveSystem`*
+1.  **2D Environment Interaction:** The player can move a 2D character sprite around a basic environment (e.g., apartment, office).
+2.  **Go to Work / Stock Minigame:** The player's job is represented by a stock trading minigame, which is the primary method of earning money.
+3.  **Core Systems:** The game will support saving/loading progress, a daily cycle (go to sleep), random events, and basic NPC interaction.
 
 -----
 
-## 3\. Recommended Folder Structure
+## 2\. Project Architecture: CLEAN Architecture in Java Swing
 
-This folder structure strictly enforces the CLEAN architecture layers.
+To meet the project requirements, we will separate our application into the four distinct layers of Clean Architecture. This ensures that our core game logic (Domain and Application) is completely independent of our GUI (Infrastructure).
 
-```
-Assets/
-├── 1_Domain/
-│   ├── Entities/
-│   │   ├── Player.cs
-│   │   ├── Stock.cs
-│   │   ├── NPC.cs
-│   │   ├── Event.cs
-│   │   └── GameState.cs
-│   └── Interfaces/
-│       ├── IPlayerRepository.cs
-│       ├── IStockRepository.cs
-│       ├── INPCRepository.cs
-│       └── IGameSaveRepository.cs
-│
-├── 2_Application/
-│   ├── UseCases/
-│   │   ├── PlayerMovementUseCase.cs
-│   │   ├── StockMarketUseCase.cs
-│   │   ├── NPCInteractionUseCase.cs
-│   │   ├── RandomEventUseCase.cs
-│   │   ├── GameSaveUseCase.cs
-│   │   └── FinancialUseCase.cs
-│   └── Interfaces/
-│       ├── IStockDataService.cs
-│       ├── ILLMService.cs
-│       └── ISaveLoadService.cs
-│
-├── 3_Presentation/
-│   ├── Controllers/
-│   │   ├── PlayerInputController.cs
-│   │   ├── StockMinigameController.cs
-│   │   ├── NPCInteractionController.cs
-│   │   ├── BillsUIController.cs
-│   │   └── SettingsMenuController.cs
-│   └── Presenters/
-│       ├── StockGraphPresenter.cs
-│       ├── DialoguePresenter.cs
-│       ├── PlayerStatsUIPresenter.cs
-│       └── BillsUIPresenter.cs
-│
-├── 4_Infrastructure/
-│   ├── Services/ (Implementations of Application Interfaces)
-│   │   ├── AlphaVantageClient.cs (Implements IStockDataService)
-│   │   ├── GeminiApiClient.cs (Implements ILLMService)
-│   │   ├── FileSaveSystem.cs (Implements ISaveLoadService)
-│   ├── Unity/ (All MonoBehaviour scripts)
-│   │   ├── GameLoopManager.cs (Main entry point)
-│   │   ├── PlayerView.cs (Handles Rigidbody, Transform, Animation)
-│   │   ├── NPCView.cs
-│   │   └── Triggers/
-│   │       ├── WorkZoneTrigger.cs
-│   │       ├── SleepTrigger.cs
-│   │       └── NPCInteractable.cs
-│   ├── ScriptableObjects/ (For configuration)
-│   │   ├── StockConfig.cs
-│   │   ├── EventConfig.cs
-│   │   └── NPCConfig.cs
-│
-├── Prefabs/
-├── Scenes/
-└── Settings/
+1.  **1\_Domain (Entities):**
+
+      * **Content:** Pure Java Objects (POJOs) that represent the core data and concepts of the game.
+      * **Rules:** Contains no logic related to *how* the game is played or displayed. Knows nothing about Swing, databases, or APIs.
+      * **Examples:** `Player.java`, `Stock.java`, `NPC.java`, `Event.java`, `GameState.java`.
+
+2.  **2\_Application (Use Cases):**
+
+      * **Content:** The business logic and rules of the game. This layer orchestrates the Entities.
+      * **Rules:** Contains all game logic (e.g., "how to calculate profit from a stock trade," "what happens when a player selects an event option"). It depends *only* on the Domain layer. It defines *interfaces* for any outside data or services it needs (e.g., `IStockDataService`, `IGameSaveRepository`).
+      * **Examples:** `StockMarketUseCase.java`, `PlayerMovementUseCase.java`, `GameSaveUseCase.java`, `NPCInteractionUseCase.java`.
+
+3.  **3\_Presentation (Controllers & Presenters):**
+
+      * **Content:** The bridge between the Application (logic) and Infrastructure (GUI).
+      * **Rules:** This layer adapts data for the view and translates user input into calls to the Use Cases.
+      * **Controllers:** Java **Event Listeners** (`ActionListener`, `KeyListener`, `MouseListener`). They take raw input from Swing components (like a `JButton` click) and call the appropriate `UseCase` method.
+      * **Presenters:** Classes responsible for formatting data from the Use Cases for the View. (e.g., taking a `List<Double>` of stock prices and preparing `(x, y)` coordinates for a `JPanel` to draw).
+
+4.  **4\_Infrastructure (Frameworks & Drivers):**
+
+      * **Content:** The "outside world." This is where Swing, our API clients, and our file system live.
+      * **Rules:** This layer is the "glue" that implements the interfaces defined in the Application layer. It is volatile and can be swapped out.
+      * **GUI (View):** All Java Swing components (`JFrame`, `JPanel`, `JButton`, `JDialog`).
+      * **Services:** `AlphaVantageClient.java` (implements `IStockDataService`), `GeminiApiClient.java` (implements `ILLMService`). These classes contain the `java.net.http.HttpClient` logic.
+      * **Persistence:** `FileSaveRepository.java` (implements `IGameSaveRepository`). This class uses `Gson` or `Jackson` to write a `GameState` object to a JSON file.
+
+-----
+
+## 3\. Recommended Package Structure
+
+This structure enforces the architectural layers.
+
+```java
+src/
+└── com/tut0401/prop65/
+    ├── 1_domain/
+    │   ├── entities/
+    │   │   ├── Player.java
+    │   │   ├── Stock.java
+    │   │   ├── Npc.java
+    │   │   ├── Event.java
+    │   │   └── GameState.java
+    │
+    ├── 2_application/
+    │   ├── usecases/
+    │   │   ├── PlayerMovementUseCase.java
+    │   │   ├── StockMarketUseCase.java
+    │   │   ├── NpcInteractionUseCase.java
+    │   │   ├── RandomEventUseCase.java
+    │   │   ├── GameSaveUseCase.java
+    │   │   └── FinancialUseCase.java
+    │   └── interfaces/
+    │       ├── IStockDataService.java  // Implemented by Infrastructure
+    │       ├── ILlmService.java        // Implemented by Infrastructure
+    │       └── IGameSaveRepository.java // Implemented by Infrastructure
+    │
+    ├── 3_presentation/
+    │   ├── controllers/
+    │   │   ├── PlayerInputController.java  // Implements KeyListener
+    │   │   ├── StockMinigameController.java // Contains ActionListeners
+    │   │   └── SettingsMenuController.java  // Contains ActionListeners
+    │   └── presenters/
+    │       └── StockGraphPresenter.java // Logic to prep data for graph
+    │
+    ├── 4_infrastructure/
+    │   ├── gui/
+    │   │   ├── MainGameWindow.java  // The main JFrame
+    │   │   ├── GamePanel.java       // The main 2D game view (extends JPanel)
+    │   │   ├── StockMinigamePanel.java // The stock game UI (extends JPanel)
+    │   │   ├── NpcDialog.java       // (extends JDialog)
+    │   │   ├── EventDialog.java     // (extends JDialog)
+    │   │   └── BillDialog.java      // (extends JDialog)
+    │   ├── services/
+    │   │   ├── AlphaVantageClient.java // Implements IStockDataService
+    │   │   └── GeminiApiClient.java    // Implements ILlmService
+    │   └── persistence/
+    │       └── FileSaveRepository.java // Implements IGameSaveRepository
+    │
+    └── Main.java // Main entry point, creates and shows the MainGameWindow
 ```
 
 -----
 
-## 4\. MVP Module Breakdown & Team Responsibilities
+## 4\. Core Game Loop (Swing Implementation)
 
-Here is the detailed architecture and task list for each MVP module.
+To create a 2D game ("User Story \#1") in Swing, we cannot rely on a simple event-driven model. We must create a real-time **game loop**.
+
+1.  **`MainGameWindow.java` (`JFrame`):** This is the main application window. It will hold the `GamePanel`.
+2.  **`GamePanel.java` (`JPanel`):**
+      * This class will override the `protected void paintComponent(Graphics g)` method.
+      * Inside `paintComponent`, we will draw the entire game state: the level background, the player sprite, and any NPCs, using `Graphics2D` methods (e.g., `g.drawImage()`, `g.fillRect()`).
+      * This panel will be the focus of the application.
+3.  **`PlayerInputController.java` (`KeyListener`):**
+      * This controller will be attached to the `GamePanel`.
+      * It will listen for `keyPressed` and `keyReleased` events (e.g., W, A, S, D).
+      * When a key is pressed, it will call a method in the `PlayerMovementUseCase` (e.g., `useCase.setMoving(Direction.UP, true)`).
+4.  **The Game Loop (`javax.swing.Timer`):**
+      * A `javax.swing.Timer` will be initialized in the `GamePanel` (or a main game manager) to fire approximately 60 times per second (e.g., every 16ms).
+      * This `Timer` is the "heartbeat" of the game.
+      * On each "tick" (its `actionPerformed` method), it will:
+        1.  **Update:** Call a main `update()` method, which in turn calls the `PlayerMovementUseCase.updatePosition()` to calculate the player's new `x, y` coordinates based on current input.
+        2.  **Render:** Call `gamePanel.repaint()`. This tells Swing to schedule a call to `paintComponent`, which will redraw the player at their new coordinates.
+
+-----
+
+## 5\. MVP Module Breakdown & Team Responsibilities
 
 ### Albert: Use Case \#1 (Environment Interaction)
 
   * **User Story:** As a user, I want to be able to interact with and move around in a virtual environment.
-  * **Core Logic:** Translate user input into character movement while respecting physics and boundaries.
-
-**Architecture:**
-
-1.  **Domain (`/1_Domain/Entities/Player.cs`):**
-      * The `Player` entity will hold data like `currentPosition` (Vector3) and `movementSpeed` (float). This class should *not* know about Unity's `Transform` or `Rigidbody`.
-2.  **Application (`/2_Application/UseCases/PlayerMovementUseCase.cs`):**
-      * Create a class `PlayerMovementUseCase`.
-      * It will have a method: `Move(Player player, Vector3 direction)`.
-      * This method contains the *logic* of movement (e.g., applying speed, checking for stamina if we add it later). It does *not* handle collisions.
-3.  **Presentation (`/3_Presentation/Controllers/PlayerInputController.cs`):**
-      * This **MonoBehaviour** script will live in the scene.
-      * It will use Unity's Input System (e.g., `Input.GetAxis("Horizontal")`).
-      * In its `Update()` loop, it will read the input, create a `direction` vector, and call the `PlayerMovementUseCase.Move()` method.
-4.  **Infrastructure (`/4_Infrastructure/Unity/PlayerView.cs`):**
-      * This **MonoBehaviour** script is attached to the Player GameObject.
-      * It holds the reference to the `Rigidbody` or `CharacterController`.
-      * The `PlayerMovementUseCase` (or an intermediary) will update the `Player` entity's position. This `PlayerView` script will observe that change (or be called directly) and apply the actual movement to the `Rigidbody` (e.g., `rb.MovePosition()`). This class handles the *physics and collisions*.
-
------
+  * **Architecture:**
+      * **Domain:** Modify `Player.java` to include `double x`, `double y`, `double speed`.
+      * **Application:** Create `PlayerMovementUseCase.java`. This class will manage the player's position and movement state.
+          * Methods: `setMovementState(Direction dir, boolean isMoving)`, `updatePosition(double deltaTime)`. This method calculates the new `x, y` based on speed and time, and handles basic collision detection (checking against a simple map array).
+      * **Presentation:** Create `PlayerInputController.java` (implements `KeyListener`). On `keyPressed("W")`, call `useCase.setMovementState(Direction.UP, true)`.
+      * **Infrastructure:**
+          * Create `GamePanel.java` (extends `JPanel`). This is the core view.
+          * Implement the `javax.swing.Timer` game loop here. The loop's `actionPerformed` will call `playerMovementUseCase.updatePosition()` and then `this.repaint()`.
+          * Implement `paintComponent(Graphics g)`. This method will read `player.getX()` and `player.getY()` (from the entity) and draw a `g.fillRect(player.getX(), ...)` or `g.drawImage(...)`.
+          * Implement the interaction trigger (e.g., if player `x, y` is near an object and "E" is pressed).
 
 ### Cynthia: Use Case \#6 (Stock Investing)
 
-  * **User Story:** As a user, I want to work a 9-5 and invest in a simulated stock market to earn virtual money.
-  * **Core Logic:** Fetch real stock data, generate a playable minigame, and handle the buy/sell logic within a time limit.
-
-**Architecture:**
-
-1.  **Domain (`/1_Domain/Entities/Stock.cs`, `Player.cs`):**
-      * `Stock` class: Holds `tickerSymbol`, `companyName`, and `List<double> priceHistory`.
-      * `Player` class: Holds `cashBalance`.
-2.  **Application (`/2_Application/UseCases/StockMarketUseCase.cs`):**
-      * This is the *brain* of the minigame. It is a **pure C\# class**.
-      * It needs data. It will depend on an *interface*: `IStockDataService`.
-      * **Methods:**
-          * `StartMinigame(Player player, string stockTicker)`: Calls `IStockDataService.GetStockData()`, stores the data, sets the timer (30s), and calculates the player's initial investment (40% of cash).
-          * `Tick()`: Called every frame/second by the controller. It advances the minigame timer and generates the *next* stock price based on the algorithm (weighted random walk on real data).
-          * `Buy(Player player)`: Logic to buy stock with all available minigame cash.
-          * `Sell(Player player)`: Logic to sell all held stock.
-          * `EndMinigame(Player player)`: Called when timer hits 0 or user exits. Sells all stock, calculates profit/loss, and updates the `player.cashBalance`.
-3.  **Presentation (`/3_Presentation/`):**
-      * `StockMinigameController.cs`: A **MonoBehaviour** that manages the minigame UI.
-          * Listens for "Buy" and "Sell" button clicks and calls the corresponding `StockMarketUseCase` methods.
-          * Runs a `Coroutine` or uses `Update()` to call `StockMarketUseCase.Tick()` and update the timer UI.
-      * `StockGraphPresenter.cs`: A **MonoBehaviour** that takes the `priceHistory` list from the `StockMarketUseCase` and renders it on the UI (e.g., using a LineRenderer or UI\_Graph asset).
-4.  **Infrastructure (`/4_Infrastructure/`):**
-      * `AlphaVantageClient.cs`: Implements the `IStockDataService` interface. This class is the *only* one that knows about Alpha Vantage. It will use `UnityWebRequest` to call the API and parse the JSON into a `List<double>`.
-      * `WorkZoneTrigger.cs`: A **MonoBehaviour** (e.g., a box collider) that the player enters. On trigger, it calls the `StockMinigameController` to start the game.
-
------
+  * **User Story:** As a user, I want to work a 9-5 and invest in a simulated stock market.
+  * **Architecture:**
+      * **Domain:** Create `Stock.java` (with `priceHistory`). Modify `Player.java` (with `cashBalance`).
+      * **Application:**
+          * Create `IStockDataService.java` interface (e.g., `List<Double> getStockHistory(String ticker)`).
+          * Create `StockMarketUseCase.java`. This is the *logic core*.
+          * Methods: `startMinigame(Player p)`. This fetches data via `IStockDataService`, sets up the 30-second game timer (e.g., `java.util.Timer`), and generates the price walk.
+          * Methods: `buy(Player p)`, `sell(Player p)`, `endMinigame(Player p)`. These methods modify the `Player`'s `cashBalance` and stock holdings.
+      * **Infrastructure (Services):** Create `AlphaVantageClient.java` (implements `IStockDataService`). This class uses `java.net.http.HttpClient` to call the Alpha Vantage API and parse the JSON response (using `Gson` or `Jackson`).
+      * **Infrastructure (GUI):** Create `StockMinigamePanel.java` (extends `JPanel`). This panel will be shown in the `MainGameWindow` (e.g., using a `CardLayout`) when the game starts. It will contain "Buy" and "Sell" `JButton`s and a `JPanel` for the graph.
+      * **Presentation:** Create `StockMinigameController.java`. This adds `ActionListener`s to the buttons. The "Buy" listener calls `stockMarketUseCase.buy()`. This layer also needs a way to get data *from* the use case (e.g., via the Observer pattern) to update the graph, which will be drawn in the `StockMinigamePanel`'s `paintComponent`.
 
 ### Joshua: Use Case \#2 (Random Events)
 
   * **User Story:** As a user, experience random events/challenges.
-  * **Core Logic:** Trigger an event, present options, and apply the outcome.
-
-**Architecture:**
-
-1.  **Domain (`/1_Domain/Entities/Event.cs`, `Player.cs`):**
-      * `Event` class: Holds `eventID`, `eventDescription`, and a `List<EventOption>`.
-      * `EventOption` class: Holds `optionText` and `outcome` (e.g., a struct with `moneyChange` and `statChange`).
-2.  **Application (`/2_Application/UseCases/RandomEventUseCase.cs`):**
-      * **Methods:**
-          * `TriggerRandomEvent(Player player)`: Selects a random `Event` (e.g., from a `ScriptableObject` list passed in). Checks if `player.events` list already contains it.
-          * `SelectEventOption(Player player, EventOption option)`: Applies the `option.outcome` to the `player` (e.g., `player.cashBalance += option.outcome.moneyChange`). Adds `eventID` to `player.events`.
-3.  **Presentation (`/3_Presentation/`):**
-      * `EventPresenter.cs`: A **MonoBehaviour** that controls the Event pop-up UI. It's normally hidden.
-      * `RandomEventUseCase` will call this `Presenter` to show the UI, populating the `eventDescription` text and creating buttons for each `EventOption`.
-      * The buttons' `OnClick` listeners will call `RandomEventUseCase.SelectEventOption()`.
-4.  **Infrastructure (`/4_Infrastructure/Unity/Triggers/`):**
-      * Event triggers can be placed in the world (e.g., `SleepTrigger` calls `RandomEventUseCase.TriggerRandomEvent()` before sleeping).
-
------
+  * **Architecture:**
+      * **Domain:** Create `Event.java` and `EventOption.java` (with `eventDescription`, `optionText`, `moneyEffect`).
+      * **Application:** Create `RandomEventUseCase.java`.
+          * Methods: `triggerRandomEvent()`. This method randomly selects an `Event` from a predefined list (e.g., loaded from a config file) and returns it.
+          * Methods: `selectEventOption(Player p, EventOption option)`. This method applies the `moneyEffect` to the `p.cashBalance`.
+      * **Infrastructure (GUI):** Create `EventDialog.java` (extends `JDialog`). This is a modal pop-up window.
+          * Its constructor will take an `Event` object.
+          * It will dynamically create a `JLabel` for the `eventDescription` and a `JButton` for each `EventOption`.
+      * **Presentation (Controller):** The `ActionListener` for each option `JButton` (created in the `EventDialog`) will call `randomEventUseCase.selectEventOption()` with the corresponding option, and then `dispose()` the dialog.
+      * **Integration:** Sherry's `TimeUseCase` will call `randomEventUseCase.triggerRandomEvent()` and show this dialog.
 
 ### Jayden: Use Case \#3 (NPC Interactions)
 
   * **User Story:** As a user, I want to be able to interact/talk to other characters or npcs.
-  * **Core Logic:** Send user input and NPC personality to an LLM and display the response.
-
-**Architecture:**
-
-1.  **Domain (`/1_Domain/Entities/NPC.cs`, `Player.cs`):**
-      * `NPC` class: Holds `name` and `dialoguePrompt` (the personality).
-      * `Player` class: Holds `Map<NPC, Integer> relationships`.
-2.  **Application (`/2_Application/UseCases/NPCInteractionUseCase.cs`):**
-      * Depends on an *interface*: `ILLMService`.
-      * **Methods:**
-          * `StartInteraction(NPC npc)`: Prepares the dialogue state.
-          * `SendPlayerMessage(Player player, NPC npc, string playerInput)`:
-            1.  Constructs a full prompt (e.g., `npc.dialoguePrompt` + "The player says: " + `playerInput`).
-            2.  Calls `await ILLMService.GetResponse(fullPrompt)`.
-            3.  Receives the `npcResponse` string.
-            4.  (Bonus) Can do simple sentiment analysis on `playerInput` to update `player.relationships`.
-            5.  Returns the `npcResponse` to the Presentation layer.
-3.  **Presentation (`/3_Presentation/`):**
-      * `NPCInteractionController.cs`: A **MonoBehaviour**. When the player interacts, it calls `StartInteraction`. It takes text from an `InputField` and calls `SendPlayerMessage`.
-      * `DialoguePresenter.cs`: A **MonoBehaviour**. Receives the `npcResponse` string from the `UseCase` and displays it in a `TextMeshProUGUI` component.
-4.  **Infrastructure (`/4_Infrastructure/`):**
-      * `GeminiApiClient.cs`: Implements the `ILLMService` interface. This class handles the `UnityWebRequest` to the Google Gemini API, including managing the API key and parsing the JSON response.
-      * `NPCInteractable.cs`: A **MonoBehaviour** on the NPC GameObject that detects the player's "interact" button press.
-
------
+  * **Architecture:**
+      * **Domain:** Create `Npc.java` (with `name`, `dialoguePrompt`, `x`, `y`). Modify `Player.java` to hold `relationships`.
+      * **Application:**
+          * Create `ILlmService.java` interface (e.g., `String getDynamicResponse(String prompt)`).
+          * Create `NpcInteractionUseCase.java`.
+          * Methods: `interact(Player p, Npc npc, String playerInput)`. This method builds the full prompt, calls `iLlmService.getDynamicResponse()`, and returns the NPC's response string.
+      * **Infrastructure (Services):** Create `GeminiApiClient.java` (implements `ILlmService`). This uses `HttpClient` to call the Google Gemini API.
+      * **Infrastructure (GUI):** Create `NpcDialog.java` (extends `JDialog`). This modal pop-up contains a `JTextArea` (for chat history), a `JTextField` (for user input), and a "Send" `JButton`.
+      * **Presentation (Controller):** The "Send" button's `ActionListener` gets text from the `JTextField`, calls `npcInteractionUseCase.interact()`, and appends both the player's input and the NPC's response to the `JTextArea`.
+      * **Integration:** Albert's `PlayerMovementUseCase` (or `PlayerInputController`) will detect an interaction (e.g., "E" key near an NPC) and trigger this dialog.
 
 ### Anjani: Use Case \#4 (Saving/Loading)
 
   * **User Story:** As a user, I want to be able to save/load my progress.
-  * **Core Logic:** Gather all game state, serialize it, and write it to a file. Then, be able to read, deserialize, and restore the state.
+  * **Architecture:**
+      * **Domain:** Create `GameState.java`. This is a POJO that holds *all* data to be persisted (the `Player` entity, `List<Npc>` states, current in-game day, etc.).
+      * **Application:**
+          * Create `IGameSaveRepository.java` interface (e.g., `void save(GameState state)`, `GameState load()`).
+          * Create `GameSaveUseCase.java`.
+          * Methods: `saveGame()`. This method gathers all current data from the live `Player` entity (and other entities) into a new `GameState` object and passes it to `iGameSaveRepository.save()`.
+          * Methods: `loadGame()`. This method calls `iGameSaveRepository.load()` and receives a `GameState` object. It then *updates* the application's *current* live `Player` entity (and others) with this loaded data.
+      * **Infrastructure (Persistence):** Create `FileSaveRepository.java` (implements `IGameSaveRepository`). This class uses `Gson` or `Jackson` to serialize the `GameState` object to a JSON file (e.g., `save.json`) and deserialize it.
+      * **Infrastructure (GUI):** Add a `JMenuBar` to the `MainGameWindow.java`.
+      * **Presentation (Controller):** Create `SettingsMenuController.java`. This adds `ActionListener`s to "Save" and "Load" `JMenuItem`s, which call `gameSaveUseCase.saveGame()` and `gameSaveUseCase.loadGame()` respectively.
 
-**Architecture:**
+### Sherry: Use Case \#5 (Everyday Tasks: Bills + Sleep)
 
-1.  **Domain (`/1_Domain/Entities/GameState.cs`):**
-      * A **serializable** C\# class.
-      * It contains *data*, not logic. E.g., `PlayerData`, `WorldData` (like in-game time), `List<NPCData>`.
-      * `PlayerData` would store `cashBalance`, `relationships`, `events`, `position`.
-2.  **Application (`/2_Application/UseCases/GameSaveUseCase.cs`):**
-      * Depends on an *interface*: `ISaveLoadService`.
-      * **Methods:**
-          * `SaveGame()`:
-            1.  Gathers all necessary data from the `Player` entity and other game systems.
-            2.  Assembles a new `GameState` object.
-            3.  Calls `ISaveLoadService.Save(gameState)`.
-          * `LoadGame()`:
-            1.  Calls `ISaveLoadService.Load()`.
-            2.  Receives a `GameState` object.
-            3.  Restores the game. This is tricky. It will likely need to *push* this data back into the `Player` entity and notify other systems to update themselves (e.g., move the player GameObject).
-          * `AutoSave()`: Called by the `TimeUseCase` (Sherry's module) at the end of the day.
-3.  **Presentation (`/3_Presentation/Controllers/SettingsMenuController.cs`):**
-      * A **MonoBehaviour** for the settings UI.
-      * The "Save" button `OnClick` listener calls `GameSaveUseCase.SaveGame()`.
-      * The "Load" button `OnClick` listener (on the main menu) calls `GameSaveUseCase.LoadGame()`.
-4.  **Infrastructure (`/4_Infrastructure/Services/FileSaveSystem.cs`):**
-      * Implements the `ISaveLoadService` interface.
-      * **Methods:**
-          * `Save(GameState state)`: Uses `JsonUtility` (or Newtonsoft) to serialize the `state` object into a JSON string. Writes this string to a file using `File.WriteAllText(Application.persistentDataPath + "/save.json")`.
-          * `Load()`: Reads the text from the file, deserializes it back into a `GameState` object, and returns it.
-
------
-
-### Sherry: Use Case \#5 (Everyday Tasks)
-
-  * **User Story:** As a user, I want to manage my virtual money (pay bills, go to sleep).
-  * **Core Logic:** Track in-game time. At set intervals, trigger bills. Allow the player to sleep to advance time and trigger saves.
-
-**Architecture:**
-
-1.  **Domain (`/1_Domain/Entities/Player.cs`):**
-      * The `Player` entity holds `cashBalance`.
-2.  **Application (`/2_Application/UseCases/FinancialUseCase.cs`, `TimeUseCase.cs`):**
-      * `FinancialUseCase.cs`:
-          * `PayBills(Player player, double amount)`: Checks if `player.cashBalance >= amount`. If yes, subtracts it. If no, returns an error (for the UI to display).
-      * `TimeUseCase.cs`:
-          * Depends on `GameSaveUseCase` (Anjani's module).
-          * `GoToSleep(Player player)`:
-            1.  Advances the in-game day counter.
-            2.  Triggers the bill logic (e.g., generates a bill amount and calls `BillsUIPresenter` to show it).
-            3.  Calls `GameSaveUseCase.AutoSave()`.
-            4.  (Bonus) Can call `RandomEventUseCase.TriggerRandomEvent()`.
-3.  **Presentation (`/3_Presentation/`):**
-      * `BillsUIController.cs`: A **MonoBehaviour** that shows the bill pop-up. The "Pay" button calls `FinancialUseCase.PayBills()`. It will display an error if the Use Case returns one.
-      * `SleepController.cs`: (Can be part of `BillsUIController`). Shows the "End Day?" confirmation.
-4.  **Infrastructure (`/4_Infrastructure/`):**
-      * `GameClock.cs`: A **MonoBehaviour** that can track the in-game time (e.g., a simple float that counts up).
-      * `SleepTrigger.cs`: A **MonoBehaviour** (collider) on the bed. When interacted with, it calls `TimeUseCase.GoToSleep()`.
+  * **User Story:** As a user, I want to be able to... go through everyday tasks (pay bills, ... go to bed).
+  * **Architecture:**
+      * **Domain:** Modify `Player.java` for `cashBalance`.
+      * **Application:**
+          * Create `FinancialUseCase.java`. Methods: `payBills(Player p, double amount)`. This checks if the player has enough `cashBalance` and subtracts the amount.
+          * Create `TimeUseCase.java`. This orchestrates the end-of-day sequence.
+          * Methods: `goToSleep(Player p)`. This is a critical method that calls other use cases in order:
+            1.  Calls `Joshua_RandomEventUseCase.triggerRandomEvent()` (and shows the dialog).
+            2.  Generates bills and shows the `BillDialog`.
+            3.  Calls `Anjani_GameSaveUseCase.saveGame()` (this is the auto-save).
+            4.  Advances the in-game day counter.
+      * **Infrastructure (GUI):**
+          * Create `BillDialog.java` (extends `JDialog`). Shows the user their bills and a "Pay" button.
+          * The "Go to Sleep" trigger will be in Albert's `GamePanel` (e.g., player walks to a bed and presses "E").
+      * **Presentation (Controller):** The "Pay" button's `ActionListener` in `BillDialog` will call `financialUseCase.payBills()`. The "Sleep" interaction will call `timeUseCase.goToSleep()`.
 
 -----
 
-## 5\. Core API Integration
+## 6\. API and Data Persistence Plan
 
-1.  **Google Gemini (Jayden: NPC Interaction)**
-
-      * **File:** `/4_Infrastructure/Services/GeminiApiClient.cs`
-      * **Purpose:** To generate dynamic NPC dialogue.
-      * **Method:** This class will implement `ILLMService`. It will have an `async` method `GetResponse(string prompt)` that uses `UnityWebRequest` to send a POST request to the Gemini API endpoint.
-      * **Security:** The API key **must not** be in the code. Store it in a file ignored by Git (e.g., `api_keys.json`) and load it at runtime.
-
-2.  **Alpha Vantage (Cynthia: Stock Minigame)**
-
-      * **File:** `/4_Infrastructure/Services/AlphaVantageClient.cs`
-      * **Purpose:** To fetch historical stock data for the minigame.
-      * **Method:** This class will implement `IStockDataService`. It will have an `async` method `GetStockData(string ticker)` that uses `UnityWebRequest` to send a GET request. It will parse the "Time Series (Daily)" JSON response and extract, for example, the last 100 days of "4. close" prices into a `List<double>`.
-      * **Security:** Same as above; store the API key securely.
-
-This structure keeps your logic clean, makes it easy to swap out systems (e.g., change from Alpha Vantage to another API), and allows each team member to work on their module without causing conflicts.
-
-Would you like me to elaborate on the `GameState` design or the specific data flow for the stock minigame?
+  * **API Usage:**
+    1.  **Alpha Vantage:** (Cynthia) Used via `AlphaVantageClient.java` to get historical stock data for the trading minigame.
+    2.  **Google Gemini:** (Jayden) Used via `GeminiApiClient.java` to generate dynamic dialogue for NPCs.
+  * **Data Persistence:**
+    1.  **File System:** (Anjani) The `FileSaveRepository.java` will implement the `IGameSaveRepository` interface. It will use the `Gson` library to serialize the `GameState` domain object into a `save.json` file. This fulfills the data persistence requirement.
