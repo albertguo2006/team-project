@@ -32,17 +32,19 @@ import java.awt.event.ActionListener;
  * 4. RENDER PHASE: this.repaint() schedules paintComponent()
  * 5. On EDT: paintComponent(Graphics g) renders the frame
  */
+import entity.GameMap;
+import entity.Zone;
+
 public class GamePanel extends JPanel implements ActionListener {
-    
     private final PlayerMovementUseCase playerMovementUseCase;
     private final Timer gameTimer;
-    
+    private final GameMap gameMap;
+
     // Game loop timing
     private static final int FRAME_DELAY_MS = 16;  // ~60 FPS (1000ms / 60 ≈ 16.67ms)
     private long lastUpdateTime;
-    
+
     // Rendering constants
-    private static final Color BACKGROUND_COLOR = new Color(34, 139, 34);  // Forest green
     private static final Color PLAYER_COLOR = Color.BLUE;
     private static final int PLAYER_WIDTH = 32;
     private static final int PLAYER_HEIGHT = 32;
@@ -57,17 +59,17 @@ public class GamePanel extends JPanel implements ActionListener {
     public GamePanel(PlayerMovementUseCase playerMovementUseCase, 
                      PlayerInputController playerInputController) {
         this.playerMovementUseCase = playerMovementUseCase;
-        
+        this.gameMap = new GameMap();
+
         // Set panel properties
         this.setPreferredSize(new Dimension(800, 600));
-        this.setBackground(BACKGROUND_COLOR);
+        this.setBackground(gameMap.getCurrentZone().getBackgroundColor());
         this.setFocusable(true);
-        
+
         // Attach the input controller as a KeyListener
         this.addKeyListener(playerInputController);
-        
+
         // Initialize the game loop timer
-        // ActionListener is 'this', so actionPerformed() will be called each tick
         this.gameTimer = new Timer(FRAME_DELAY_MS, this);
         this.lastUpdateTime = System.currentTimeMillis();
     }
@@ -104,19 +106,86 @@ public class GamePanel extends JPanel implements ActionListener {
         long currentTime = System.currentTimeMillis();
         double deltaTime = (currentTime - lastUpdateTime) / 1000.0;
         lastUpdateTime = currentTime;
-        
+
         // Cap delta time to prevent huge jumps if frame is delayed
         if (deltaTime > 0.05) {  // More than 50ms = cap at 50ms
             deltaTime = 0.05;
         }
-        
+
         // === UPDATE PHASE ===
         playerMovementUseCase.updatePosition(deltaTime);
-        
+        checkZoneTransition();
+
         // === RENDER PHASE ===
-        // Schedule a repaint on the Event Dispatch Thread
-        // This will eventually call paintComponent()
         this.repaint();
+    }
+
+    /**
+     * Checks if the player has reached the edge of the screen and transitions to the next zone if needed.
+     */
+    private void checkZoneTransition() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        double x = player.getX();
+        double y = player.getY();
+        boolean transitioned = false;
+
+        // Check vertical transitions first
+        // Bottom edge
+        if (y >= getHeight()) {
+            String nextZone = currentZone.getNeighbor(Zone.Edge.DOWN);
+            if (nextZone != null) {
+                gameMap.setCurrentZone(nextZone);
+                player.setY(0); // Enter from top
+                transitioned = true;
+            } else {
+                // Block movement if no zone below
+                player.setY(getHeight() - PLAYER_HEIGHT);
+            }
+        }
+        // Top edge
+        if (y <= -PLAYER_HEIGHT) {
+            String nextZone = currentZone.getNeighbor(Zone.Edge.UP);
+            if (nextZone != null) {
+                gameMap.setCurrentZone(nextZone);
+                player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
+                transitioned = true;
+            } else {
+                // Block movement if no zone above
+                player.setY(0);
+            }
+        }
+
+        // Check horizontal transitions
+        // Right edge
+        if (x >= getWidth()) {
+            String nextZone = currentZone.getNeighbor(Zone.Edge.RIGHT);
+            if (nextZone != null) {
+                gameMap.setCurrentZone(nextZone);
+                player.setX(0); // Enter from left
+                transitioned = true;
+            } else {
+                // Block movement if no zone to the right
+                player.setX(getWidth() - PLAYER_WIDTH);
+            }
+        }
+        // Left edge
+        if (x <= -PLAYER_WIDTH) {
+            String nextZone = currentZone.getNeighbor(Zone.Edge.LEFT);
+            if (nextZone != null) {
+                gameMap.setCurrentZone(nextZone);
+                player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
+                transitioned = true;
+            } else {
+                // Block movement if no zone to the left
+                player.setX(0);
+            }
+        }
+
+        // Update background color if zone changed
+        if (transitioned) {
+            setBackground(gameMap.getCurrentZone().getBackgroundColor());
+        }
     }
     
     /**
@@ -132,19 +201,20 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        // Call parent to handle background and borders
         super.paintComponent(g);
-        
-        // Cast to Graphics2D for more features (optional)
         Graphics2D g2d = (Graphics2D) g;
-        
-        // Enable anti-aliasing for smoother graphics
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        // === Draw Game Objects ===
+
+        // Draw zone name at top center
+        Zone zone = gameMap.getCurrentZone();
+        g2d.setColor(Color.DARK_GRAY);
+        g2d.setFont(new Font("Arial", Font.BOLD, 24));
+        String zoneName = zone.getName();
+        int zoneNameWidth = g2d.getFontMetrics().stringWidth(zoneName);
+        g2d.drawString(zoneName, (getWidth() - zoneNameWidth) / 2, 40);
+
+        // Draw player
         drawPlayer(g2d);
-        
-        // === Draw UI ===
         drawUI(g2d);
     }
     

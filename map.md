@@ -1,21 +1,24 @@
 # Game Map Design
 
-This document describes the layout and structure of the game world for California Prop. 65. The world is divided into multiple screens (zones), each representing a distinct area. When the player reaches the edge of a screen, the game transitions to the adjacent zone.
+This document describes the layout and structure of the game world for California Prop. 65. The world is divided into multiple screens (zones), each representing a distinct area. When the player reaches the edge of a screen, the game transitions to the adjacent zone. x denotes two zones are not connected
 
 ## Map Overview
 
 ```
 +-------------------+-------------------+
-| Home              | Subway Station 1  |
-|                   |                   |
+| Home              x Subway Station 1  |
+|                   x  (connects to 2)  |
 +-------------------+-------------------+
 | Street 1          | Street 2          |
+|                   |                   |
++-------------------+-------------------+
+|                   |                   |
 |                   | Grocery Store     |
 +-------------------+-------------------+
 
 +-------------------+-------------------+
-| Subway Station 2  | Office            |
-|                   | (Your Cubicle)    |
+| Subway Station 2  x Office            |
+|  (connects to 1)  x (Your Cubicle)    |
 +-------------------+-------------------+
 | Street 3          | Office Lobby      |
 +-------------------+-------------------+

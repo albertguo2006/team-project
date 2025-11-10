@@ -72,7 +72,7 @@ public class PlayerMovementUseCase {
      * This method:
      * 1. Calculates velocity based on active movement directions
      * 2. Computes new position: newPos = currentPos + (velocity * deltaTime)
-     * 3. Checks for collisions and boundary violations
+     * 3. Checks for collisions and boundary violations (but allows edge crossing for zone transitions)
      * 4. Updates the player's x and y coordinates
      * 
      * @param deltaTime the time elapsed since the last update, in seconds
@@ -99,9 +99,13 @@ public class PlayerMovementUseCase {
         double newX = player.getX() + (velocityX * deltaTime);
         double newY = player.getY() + (velocityY * deltaTime);
         
-        // Apply collision detection and boundary checking
-        newX = clampPosition(newX, PLAYER_WIDTH, WORLD_WIDTH);
-        newY = clampPosition(newY, PLAYER_HEIGHT, WORLD_HEIGHT);
+        // Allow position to go slightly beyond boundaries for zone transitions
+        // The GamePanel will handle zone transitions when position exceeds bounds
+        // Only prevent huge out-of-bounds jumps
+        if (newX < -50) newX = -50;
+        if (newX > WORLD_WIDTH + 50) newX = WORLD_WIDTH + 50;
+        if (newY < -50) newY = -50;
+        if (newY > WORLD_HEIGHT + 50) newY = WORLD_HEIGHT + 50;
         
         // Update player position
         player.setX(newX);
