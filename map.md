@@ -17,10 +17,12 @@ This document describes the layout and structure of the game world for Californi
 +-------------------+-------------------+
 
 +-------------------+-------------------+
-| Subway Station 2  x Office            |
-|  (connects to 1)  x (Your Cubicle)    |
+|                   x Office            |
+|                   x (Your Cubicle)    |
 +-------------------+-------------------+
 | Street 3          | Office Lobby      |
++-------------------+-------------------+
+| Subway Station 2  |                   |
 +-------------------+-------------------+
 ```
 

@@ -50,31 +50,29 @@ public class GameMap {
         // UP will be handled by special transition to Subway Station 2
         subway1.setNeighbor(Zone.Edge.DOWN, "Street 2");
 
-        // Street 1 - connects UP to Home, RIGHT to Street 2, DOWN to Subway Station 2
+        // Street 1 - connects UP to Home, RIGHT to Street 2
         street1.setNeighbor(Zone.Edge.UP, "Home");
         street1.setNeighbor(Zone.Edge.RIGHT, "Street 2");
-        street1.setNeighbor(Zone.Edge.DOWN, "Subway Station 2");
 
         // Street 2 - connects UP to Subway Station 1, LEFT to Street 1, RIGHT to Grocery Store
-        // DOWN is blocked (Office is no longer directly accessible from Street 2)
         street2.setNeighbor(Zone.Edge.UP, "Subway Station 1");
         street2.setNeighbor(Zone.Edge.LEFT, "Street 1");
         street2.setNeighbor(Zone.Edge.RIGHT, "Grocery Store");
 
-        // Grocery Store - connects LEFT to Street 2 only (NOT to Office)
+        // Grocery Store - connects LEFT to Street 2 only
         grocery.setNeighbor(Zone.Edge.LEFT, "Street 2");
 
         // Subway Station 2 - connects UP to Street 1, DOWN to Street 3, RIGHT is blocked (x)
         // DOWN will be handled by special transition to Subway Station 1
-        subway2.setNeighbor(Zone.Edge.UP, "Street 1");
-        subway2.setNeighbor(Zone.Edge.DOWN, "Street 3");
+        subway2.setNeighbor(Zone.Edge.DOWN, "Subway Station 1");
+        subway2.setNeighbor(Zone.Edge.UP, "Street 3");
 
         // Office (Your Cubicle) - ONLY connects DOWN to Office Lobby
         // UP, LEFT, RIGHT are all blocked
         office.setNeighbor(Zone.Edge.DOWN, "Office Lobby");
 
         // Street 3 - connects UP to Subway Station 2, RIGHT to Office Lobby
-        street3.setNeighbor(Zone.Edge.UP, "Subway Station 2");
+        street3.setNeighbor(Zone.Edge.DOWN, "Subway Station 2");
         street3.setNeighbor(Zone.Edge.RIGHT, "Office Lobby");
 
         // Office Lobby - connects UP to Office, LEFT to Street 3
