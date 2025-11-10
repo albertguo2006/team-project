@@ -2,18 +2,23 @@ package entity;
 
 import java.awt.Color;
 import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
  * Represents the entire game map, containing all zones and their connections.
+ * Also manages special transitions like subway tunnels.
  */
 public class GameMap {
     private final Map<String, Zone> zones = new HashMap<>();
+    private final List<Transition> specialTransitions = new ArrayList<>();
     private String currentZoneName;
 
     public GameMap() {
         // Initialize all zones and their connections
         createZones();
+        createSpecialTransitions();
         currentZoneName = "Home";
     }
 
@@ -42,6 +47,7 @@ public class GameMap {
         home.setNeighbor(Zone.Edge.DOWN, "Street 1");
 
         // Subway Station 1 (top-right) - connects DOWN to Street 2, LEFT is blocked (x)
+        // UP will be handled by special transition to Subway Station 2
         subway1.setNeighbor(Zone.Edge.DOWN, "Street 2");
 
         // Street 1 - connects UP to Home, RIGHT to Street 2, DOWN to Subway Station 2
@@ -49,21 +55,22 @@ public class GameMap {
         street1.setNeighbor(Zone.Edge.RIGHT, "Street 2");
         street1.setNeighbor(Zone.Edge.DOWN, "Subway Station 2");
 
-        // Street 2 - connects UP to Subway Station 1, LEFT to Street 1, DOWN to Office, RIGHT to Grocery Store
+        // Street 2 - connects UP to Subway Station 1, LEFT to Street 1, RIGHT to Grocery Store
+        // DOWN is blocked (Office is no longer directly accessible from Street 2)
         street2.setNeighbor(Zone.Edge.UP, "Subway Station 1");
         street2.setNeighbor(Zone.Edge.LEFT, "Street 1");
-        street2.setNeighbor(Zone.Edge.DOWN, "Office (Your Cubicle)");
         street2.setNeighbor(Zone.Edge.RIGHT, "Grocery Store");
 
-        // Grocery Store - connects LEFT to Street 2
+        // Grocery Store - connects LEFT to Street 2 only (NOT to Office)
         grocery.setNeighbor(Zone.Edge.LEFT, "Street 2");
 
         // Subway Station 2 - connects UP to Street 1, DOWN to Street 3, RIGHT is blocked (x)
+        // DOWN will be handled by special transition to Subway Station 1
         subway2.setNeighbor(Zone.Edge.UP, "Street 1");
         subway2.setNeighbor(Zone.Edge.DOWN, "Street 3");
 
-        // Office (Your Cubicle) - connects UP to Street 2, DOWN to Office Lobby, LEFT is blocked (x)
-        office.setNeighbor(Zone.Edge.UP, "Street 2");
+        // Office (Your Cubicle) - ONLY connects DOWN to Office Lobby
+        // UP, LEFT, RIGHT are all blocked
         office.setNeighbor(Zone.Edge.DOWN, "Office Lobby");
 
         // Street 3 - connects UP to Subway Station 2, RIGHT to Office Lobby
@@ -86,15 +93,57 @@ public class GameMap {
         zones.put(lobby.getName(), lobby);
     }
 
+    /**
+     * Creates special transitions like subway tunnels that connect non-adjacent zones.
+     */
+    private void createSpecialTransitions() {
+        // Subway tunnel connecting Subway Station 1 (top) and Subway Station 2 (bottom)
+        // From Subway Station 1, going UP enters the tunnel to Subway Station 2
+        specialTransitions.add(new Transition(
+            "Subway Station 1", Zone.Edge.UP,
+            "Subway Station 2", Zone.Edge.DOWN,
+            "Subway Tunnel"
+        ));
+
+        // Bidirectional: From Subway Station 2, going DOWN enters the tunnel to Subway Station 1
+        specialTransitions.add(new Transition(
+            "Subway Station 2", Zone.Edge.DOWN,
+            "Subway Station 1", Zone.Edge.UP,
+            "Subway Tunnel"
+        ));
+    }
+
     public Zone getCurrentZone() {
         return zones.get(currentZoneName);
     }
+    
     public void setCurrentZone(String zoneName) {
         if (zones.containsKey(zoneName)) {
             currentZoneName = zoneName;
         }
     }
+    
     public Zone getZone(String zoneName) {
         return zones.get(zoneName);
+    }
+
+    /**
+     * Gets a special transition from the current zone in a given direction.
+     * Returns null if no special transition exists for that direction.
+     * 
+     * @param edge the direction to check
+     * @return the Transition object if one exists, or null
+     */
+    public Transition getSpecialTransition(Zone.Edge edge) {
+        for (Transition t : specialTransitions) {
+            if (t.getFromZone().equals(currentZoneName) && t.getFromEdge() == edge) {
+                return t;
+            }
+        }
+        return null;
+    }
+
+    public List<Transition> getAllTransitions() {
+        return specialTransitions;
     }
 }

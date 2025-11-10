@@ -29,20 +29,20 @@ This document describes the layout and structure of the game world for Californi
 ### Zone 1: Home
 - Top-left screen
 - Exits:
-  - Right: Subway Station 1
   - Down: Street 1
+  - Right is BLOCKED
 
 ### Zone 2: Subway Station 1
 - Top-right screen
 - Exits:
-  - Left: Home
-  - Down: Street 2 / Grocery Store
+  - Down: Street 2
+  - **Up (Special): Subway Tunnel to Subway Station 2**
 
 ### Zone 3: Street 1
 - Bottom-left screen
 - Exits:
   - Up: Home
-  - Right: Street 2 / Grocery Store
+  - Right: Street 2
   - Down: Subway Station 2
 
 ### Zone 4: Street 2 / Grocery Store
@@ -50,21 +50,27 @@ This document describes the layout and structure of the game world for Californi
 - Exits:
   - Up: Subway Station 1
   - Left: Street 1
-  - Down: Office
+  - Right: Grocery Store
+  - Down is BLOCKED
+
+### Zone 4b: Grocery Store
+- Connects only to Street 2 (LEFT)
+- Dead-end destination
 
 ### Zone 5: Subway Station 2
 - Lower-left screen (second map row)
 - Exits:
   - Up: Street 1
-  - Right: Office
-  - Down: Street 3
+  - **Down (Special): Subway Tunnel to Subway Station 1**
+  - Down-exit: Street 3 (blocked by tunnel)
 
 ### Zone 6: Office (Your Cubicle)
 - Lower-right screen (second map row)
 - Exits:
-  - Up: Street 2 / Grocery Store
-  - Left: Subway Station 2
-  - Down: Office Lobby
+  - Down: Office Lobby ONLY
+  - Up is BLOCKED
+  - Left is BLOCKED
+  - Right is BLOCKED
 
 ### Zone 7: Street 3
 - Bottom-left screen (third map row)
@@ -78,14 +84,30 @@ This document describes the layout and structure of the game world for Californi
   - Up: Office (Your Cubicle)
   - Left: Street 3
 
+## Special Transitions
+
+Special transitions allow travel between non-adjacent zones, useful for implementing tunnels, elevators, and fast travel.
+
+### Subway Tunnel
+- **Route**: Subway Station 1 ↔ Subway Station 2
+- **Activation**: 
+  - From Subway Station 1: Move UP
+  - From Subway Station 2: Move DOWN
+- **Purpose**: Connects the two subway stations that are not physically adjacent on the map
+- **Future use**: Can add visual feedback, travel time, or special events
+
 ## Transition Logic
 - The game world is a grid of screens (zones).
-- When the player moves to the edge of the current screen, the game loads the adjacent zone and places the player at the corresponding entry edge.
-- Each zone has its own background, objects, and NPCs.
+- When the player moves to the edge of the current screen, the game checks:
+  1. First for special transitions (tunnels, elevators)
+  2. Then for normal zone connections
+- If a valid transition exists, the player is moved to the adjacent zone at the corresponding entry edge
+- If no transition exists, the player is blocked from moving beyond the edge
 
-## Example Transition
-- Player moves right at the edge of "Home" → loads "Subway Station 1" and places player at the left edge of that screen.
-- Player moves down at the edge of "Street 1" → loads "Subway Station 2" and places player at the top edge of that screen.
+## Example Transitions
+- Player moves right at the edge of "Home" → BLOCKED (no connection)
+- Player moves down at the edge of "Street 1" → loads "Subway Station 2" at top edge
+- Player moves UP at the edge of "Subway Station 1" → loads "Subway Station 2" at bottom edge (via subway tunnel)
 
 ## Future Extensions
 - Add more zones for additional gameplay areas.

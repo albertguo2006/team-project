@@ -34,6 +34,7 @@ import java.awt.event.ActionListener;
  */
 import entity.GameMap;
 import entity.Zone;
+import entity.Transition;
 
 public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
@@ -122,6 +123,7 @@ public class GamePanel extends JPanel implements ActionListener {
 
     /**
      * Checks if the player has reached the edge of the screen and transitions to the next zone if needed.
+     * First checks for special transitions (tunnels, elevators), then normal zone connections.
      */
     private void checkZoneTransition() {
         Player player = playerMovementUseCase.getPlayer();
@@ -130,61 +132,104 @@ public class GamePanel extends JPanel implements ActionListener {
         double y = player.getY();
         boolean transitioned = false;
 
-        // Check vertical transitions first
-        // Bottom edge
+        // Determine which edge the player crossed
+        Zone.Edge edgeCrossed = null;
         if (y >= getHeight()) {
-            String nextZone = currentZone.getNeighbor(Zone.Edge.DOWN);
-            if (nextZone != null) {
-                gameMap.setCurrentZone(nextZone);
+            edgeCrossed = Zone.Edge.DOWN;
+        } else if (y <= -PLAYER_HEIGHT) {
+            edgeCrossed = Zone.Edge.UP;
+        } else if (x >= getWidth()) {
+            edgeCrossed = Zone.Edge.RIGHT;
+        } else if (x <= -PLAYER_WIDTH) {
+            edgeCrossed = Zone.Edge.LEFT;
+        }
+
+        if (edgeCrossed != null) {
+            // First check for special transitions (tunnels, elevators, etc.)
+            Transition specialTransition = gameMap.getSpecialTransition(edgeCrossed);
+            if (specialTransition != null) {
+                // Use special transition
+                gameMap.setCurrentZone(specialTransition.getToZone());
+                repositionPlayerFromTransition(player, specialTransition.getToEdge());
+                transitioned = true;
+            } else {
+                // Fall back to normal zone connection
+                String nextZone = currentZone.getNeighbor(edgeCrossed);
+                if (nextZone != null) {
+                    gameMap.setCurrentZone(nextZone);
+                    repositionPlayerFromEdge(player, edgeCrossed);
+                    transitioned = true;
+                } else {
+                    // Block movement if no connection
+                    blockPlayerMovement(player, edgeCrossed);
+                }
+            }
+
+            // Update background color if zone changed
+            if (transitioned) {
+                setBackground(gameMap.getCurrentZone().getBackgroundColor());
+            }
+        }
+    }
+
+    /**
+     * Repositions the player when entering a zone via a normal edge connection.
+     */
+    private void repositionPlayerFromEdge(Player player, Zone.Edge edgeExited) {
+        switch (edgeExited) {
+            case DOWN:
                 player.setY(0); // Enter from top
-                transitioned = true;
-            } else {
-                // Block movement if no zone below
-                player.setY(getHeight() - PLAYER_HEIGHT);
-            }
-        }
-        // Top edge
-        if (y <= -PLAYER_HEIGHT) {
-            String nextZone = currentZone.getNeighbor(Zone.Edge.UP);
-            if (nextZone != null) {
-                gameMap.setCurrentZone(nextZone);
+                break;
+            case UP:
                 player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
-                transitioned = true;
-            } else {
-                // Block movement if no zone above
-                player.setY(0);
-            }
-        }
-
-        // Check horizontal transitions
-        // Right edge
-        if (x >= getWidth()) {
-            String nextZone = currentZone.getNeighbor(Zone.Edge.RIGHT);
-            if (nextZone != null) {
-                gameMap.setCurrentZone(nextZone);
+                break;
+            case RIGHT:
                 player.setX(0); // Enter from left
-                transitioned = true;
-            } else {
-                // Block movement if no zone to the right
-                player.setX(getWidth() - PLAYER_WIDTH);
-            }
-        }
-        // Left edge
-        if (x <= -PLAYER_WIDTH) {
-            String nextZone = currentZone.getNeighbor(Zone.Edge.LEFT);
-            if (nextZone != null) {
-                gameMap.setCurrentZone(nextZone);
+                break;
+            case LEFT:
                 player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
-                transitioned = true;
-            } else {
-                // Block movement if no zone to the left
-                player.setX(0);
-            }
+                break;
         }
+    }
 
-        // Update background color if zone changed
-        if (transitioned) {
-            setBackground(gameMap.getCurrentZone().getBackgroundColor());
+    /**
+     * Repositions the player when entering a zone via a special transition.
+     * The toEdge indicates which edge of the destination zone the player enters from.
+     */
+    private void repositionPlayerFromTransition(Player player, Zone.Edge toEdge) {
+        switch (toEdge) {
+            case DOWN:
+                player.setY(0); // Enter from top
+                break;
+            case UP:
+                player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
+                break;
+            case RIGHT:
+                player.setX(0); // Enter from left
+                break;
+            case LEFT:
+                player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
+                break;
+        }
+    }
+
+    /**
+     * Blocks the player from moving beyond the edge when there's no valid connection.
+     */
+    private void blockPlayerMovement(Player player, Zone.Edge edgeTouched) {
+        switch (edgeTouched) {
+            case DOWN:
+                player.setY(getHeight() - PLAYER_HEIGHT);
+                break;
+            case UP:
+                player.setY(0);
+                break;
+            case RIGHT:
+                player.setX(getWidth() - PLAYER_WIDTH);
+                break;
+            case LEFT:
+                player.setX(0);
+                break;
         }
     }
     
