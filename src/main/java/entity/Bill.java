@@ -32,6 +32,9 @@ public class Bill {
     public Boolean getPaid() {
         return isPaid;
     }
+    public double getAmount() {
+        return amount;
+    }
     public double getTotal(){
         return total;
     }
