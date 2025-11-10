@@ -1,9 +1,9 @@
-package use_case.stock_game;
+package use_case.stock_game.end_stock_game;
 
 /**
  * The output boundary for the stock game Use Case.
  */
-public interface StockGameOutputBoundary {
+public interface EndStockGameOutputBoundary {
     /**
      * Prepares the success view for the stock game Use Case.
      * for when the amount the player invests is right

@@ -1,22 +1,26 @@
-package use_case.stock_game;
+package use_case.stock_game.play_stock_game;
+
+import entity.Stock;
+
+import java.util.List;
 
 /**
  * The stock game Interactor.
  */
 //TODO eventually break this up into multiple interactors?
 // single responsibility or something
-public class StockGameInteractor implements StockGameInputBoundary{
+public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
 
-    private final StockGameDataAccessInterface stockGameDataAccessObject;
-    private final StockGameOutputBoundary loginPresenter;
+    private final PlayStockGameDataAccessInterface stockGameDataAccessObject;
+    private final PlayStockGameOutputBoundary loginPresenter;
 
-    public StockGameInteractor(StockGameDataAccessInterface stockGameDataAccessInterface,
-                               StockGameOutputBoundary stockGameOutputBoundary){
-        this.stockGameDataAccessObject = stockGameDataAccessInterface;
-        this.loginPresenter = stockGameOutputBoundary;
+    public PlayStockGameInteractor(PlayStockGameDataAccessInterface playStockGameDataAccessInterface,
+                                   PlayStockGameOutputBoundary playStockGameOutputBoundary){
+        this.stockGameDataAccessObject = playStockGameDataAccessInterface;
+        this.loginPresenter = playStockGameOutputBoundary;
     }
 
-    public void execute(StockGameInputData stockGameInputData){
+    public void execute(PlayStockGameInputData playStockGameInputData){
 
     }
 
@@ -24,10 +28,13 @@ public class StockGameInteractor implements StockGameInputBoundary{
 
     // TODO: these methods below need to go somewhere else but i dont know where so thats a later problem
     /**
-     * Returns the list of stock prices given the date, gameday.
-     * @param //
-     * @return//
+     * Returns the list of stock prices given the stock, date, gameday.
+     * @param stock which stock you want data on
+     * @param date (String?) for the date of the data
+     * @param gameday integer from 1-5 for which day of the game thy're on
+     * @return stockPastPrices which are that stock's prices for that day
      */
+    List<Double> getStockPastPrices(Stock stock, String date, int gameday);
     User get(String username);
 
 

@@ -1,10 +1,10 @@
-package use_case.stock_game;
+package use_case.stock_game.end_stock_game;
 
 /**
  * input data for stock game use case
 **/
 
-public class StockGameInputData {
+public class EndStockGameInputData {
     private final Double startAmount;
     // starting amount that player is investing
     private final String date; // current date for user
@@ -13,7 +13,7 @@ public class StockGameInputData {
 
 
     // initialise attributes
-    public StockGameInputData(Double startAmount, String date, int gameDay) {
+    public EndStockGameInputData(Double startAmount, String date, int gameDay) {
         this.startAmount = startAmount;
         this.date = date;
         this.gameDay = gameDay;

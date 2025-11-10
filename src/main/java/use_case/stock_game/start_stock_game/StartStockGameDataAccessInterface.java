@@ -1,10 +1,10 @@
-package use_case.stock_game;
+package use_case.stock_game.start_stock_game;
 
 /**
  * DAO interface for the stock game use case.
  */
 
-public interface StockGameDataAccessInterface {
+public interface StartStockGameDataAccessInterface {
 
     /**
      * Returns the user with the given username.
