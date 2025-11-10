@@ -1,7 +1,7 @@
 package use_case.stock_game.start_stock_game;
 
 /**
- * Input Boundary for actions related to the stock game.
+ * Input Boundary for actions related to START stock game.
  */
 public interface StartStockGameInputBoundary {
 

@@ -1,7 +1,7 @@
 package use_case.stock_game.start_stock_game;
 
 /**
- * DAO interface for the stock game use case.
+ * DAO interface for the START stock game use case.
  */
 
 public interface StartStockGameDataAccessInterface {

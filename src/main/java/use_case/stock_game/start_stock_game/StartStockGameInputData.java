@@ -3,7 +3,7 @@ package use_case.stock_game.start_stock_game;
 import entity.Player;
 
 /**
- * input data for stock game use case
+ * input data for START stock game use case
 **/
 
 public class StartStockGameInputData {
