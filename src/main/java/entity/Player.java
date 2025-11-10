@@ -85,6 +85,10 @@ public class Player {
         }
     }
 
+    public Map <NPC, Integer> getRelationships() {
+        return relationships;
+    }
+
     public List<Event> getEvents() {
         return events;
     }
