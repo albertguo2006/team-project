@@ -10,6 +10,7 @@ public class Player {
     private double balance;
     private final Map<NPC, Integer> relationships = new HashMap<>();
     private final List<Event> events =  new ArrayList<>();
+    private Portfolio portfolio =  new Portfolio();
     
     // Movement properties (for Use Case 1: Environment Interaction)
     private double x;
