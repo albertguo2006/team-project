@@ -32,17 +32,20 @@ import java.awt.event.ActionListener;
  * 4. RENDER PHASE: this.repaint() schedules paintComponent()
  * 5. On EDT: paintComponent(Graphics g) renders the frame
  */
+import entity.GameMap;
+import entity.Zone;
+import entity.Transition;
+
 public class GamePanel extends JPanel implements ActionListener {
-    
     private final PlayerMovementUseCase playerMovementUseCase;
     private final Timer gameTimer;
-    
+    private final GameMap gameMap;
+
     // Game loop timing
     private static final int FRAME_DELAY_MS = 16;  // ~60 FPS (1000ms / 60 ≈ 16.67ms)
     private long lastUpdateTime;
-    
+
     // Rendering constants
-    private static final Color BACKGROUND_COLOR = new Color(34, 139, 34);  // Forest green
     private static final Color PLAYER_COLOR = Color.BLUE;
     private static final int PLAYER_WIDTH = 32;
     private static final int PLAYER_HEIGHT = 32;
@@ -57,17 +60,17 @@ public class GamePanel extends JPanel implements ActionListener {
     public GamePanel(PlayerMovementUseCase playerMovementUseCase, 
                      PlayerInputController playerInputController) {
         this.playerMovementUseCase = playerMovementUseCase;
-        
+        this.gameMap = new GameMap();
+
         // Set panel properties
         this.setPreferredSize(new Dimension(800, 600));
-        this.setBackground(BACKGROUND_COLOR);
+        this.setBackground(gameMap.getCurrentZone().getBackgroundColor());
         this.setFocusable(true);
-        
+
         // Attach the input controller as a KeyListener
         this.addKeyListener(playerInputController);
-        
+
         // Initialize the game loop timer
-        // ActionListener is 'this', so actionPerformed() will be called each tick
         this.gameTimer = new Timer(FRAME_DELAY_MS, this);
         this.lastUpdateTime = System.currentTimeMillis();
     }
@@ -104,19 +107,130 @@ public class GamePanel extends JPanel implements ActionListener {
         long currentTime = System.currentTimeMillis();
         double deltaTime = (currentTime - lastUpdateTime) / 1000.0;
         lastUpdateTime = currentTime;
-        
+
         // Cap delta time to prevent huge jumps if frame is delayed
         if (deltaTime > 0.05) {  // More than 50ms = cap at 50ms
             deltaTime = 0.05;
         }
-        
+
         // === UPDATE PHASE ===
         playerMovementUseCase.updatePosition(deltaTime);
-        
+        checkZoneTransition();
+
         // === RENDER PHASE ===
-        // Schedule a repaint on the Event Dispatch Thread
-        // This will eventually call paintComponent()
         this.repaint();
+    }
+
+    /**
+     * Checks if the player has reached the edge of the screen and transitions to the next zone if needed.
+     * First checks for special transitions (tunnels, elevators), then normal zone connections.
+     */
+    private void checkZoneTransition() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        double x = player.getX();
+        double y = player.getY();
+        boolean transitioned = false;
+
+        // Determine which edge the player crossed
+        Zone.Edge edgeCrossed = null;
+        if (y >= getHeight()) {
+            edgeCrossed = Zone.Edge.DOWN;
+        } else if (y <= -PLAYER_HEIGHT) {
+            edgeCrossed = Zone.Edge.UP;
+        } else if (x >= getWidth()) {
+            edgeCrossed = Zone.Edge.RIGHT;
+        } else if (x <= -PLAYER_WIDTH) {
+            edgeCrossed = Zone.Edge.LEFT;
+        }
+
+        if (edgeCrossed != null) {
+            // First check for special transitions (tunnels, elevators, etc.)
+            Transition specialTransition = gameMap.getSpecialTransition(edgeCrossed);
+            if (specialTransition != null) {
+                // Use special transition
+                gameMap.setCurrentZone(specialTransition.getToZone());
+                repositionPlayerFromTransition(player, specialTransition.getToEdge());
+                transitioned = true;
+            } else {
+                // Fall back to normal zone connection
+                String nextZone = currentZone.getNeighbor(edgeCrossed);
+                if (nextZone != null) {
+                    gameMap.setCurrentZone(nextZone);
+                    repositionPlayerFromEdge(player, edgeCrossed);
+                    transitioned = true;
+                } else {
+                    // Block movement if no connection
+                    blockPlayerMovement(player, edgeCrossed);
+                }
+            }
+
+            // Update background color if zone changed
+            if (transitioned) {
+                setBackground(gameMap.getCurrentZone().getBackgroundColor());
+            }
+        }
+    }
+
+    /**
+     * Repositions the player when entering a zone via a normal edge connection.
+     */
+    private void repositionPlayerFromEdge(Player player, Zone.Edge edgeExited) {
+        switch (edgeExited) {
+            case DOWN:
+                player.setY(0); // Enter from top
+                break;
+            case UP:
+                player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
+                break;
+            case RIGHT:
+                player.setX(0); // Enter from left
+                break;
+            case LEFT:
+                player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
+                break;
+        }
+    }
+
+    /**
+     * Repositions the player when entering a zone via a special transition.
+     * The toEdge indicates which edge of the destination zone the player enters from.
+     */
+    private void repositionPlayerFromTransition(Player player, Zone.Edge toEdge) {
+        switch (toEdge) {
+            case DOWN:
+                player.setY(0); // Enter from top
+                break;
+            case UP:
+                player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
+                break;
+            case RIGHT:
+                player.setX(0); // Enter from left
+                break;
+            case LEFT:
+                player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
+                break;
+        }
+    }
+
+    /**
+     * Blocks the player from moving beyond the edge when there's no valid connection.
+     */
+    private void blockPlayerMovement(Player player, Zone.Edge edgeTouched) {
+        switch (edgeTouched) {
+            case DOWN:
+                player.setY(getHeight() - PLAYER_HEIGHT);
+                break;
+            case UP:
+                player.setY(0);
+                break;
+            case RIGHT:
+                player.setX(getWidth() - PLAYER_WIDTH);
+                break;
+            case LEFT:
+                player.setX(0);
+                break;
+        }
     }
     
     /**
@@ -132,19 +246,20 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     @Override
     protected void paintComponent(Graphics g) {
-        // Call parent to handle background and borders
         super.paintComponent(g);
-        
-        // Cast to Graphics2D for more features (optional)
         Graphics2D g2d = (Graphics2D) g;
-        
-        // Enable anti-aliasing for smoother graphics
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        
-        // === Draw Game Objects ===
+
+        // Draw zone name at top center
+        Zone zone = gameMap.getCurrentZone();
+        g2d.setColor(Color.DARK_GRAY);
+        g2d.setFont(new Font("Arial", Font.BOLD, 24));
+        String zoneName = zone.getName();
+        int zoneNameWidth = g2d.getFontMetrics().stringWidth(zoneName);
+        g2d.drawString(zoneName, (getWidth() - zoneNameWidth) / 2, 40);
+
+        // Draw player
         drawPlayer(g2d);
-        
-        // === Draw UI ===
         drawUI(g2d);
     }
     
