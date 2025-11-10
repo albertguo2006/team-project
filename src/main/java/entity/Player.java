@@ -10,10 +10,18 @@ public class Player {
     private double balance;
     private final Map<NPC, Integer> relationships = new HashMap<>();
     private final List<Event> events =  new ArrayList<>();
+    
+    // Movement properties (for Use Case 1: Environment Interaction)
+    private double x;
+    private double y;
+    private double speed;  // pixels per second
 
     public Player(String name) {
         this.name = name;
         balance = 1000.0;
+        this.x = 400.0;  // Default starting position (center-ish)
+        this.y = 300.0;
+        this.speed = 150.0;  // pixels per second
     }
 
     public void setName(String name) {
@@ -55,6 +63,31 @@ public class Player {
 
     public List<Event> getEvents() {
         return events;
+    }
+
+    // Movement getters and setters
+    public double getX() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
+
+    public double getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(double speed) {
+        this.speed = speed;
     }
 
 }
