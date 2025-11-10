@@ -11,6 +11,95 @@ California Prop. 65 is a 2D simulation game that provides a satirical commentary
 
 This project will be developed as a standalone **Java application** using the **Java Swing GUI toolkit**. It will strictly adhere to **Clean Architecture** principles to ensure a maintainable, testable, and scalable codebase.
 
+## Quick Start: How to Run the Program
+
+### Prerequisites
+- Java 11 or higher installed on your system
+- `javac` compiler available in your PATH
+
+### Option 1: Using Maven (Recommended)
+```bash
+cd /path/to/team-project
+mvn clean compile exec:java -Dexec.mainClass="app.Main"
+```
+
+### Option 2: Manual Compilation & Execution
+```bash
+# 1. Navigate to the source directory
+cd src/main/java
+
+# 2. Compile all Java files
+javac -d ../../../target/classes \
+  app/Main.java \
+  entity/Player.java \
+  entity/NPC.java \
+  entity/Event.java \
+  entity/Stock.java \
+  use_case/Direction.java \
+  use_case/PlayerMovementUseCase.java \
+  interface_adapter/events/PlayerInputController.java \
+  view/GamePanel.java \
+  view/MainGameWindow.java
+
+# 3. Run the application
+cd ../../../target/classes
+java app.Main
+```
+
+### Option 3: Quick Test (One-Line Compile & Run)
+```bash
+cd src/main/java && \
+javac -d /tmp/prop65 \
+  app/Main.java entity/Player.java entity/NPC.java entity/Event.java \
+  entity/Stock.java use_case/Direction.java use_case/PlayerMovementUseCase.java \
+  interface_adapter/events/PlayerInputController.java view/GamePanel.java view/MainGameWindow.java && \
+cd /tmp/prop65 && java app.Main
+```
+
+### Controls (Use Case 1: Character Movement)
+Once the game window opens, use these controls:
+
+| Key | Action |
+|-----|--------|
+| **W** | Move character up |
+| **A** | Move character left |
+| **S** | Move character down |
+| **D** | Move character right |
+| **W + D** (or any combination) | Move diagonally |
+| **ESC** | Exit the application |
+
+### What You'll See
+- A green game window (800x600 pixels)
+- A blue character sprite in the center that you can control
+- A yellow arrow indicating movement direction
+- HUD display showing:
+  - Current position (X, Y coordinates)
+  - Cash balance
+  - Movement status ("MOVING" indicator)
+  - Control instructions
+
+### Troubleshooting
+
+**"Command not found: java"**
+- Ensure Java is installed: `java -version`
+- If not installed, download from [java.com](https://www.java.com) or use your package manager
+
+**"javac: command not found"**
+- You need the Java Development Kit (JDK), not just JRE
+- Download JDK from [oracle.com](https://www.oracle.com/java/technologies/downloads/) or use:
+  ```bash
+  sudo apt-get install default-jdk  # Ubuntu/Debian
+  brew install openjdk              # macOS
+  ```
+
+**Game window doesn't appear**
+- Ensure you're running on a display (not headless)
+- On Linux, you may need: `DISPLAY=:0 java app.Main`
+
+**Character doesn't respond to WASD input**
+- Click on the game window to ensure it has focus
+- Ensure caps lock is off (the program uses lowercase WASD)
+
 ### Core MVP Features
 
 The Minimum Viable Product (MVP) will focus on delivering the core "survive the day" loop. This includes:
