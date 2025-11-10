@@ -7,14 +7,15 @@ package use_case.stock_game.start_stock_game;
 public interface StartStockGameDataAccessInterface {
 
     /**
-     * Returns the user with the given username.
-     * @param username the username to look up
-     * @return the user with the given username
+     * Checks if the given startAmount is valid (in between 0 and player balance)
+     * AND if the player has not already played the stock game for this game day
+     * // TODO: how to check if player has already played stocks today
+     *
+     * @param startAmount the double to check
+     * @param ??????
+     * @return true if the user is able to begin the stock game
      */
-    User get(String username);
+    boolean validBeginGame(Double startAmount);
 
-
-
-
-
+    void setStartAmount(Double startAmount);
 }

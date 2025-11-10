@@ -1,27 +1,33 @@
 package use_case.stock_game.start_stock_game;
 
+import entity.Player;
 import entity.Stock;
 
 import java.util.List;
 
 /**
- * The stock game Interactor.
+ * The START stock game Interactor.
  */
-//TODO eventually break this up into multiple interactors?
-// single responsibility or something
 public class StartStockGameInteractor implements StartStockGameInputBoundary {
 
     private final StartStockGameDataAccessInterface stockGameDataAccessObject;
-    private final StartStockGameOutputBoundary loginPresenter;
+    private final StartStockGameOutputBoundary stockGamePresenter;
 
-    public StartStockGameInteractor(StartStockGameDataAccessInterface startStockGameDataAccessInterface,
-                                    StartStockGameOutputBoundary startStockGameOutputBoundary){
-        this.stockGameDataAccessObject = startStockGameDataAccessInterface;
-        this.loginPresenter = startStockGameOutputBoundary;
+    public StartStockGameInteractor(StartStockGameDataAccessInterface stockGameDataAccessObject,
+                                    StartStockGameOutputBoundary stockGamePresenter){
+        this.stockGameDataAccessObject = stockGameDataAccessObject;
+        this.stockGamePresenter = stockGamePresenter;
     }
 
+    @Override
     public void execute(StartStockGameInputData startStockGameInputData){
+        final Double startAmount = startStockGameInputData.getStartAmount();
+        final Player player = startStockGameInputData.getPlayer();
 
+        if (player.getBalance() < startAmount || startAmount <= 0){
+            stockGamePresenter.prepareFailView(startAmount + " is not a valid investment amount. " +
+                    "\n Your investment amount must be greater than zero and less than your current balance.");
+        }
     }
 
 
