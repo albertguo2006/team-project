@@ -8,6 +8,7 @@ import java.util.Map;
 public class Player {
     private String name;
     private double balance;
+    private final Map<String, Integer> stats = new HashMap<>();
     private final Map<NPC, Integer> relationships = new HashMap<>();
     private final List<Event> events =  new ArrayList<>();
     
@@ -19,9 +20,21 @@ public class Player {
     public Player(String name) {
         this.name = name;
         balance = 1000.0;
+        stats.put("Hunger", 100);
+        stats.put("Energy", 100);
+        stats.put("Mood", 100);
         this.x = 400.0;  // Default starting position (center-ish)
         this.y = 300.0;
         this.speed = 150.0;  // pixels per second
+    }
+
+    public Player (String name, double balance, double x, double y, Map<String, Integer> stats) {
+        this.name = name;
+        this.balance = balance;
+        this.x = x;
+        this.y = y;
+        this.speed = 150.0;
+        this.stats.putAll(stats);
     }
 
     public void setName(String name) {
@@ -39,6 +52,16 @@ public class Player {
 
     public double getBalance() {
         return balance;
+    }
+
+    public void setStats(int hunger, int energy, int mood) {
+        stats.put("Hunger", hunger);
+        stats.put("Energy", energy);
+        stats.put("Mood", mood);
+    }
+
+    public Map<String, Integer> getStats(){
+        return stats;
     }
 
     public int getNPCScore(NPC npc) {
