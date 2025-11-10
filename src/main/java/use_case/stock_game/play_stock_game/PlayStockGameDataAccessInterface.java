@@ -11,7 +11,7 @@ public interface PlayStockGameDataAccessInterface {
      * @param username the username to look up
      * @return the user with the given username
      */
-    User get(String username);
+    //User get(String username);
 
 
 

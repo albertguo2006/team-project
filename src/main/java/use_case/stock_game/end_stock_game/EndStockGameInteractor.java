@@ -7,8 +7,6 @@ import java.util.List;
 /**
  * The stock game Interactor.
  */
-//TODO eventually break this up into multiple interactors?
-// single responsibility or something
 public class EndStockGameInteractor implements EndStockGameInputBoundary {
 
     private final EndStockGameDataAccessInterface stockGameDataAccessObject;
@@ -33,9 +31,10 @@ public class EndStockGameInteractor implements EndStockGameInputBoundary {
      * @param date (String?) for the date of the data
      * @param gameday integer from 1-5 for which day of the game thy're on
      * @return stockPastPrices which are that stock's prices for that day
-     */
-    List<Double> getStockPastPrices(Stock stock, String date, int gameday);
-    User get(String username);
+     **/
+    //List<Double> getStockPastPrices(Stock stock, String date, int gameday){
+
+   // };
 
 
     //TODO
@@ -44,7 +43,7 @@ public class EndStockGameInteractor implements EndStockGameInputBoundary {
      * @param //
      * @return //
      */
-    public int
+
 
     //TODO
     /**

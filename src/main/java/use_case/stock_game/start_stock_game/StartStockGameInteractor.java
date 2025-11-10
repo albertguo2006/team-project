@@ -34,8 +34,7 @@ public class StartStockGameInteractor implements StartStockGameInputBoundary {
      * @param gameday integer from 1-5 for which day of the game thy're on
      * @return stockPastPrices which are that stock's prices for that day
      */
-    List<Double> getStockPastPrices(Stock stock, String date, int gameday);
-    User get(String username);
+    //List<Double> getStockPastPrices(Stock stock, String date, int gameday);
 
 
     //TODO
@@ -44,7 +43,6 @@ public class StartStockGameInteractor implements StartStockGameInputBoundary {
      * @param //
      * @return //
      */
-    public int
 
     //TODO
     /**

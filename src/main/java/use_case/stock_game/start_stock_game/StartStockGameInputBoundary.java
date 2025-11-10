@@ -6,7 +6,7 @@ package use_case.stock_game.start_stock_game;
 public interface StartStockGameInputBoundary {
 
     /**
-     * Executes the stock game use case.
+     * Executes the START stock game use case.
      * @param startStockGameInputData the input data
      */
     void execute(StartStockGameInputData startStockGameInputData);
