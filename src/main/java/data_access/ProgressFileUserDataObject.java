@@ -6,39 +6,41 @@ import entity.Event;
 import entity.NPC;
 import entity.Player;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ProgressFileUserDataObject {
 
     public void JsonFileWriter(Player player){
-
         JsonArray saveData = new JsonArray();
+
+        Map <NPC, Integer> npcMap = player.getRelationships();
+        List<Event> eventList = player.getEvents();
 
         JsonObject playerData = new JsonObject();
         playerData.addProperty("name", player.getName());
         playerData.addProperty("balance", player.getBalance());
-        playerData.addProperty("locationX", player.getX());
-        playerData.addProperty("locationY", player.getY());
+        playerData.addProperty("xLocation", player.getX());
+        playerData.addProperty("yLocation", player.getY());
 
         JsonObject stats = new JsonObject();
-        for(String stat : player.getStats().keySet()){
+        for (String stat: player.getStats().keySet()) {
             stats.addProperty(stat, player.getStats().get(stat));
         }
         playerData.add("stats", stats);
 
         JsonObject npcData = new JsonObject();
-        Map<NPC, Integer> npcsData = player.getRelationships();
-        for (NPC npc: npcsData.keySet()) {
-            npcData.addProperty(npc.getName(), npcsData.get(npc));
+        for (NPC npc : npcMap.keySet()) {
+            npcData.addProperty(npc.getName(), npcMap.get(npc));
         }
 
-        // TODO add event data
+        JsonObject eventData = new JsonObject();
+        for (Event event : eventList) {
+            eventData.addProperty(event.getEventName(), event.getEventID());
+        }
 
         saveData.add(playerData);
         saveData.add(npcData);
-
-
+        saveData.add(eventData);
     }
 }
