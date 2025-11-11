@@ -1,6 +1,6 @@
 package use_case.paybills;
 import entity.Bill;
-import entity.Player
+import entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +56,7 @@ public class PaybillUseCase {
                 break;
             }
         }
-        if (billToPay == null()){
+        if (null == billToPay){
             return false; // bill not found
         }
         else if (billToPay.getPaid()){
