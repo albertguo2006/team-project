@@ -2,6 +2,7 @@ package use_case.paybills;
 import entity.Bill;
 import entity.Player
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,10 +27,13 @@ public class PaybillUseCase {
         this.bills = bills;
     }
     public double calculateTotalDue(){
-        return bills.stream();
-        bills.filter(bill-> !bill.getPaid());
-        bills.mapToDouble(Bill::getAmount);
-        bills.sum();
+        double total = 0;
+        for (Bill bill: bills){
+            if (!bill.getPaid()){
+                total += bill.getAmount();
+            }
+        }
+        return total;
     }
     public boolean payAllBills(){
         double totalDue = calculateTotalDue();
@@ -40,9 +44,43 @@ public class PaybillUseCase {
             if (!bill.getPaid()){
                 bill.setIsPaid(true);
             }
-            player.setBalance(player.getBalance() - totalDue);
-            return true; //success
         }
+        player.setBalance(player.getBalance() - totalDue);
+        return true; //success
+    }
+    public boolean paySingleBill(String id){
+        Bill billToPay = null;
+        for (Bill bill: bills){
+            if (bill.getId().equals(id)){
+                billToPay = bill;
+                break;
+            }
+        }
+        if (billToPay == null()){
+            return false; // bill not found
+        }
+        else if (billToPay.getPaid()){
+            return false; // bill already paid
+        }
+        if (player.getBalance() < billToPay.getAmount()){
+            return false; // insufficient funds
+        }
+        billToPay.setIsPaid(true);
+        player.setBalance(player.getBalance() - billToPay.getAmount());
+        return true;
+    }
+
+    public List<Bill> getAllBills(){
+        return new ArrayList<>(bills);
+    }
+    public List<Bill> getUnpaidBills(){
+        List<Bill> unpaidbills = new ArrayList<>();
+        for (Bill bill: bills){
+            if (!bill.getPaid()){
+                unpaidbills.add(bill);
+            }
+        }
+        return unpaidbills;
     }
 
 }
