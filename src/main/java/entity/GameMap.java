@@ -1,8 +1,8 @@
 package entity;
 
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +18,6 @@ public class GameMap {
     public GameMap() {
         // Initialize all zones and their connections
         createZones();
-        createSpecialTransitions();
         currentZoneName = "Home";
     }
 
@@ -47,7 +46,6 @@ public class GameMap {
         home.setNeighbor(Zone.Edge.DOWN, "Street 1");
 
         // Subway Station 1 (top-right) - connects DOWN to Street 2, LEFT is blocked (x)
-        // UP will be handled by special transition to Subway Station 2
         subway1.setNeighbor(Zone.Edge.DOWN, "Street 2");
 
         // Street 1 - connects UP to Home, RIGHT to Street 2
@@ -62,8 +60,7 @@ public class GameMap {
         // Grocery Store - connects LEFT to Street 2 only
         grocery.setNeighbor(Zone.Edge.LEFT, "Street 2");
 
-        // Subway Station 2 - connects UP to Street 1, DOWN to Street 3, RIGHT is blocked (x)
-        // DOWN will be handled by special transition to Subway Station 1
+        // Subway Station 2 - connects UP to Street 3, DOWN to Subway Station 1, RIGHT is blocked (x)
         subway2.setNeighbor(Zone.Edge.DOWN, "Subway Station 1");
         subway2.setNeighbor(Zone.Edge.UP, "Street 3");
 
@@ -71,7 +68,7 @@ public class GameMap {
         // UP, LEFT, RIGHT are all blocked
         office.setNeighbor(Zone.Edge.DOWN, "Office Lobby");
 
-        // Street 3 - connects UP to Subway Station 2, RIGHT to Office Lobby
+        // Street 3 - connects DOWN to Subway Station 2, RIGHT to Office Lobby
         street3.setNeighbor(Zone.Edge.DOWN, "Subway Station 2");
         street3.setNeighbor(Zone.Edge.RIGHT, "Office Lobby");
 
@@ -91,25 +88,6 @@ public class GameMap {
         zones.put(lobby.getName(), lobby);
     }
 
-    /**
-     * Creates special transitions like subway tunnels that connect non-adjacent zones.
-     */
-    private void createSpecialTransitions() {
-        // Subway tunnel connecting Subway Station 1 (top) and Subway Station 2 (bottom)
-        // From Subway Station 1, going UP enters the tunnel to Subway Station 2
-        specialTransitions.add(new Transition(
-            "Subway Station 1", Zone.Edge.UP,
-            "Subway Station 2", Zone.Edge.DOWN,
-            "Subway Tunnel"
-        ));
-
-        // Bidirectional: From Subway Station 2, going DOWN enters the tunnel to Subway Station 1
-        specialTransitions.add(new Transition(
-            "Subway Station 2", Zone.Edge.DOWN,
-            "Subway Station 1", Zone.Edge.UP,
-            "Subway Tunnel"
-        ));
-    }
 
     public Zone getCurrentZone() {
         return zones.get(currentZoneName);
