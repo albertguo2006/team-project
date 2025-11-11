@@ -24,9 +24,10 @@ public class Player {
         stats.put("Hunger", 100);
         stats.put("Energy", 100);
         stats.put("Mood", 100);
-        this.x = 400.0;  // Default starting position (center-ish)
-        this.y = 300.0;
-        this.speed = 150.0;  // pixels per second
+        // Updated for 1920x1200 virtual resolution
+        this.x = 960.0;  // Center of 1920 width
+        this.y = 600.0;  // Center of 1200 height
+        this.speed = 360.0;  // Scaled up for 1920x1200 (was 150 for 800x600)
     }
 
     public Player (String name, double balance, double x, double y, Map<String, Integer> stats) {
@@ -34,7 +35,7 @@ public class Player {
         this.balance = balance;
         this.x = x;
         this.y = y;
-        this.speed = 150.0;
+        this.speed = 360.0;  // Scaled up for 1920x1200 virtual resolution
         this.stats.putAll(stats);
     }
 

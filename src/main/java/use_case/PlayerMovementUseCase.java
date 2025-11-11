@@ -18,13 +18,13 @@ public class PlayerMovementUseCase {
     
     private final Player player;
     
-    // World bounds for collision detection
-    private static final double WORLD_WIDTH = 800.0;
-    private static final double WORLD_HEIGHT = 600.0;
+    // World bounds for collision detection (virtual resolution 1920x1200)
+    private static final double WORLD_WIDTH = 1920.0;
+    private static final double WORLD_HEIGHT = 1200.0;
     
     // Player sprite dimensions (for more accurate collision detection)
-    private static final double PLAYER_WIDTH = 32.0;
-    private static final double PLAYER_HEIGHT = 32.0;
+    private static final double PLAYER_WIDTH = 64.0;
+    private static final double PLAYER_HEIGHT = 64.0;
     
     // Movement state flags: which directions are currently active
     private boolean movingUp = false;

@@ -1,5 +1,7 @@
 package use_case.stock_game.start_stock_game;
 
+import entity.Player;
+
 /**
  * DAO interface for the stock game use case.
  */
@@ -7,14 +9,10 @@ package use_case.stock_game.start_stock_game;
 public interface StartStockGameDataAccessInterface {
 
     /**
-     * Returns the user with the given username.
+     * Returns the player with the given username.
      * @param username the username to look up
-     * @return the user with the given username
+     * @return the player with the given username
      */
-    User get(String username);
-
-
-
-
+    Player get(String username);
 
 }

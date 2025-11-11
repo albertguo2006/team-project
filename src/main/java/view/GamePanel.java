@@ -1,54 +1,51 @@
 package view;
 
-import interface_adapter.events.PlayerInputController;
-import use_case.PlayerMovementUseCase;
-import use_case.Direction;
-import entity.Player;
-
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-/**
- * GamePanel is the main 2D game view and contains the real-time game loop.
- * 
- * Responsibilities:
- * - Renders the game state (player, background, UI)
- * - Maintains the javax.swing.Timer game loop (~60 FPS)
- * - Orchestrates the update/render cycle
- * - Acts as the focal point for the game window
- * 
- * Architecture:
- * - Extends JPanel for rendering capability
- * - Implements ActionListener to handle Timer ticks
- * - Receives PlayerMovementUseCase as dependency injection
- * - Attaches PlayerInputController as KeyListener
- * 
- * The Game Loop Flow:
- * 1. Timer fires every 16ms (approximately 60 FPS)
- * 2. actionPerformed() is called
- * 3. UPDATE PHASE: playerMovementUseCase.updatePosition(deltaTime)
- * 4. RENDER PHASE: this.repaint() schedules paintComponent()
- * 5. On EDT: paintComponent(Graphics g) renders the frame
- */
+import javax.swing.JPanel;
+import javax.swing.Timer;
+
 import entity.GameMap;
-import entity.Zone;
+import entity.Player;
 import entity.Transition;
+import entity.Zone;
+import interface_adapter.events.PlayerInputController;
+import use_case.Direction;
+import use_case.PlayerMovementUseCase;
 
 public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
     private final Timer gameTimer;
     private final GameMap gameMap;
 
+    // Virtual (internal) resolution - game logic operates in this space
+    private static final int VIRTUAL_WIDTH = 1920;
+    private static final int VIRTUAL_HEIGHT = 1200;
+    private static final double ASPECT_RATIO = 16.0 / 10.0;
+    
+    // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
+    private int viewportWidth;
+    private int viewportHeight;
+    private int viewportX;  // Offset for centering (black bars)
+    private int viewportY;
+    private double scale;   // Current scale factor
+
     // Game loop timing
     private static final int FRAME_DELAY_MS = 16;  // ~60 FPS (1000ms / 60 ≈ 16.67ms)
     private long lastUpdateTime;
 
-    // Rendering constants
+    // Rendering constants (scaled for 1920x1200 virtual resolution)
     private static final Color PLAYER_COLOR = Color.BLUE;
-    private static final int PLAYER_WIDTH = 32;
-    private static final int PLAYER_HEIGHT = 32;
+    private static final int PLAYER_WIDTH = 64;   // Scaled up from 32 for 1920x1200
+    private static final int PLAYER_HEIGHT = 64;  // Scaled up from 32 for 1920x1200
     
     /**
      * Constructs a GamePanel with the given use case and input controller.
@@ -57,14 +54,13 @@ public class GamePanel extends JPanel implements ActionListener {
      * @param playerMovementUseCase the use case managing player movement
      * @param playerInputController the controller handling keyboard input
      */
-    public GamePanel(PlayerMovementUseCase playerMovementUseCase, 
+    public GamePanel(PlayerMovementUseCase playerMovementUseCase,
                      PlayerInputController playerInputController) {
         this.playerMovementUseCase = playerMovementUseCase;
         this.gameMap = new GameMap();
 
-        // Set panel properties
-        this.setPreferredSize(new Dimension(800, 600));
-        this.setBackground(gameMap.getCurrentZone().getBackgroundColor());
+        // Set panel properties - no preferred size since we're resizable
+        this.setBackground(Color.BLACK);  // Black for letterbox bars
         this.setFocusable(true);
 
         // Attach the input controller as a KeyListener
@@ -73,6 +69,9 @@ public class GamePanel extends JPanel implements ActionListener {
         // Initialize the game loop timer
         this.gameTimer = new Timer(FRAME_DELAY_MS, this);
         this.lastUpdateTime = System.currentTimeMillis();
+        
+        // Initialize viewport
+        calculateViewport();
     }
     
     /**
@@ -122,8 +121,68 @@ public class GamePanel extends JPanel implements ActionListener {
     }
 
     /**
+     * Calculates the viewport dimensions to maintain 16:10 aspect ratio.
+     * Adds letterboxing (horizontal bars) or pillarboxing (vertical bars) as needed.
+     */
+    private void calculateViewport() {
+        int windowWidth = getWidth();
+        int windowHeight = getHeight();
+        
+        // Avoid division by zero
+        if (windowWidth <= 0 || windowHeight <= 0) {
+            viewportWidth = VIRTUAL_WIDTH;
+            viewportHeight = VIRTUAL_HEIGHT;
+            viewportX = 0;
+            viewportY = 0;
+            scale = 1.0;
+            return;
+        }
+        
+        double windowAspect = (double) windowWidth / windowHeight;
+        
+        if (windowAspect > ASPECT_RATIO) {
+            // Window is wider than 16:10 - add pillarbox (vertical black bars)
+            viewportHeight = windowHeight;
+            viewportWidth = (int) (windowHeight * ASPECT_RATIO);
+            viewportX = (windowWidth - viewportWidth) / 2;
+            viewportY = 0;
+        } else {
+            // Window is taller than 16:10 - add letterbox (horizontal black bars)
+            viewportWidth = windowWidth;
+            viewportHeight = (int) (windowWidth / ASPECT_RATIO);
+            viewportX = 0;
+            viewportY = (windowHeight - viewportHeight) / 2;
+        }
+        
+        scale = (double) viewportWidth / VIRTUAL_WIDTH;
+    }
+    
+    /**
+     * Converts screen coordinates to virtual coordinates.
+     * Used for mouse input translation.
+     *
+     * @param screenX X coordinate in screen space
+     * @param screenY Y coordinate in screen space
+     * @return Point in virtual coordinate space (1920x1200)
+     */
+    public Point screenToVirtual(int screenX, int screenY) {
+        int virtualX = (int)((screenX - viewportX) / scale);
+        int virtualY = (int)((screenY - viewportY) / scale);
+        return new Point(virtualX, virtualY);
+    }
+    
+    /**
+     * Gets the current scale factor.
+     * @return the scale factor from virtual to screen coordinates
+     */
+    public double getScale() {
+        return scale;
+    }
+
+    /**
      * Checks if the player has reached the edge of the screen and transitions to the next zone if needed.
      * First checks for special transitions (tunnels, elevators), then normal zone connections.
+     * Now uses VIRTUAL dimensions instead of actual window size.
      */
     private void checkZoneTransition() {
         Player player = playerMovementUseCase.getPlayer();
@@ -132,13 +191,13 @@ public class GamePanel extends JPanel implements ActionListener {
         double y = player.getY();
         boolean transitioned = false;
 
-        // Determine which edge the player crossed
+        // Determine which edge the player crossed (using VIRTUAL dimensions)
         Zone.Edge edgeCrossed = null;
-        if (y >= getHeight()) {
+        if (y >= VIRTUAL_HEIGHT) {
             edgeCrossed = Zone.Edge.DOWN;
         } else if (y <= -PLAYER_HEIGHT) {
             edgeCrossed = Zone.Edge.UP;
-        } else if (x >= getWidth()) {
+        } else if (x >= VIRTUAL_WIDTH) {
             edgeCrossed = Zone.Edge.RIGHT;
         } else if (x <= -PLAYER_WIDTH) {
             edgeCrossed = Zone.Edge.LEFT;
@@ -181,13 +240,13 @@ public class GamePanel extends JPanel implements ActionListener {
                 player.setY(0); // Enter from top
                 break;
             case UP:
-                player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
+                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT); // Enter from bottom
                 break;
             case RIGHT:
                 player.setX(0); // Enter from left
                 break;
             case LEFT:
-                player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
+                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH); // Enter from right
                 break;
         }
     }
@@ -202,13 +261,13 @@ public class GamePanel extends JPanel implements ActionListener {
                 player.setY(0); // Enter from top
                 break;
             case UP:
-                player.setY(getHeight() - PLAYER_HEIGHT); // Enter from bottom
+                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT); // Enter from bottom
                 break;
             case RIGHT:
                 player.setX(0); // Enter from left
                 break;
             case LEFT:
-                player.setX(getWidth() - PLAYER_WIDTH); // Enter from right
+                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH); // Enter from right
                 break;
         }
     }
@@ -219,13 +278,13 @@ public class GamePanel extends JPanel implements ActionListener {
     private void blockPlayerMovement(Player player, Zone.Edge edgeTouched) {
         switch (edgeTouched) {
             case DOWN:
-                player.setY(getHeight() - PLAYER_HEIGHT);
+                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT);
                 break;
             case UP:
                 player.setY(0);
                 break;
             case RIGHT:
-                player.setX(getWidth() - PLAYER_WIDTH);
+                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH);
                 break;
             case LEFT:
                 player.setX(0);
@@ -248,19 +307,57 @@ public class GamePanel extends JPanel implements ActionListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
+        
+        // Recalculate viewport in case window was resized
+        calculateViewport();
+        
+        // Fill entire panel with black (letterbox/pillarbox background)
+        g2d.setColor(Color.BLACK);
+        g2d.fillRect(0, 0, getWidth(), getHeight());
+        
+        // Fill the game viewport with zone background color
+        g2d.setColor(gameMap.getCurrentZone().getBackgroundColor());
+        g2d.fillRect(viewportX, viewportY, viewportWidth, viewportHeight);
+        
+        // Create clipped viewport for game content
+        g2d.setClip(viewportX, viewportY, viewportWidth, viewportHeight);
+        
+        // Save original transform
+        java.awt.geom.AffineTransform originalTransform = g2d.getTransform();
+        
+        // Translate to viewport position and scale to virtual coordinates
+        g2d.translate(viewportX, viewportY);
+        g2d.scale(scale, scale);
+        
+        // Enable high-quality rendering
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-
+        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        
+        // Now draw everything in virtual coordinates (1920x1200)
+        drawGame(g2d);
+        
+        // Restore original transform
+        g2d.setTransform(originalTransform);
+    }
+    
+    /**
+     * Draws all game elements in virtual coordinate space (1920x1200).
+     *
+     * @param g the Graphics2D context (already scaled and translated)
+     */
+    private void drawGame(Graphics2D g) {
         // Draw zone name at top center
         Zone zone = gameMap.getCurrentZone();
-        g2d.setColor(Color.DARK_GRAY);
-        g2d.setFont(new Font("Arial", Font.BOLD, 24));
+        g.setColor(Color.DARK_GRAY);
+        g.setFont(new Font("Arial", Font.BOLD, 48));  // Scaled up for 1920x1200
         String zoneName = zone.getName();
-        int zoneNameWidth = g2d.getFontMetrics().stringWidth(zoneName);
-        g2d.drawString(zoneName, (getWidth() - zoneNameWidth) / 2, 40);
+        int zoneNameWidth = g.getFontMetrics().stringWidth(zoneName);
+        g.drawString(zoneName, (VIRTUAL_WIDTH - zoneNameWidth) / 2, 80);
 
         // Draw player
-        drawPlayer(g2d);
-        drawUI(g2d);
+        drawPlayer(g);
+        drawUI(g);
     }
     
     /**
@@ -308,7 +405,9 @@ public class GamePanel extends JPanel implements ActionListener {
         g.setColor(new Color(255, 255, 0, 150));  // Semi-transparent yellow
         int centerX = playerX + PLAYER_WIDTH / 2;
         int centerY = playerY + PLAYER_HEIGHT / 2;
-        int arrowLength = 15;
+        int arrowLength = 30;  // Scaled up for virtual resolution
+        
+        g.setStroke(new BasicStroke(4));  // Thicker line for virtual resolution
         
         switch (direction) {
             case UP:
@@ -334,32 +433,32 @@ public class GamePanel extends JPanel implements ActionListener {
     private void drawUI(Graphics2D g) {
         Player player = playerMovementUseCase.getPlayer();
         
-        // Draw semi-transparent background panel for HUD
+        // Draw semi-transparent background panel for HUD (scaled for 1920x1200)
         g.setColor(new Color(0, 0, 0, 100));
-        g.fillRect(5, 5, 250, 60);
+        g.fillRect(10, 10, 500, 120);
         
         // Draw position and balance text
         g.setColor(Color.WHITE);
-        g.setFont(new Font("Arial", Font.BOLD, 14));
+        g.setFont(new Font("Arial", Font.BOLD, 28));  // Scaled up
         
         String positionText = String.format("Pos: (%.0f, %.0f)", player.getX(), player.getY());
         String balanceText = String.format("Balance: $%.2f", player.getBalance());
         
-        g.drawString(positionText, 15, 25);
-        g.drawString(balanceText, 15, 45);
+        g.drawString(positionText, 30, 50);
+        g.drawString(balanceText, 30, 90);
         
-        // Draw instructions at bottom
+        // Draw instructions at bottom (using virtual dimensions)
         g.setColor(new Color(200, 200, 200));
-        g.setFont(new Font("Arial", Font.PLAIN, 12));
+        g.setFont(new Font("Arial", Font.PLAIN, 24));  // Scaled up
         String instructionsText = "WASD: Move | ESC: Exit";
         int instructionWidth = g.getFontMetrics().stringWidth(instructionsText);
-        g.drawString(instructionsText, this.getWidth() - instructionWidth - 10, this.getHeight() - 10);
+        g.drawString(instructionsText, VIRTUAL_WIDTH - instructionWidth - 20, VIRTUAL_HEIGHT - 20);
         
         // Draw movement state indicator
         if (playerMovementUseCase.isMoving()) {
             g.setColor(new Color(0, 255, 0));
-            g.setFont(new Font("Arial", Font.BOLD, 12));
-            g.drawString("MOVING", this.getWidth() - 100, 25);
+            g.setFont(new Font("Arial", Font.BOLD, 24));  // Scaled up
+            g.drawString("MOVING", VIRTUAL_WIDTH - 200, 50);
         }
     }
 }

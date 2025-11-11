@@ -9,7 +9,7 @@ public interface EndStockGameOutputBoundary {
      * for when the amount the player invests is right
      * @param outputData the output data
      */
-    void prepareSuccessView(StockOutputData outputData);
+    void prepareSuccessView(EndStockGameOutputData outputData);
 
     /**
      * Prepares the failure view for the stock game Use Case.
