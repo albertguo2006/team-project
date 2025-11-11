@@ -1,5 +1,5 @@
 package use_case.paybills;
-import entity.Player
+import entity.Player;
 
 /**
  * PaybillUseCase handles the player paying its bills
@@ -18,7 +18,7 @@ public class PaybillUseCase {
     public PaybillUseCase(Player player) {
         this.player = player;
     }
-    public paybills(Player player, double amount);
+    public void paybills(Player player, double amount){}
 
 }
 
