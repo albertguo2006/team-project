@@ -5,7 +5,7 @@ package use_case.stock_game.start_stock_game;
  */
 public interface StartStockGameOutputBoundary {
     /**
-     * Prepares the success view for the stock game Use Case.
+     * Prepares the success view for the START stock game Use Case.
      * for when the amount the player invests is right
      * @param outputData the output data
      */
