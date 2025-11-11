@@ -3,12 +3,12 @@ package entity;
 import java.util.Date;
 
 public class Bill {
-    private String id;
+    private String id; // each bill has a unique id
     private double amount; // Individual bill amount
     private String name;
     private Date dueDate;
     private Boolean isPaid;
-    private static double total = 0; // Total of all unpaid bills amount
+
 
     public Bill(String id, double amount, String name, Date dueDate, Boolean isPaid) {
         this.id = id;
@@ -16,9 +16,6 @@ public class Bill {
         this.name = name;
         this.dueDate = dueDate;
         this.isPaid = isPaid;
-
-        if (!isPaid)
-            total += amount;
     }
     public String getId() {
         return id;
@@ -35,20 +32,8 @@ public class Bill {
     public double getAmount() {
         return amount;
     }
-    public double getTotal(){
-        return total;
-    }
     public void setIsPaid(boolean isPaid){
-        if (!this.isPaid && isPaid){
-            total -= amount;
-        }
         this.isPaid = isPaid;
-    }
-    public void addtototal(){
-        total += amount;
-    }
-    public void removefromtotal(){
-        total -= amount;
     }
 
 }
