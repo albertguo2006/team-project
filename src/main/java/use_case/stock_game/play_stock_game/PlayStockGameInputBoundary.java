@@ -1,13 +1,12 @@
 package use_case.stock_game.play_stock_game;
 
 /**
- * Input Boundary for actions related to the stock game.
+ * Input Boundary for actions related to the PLAY stock game.
  */
 public interface PlayStockGameInputBoundary {
 
     /**
-     * Executes the stock game use case.
-     * @param playStockGameInputData the input data
+     * Executes the PLAY stock game use case.
      */
-    void execute(PlayStockGameInputData playStockGameInputData);
+    void execute();
 }

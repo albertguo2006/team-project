@@ -4,25 +4,33 @@ import entity.Stock;
 
 import java.util.List;
 
+//TODO: need to seperate into buy and sell stock use cases...?
+// and then during end_stock game use case, maybe
+// call the sell stock if they still have stocks?
+// so that way they always cash out at the end???
+
 /**
- * The stock game Interactor.
+ * The PLAY stock game Interactor.
  */
-//TODO eventually break this up into multiple interactors?
-// single responsibility or something
+
 public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
 
     private final PlayStockGameDataAccessInterface stockGameDataAccessObject;
-    private final PlayStockGameOutputBoundary loginPresenter;
+    private final PlayStockGameOutputBoundary stockGamePresenter;
 
     public PlayStockGameInteractor(PlayStockGameDataAccessInterface playStockGameDataAccessInterface,
                                    PlayStockGameOutputBoundary playStockGameOutputBoundary){
         this.stockGameDataAccessObject = playStockGameDataAccessInterface;
-        this.loginPresenter = playStockGameOutputBoundary;
+        this.stockGamePresenter = playStockGameOutputBoundary;
     }
 
-    public void execute(PlayStockGameInputData playStockGameInputData){
+    public void execute(){
+        // need input which is the startAmount
+        // TODO: ???? does this^ go into a inputdata object even though its not from the user (should be internal)
+
 
     }
+
 
 
 
@@ -44,17 +52,9 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
      * @return //
      */
 
-
     //TODO
     /**
      * Returns the total equity given the current stock shares, stock prices AND cash.
-     * @param //
-     * @return //
-     */
-
-    //TODO
-    /**
-     * Returns the NET profit/loss given the current stock shares and stock prices.
      * @param //
      * @return //
      */
@@ -71,11 +71,6 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
      * @param //
      */
 
-    //TODO
-    /**
-     * End game, by selling all stock share and going to end screen
-     * @param //
-     */
 
 
 }

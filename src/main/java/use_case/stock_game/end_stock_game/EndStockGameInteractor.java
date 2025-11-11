@@ -18,6 +18,20 @@ public class EndStockGameInteractor implements EndStockGameInputBoundary {
         this.stockGamePresenter = stockGamePresenter;
     }
 
+    //TODO
+    /**
+     * End game, by selling all stock share and going to end screen
+     * @param //
+     */
+
+    //TODO
+    /**
+     * Returns the NET profit/loss given the current stock shares and stock prices.
+     * @param //
+     * @return //
+     */
+
+
     public void execute() {
         // Implement the end/leave game logic:
         // 1. remember the total equity/ earnings

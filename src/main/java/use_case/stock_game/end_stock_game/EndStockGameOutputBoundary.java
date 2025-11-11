@@ -6,7 +6,7 @@ package use_case.stock_game.end_stock_game;
 public interface EndStockGameOutputBoundary {
     /**
      * Prepares the success view for the stock game Use Case.
-     * for when the amount the player invests is right
+     * for when the player leaves the game
      * @param outputData the output data
      */
     void prepareSuccessView(EndStockGameOutputData outputData);

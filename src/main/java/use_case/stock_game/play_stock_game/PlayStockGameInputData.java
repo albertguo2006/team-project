@@ -1,31 +1,22 @@
 package use_case.stock_game.play_stock_game;
 
+import entity.Player;
+
 /**
- * input data for stock game use case
+ * input data for START stock game use case
 **/
 
 public class PlayStockGameInputData {
-    private final Double startAmount;
-    // starting amount that player is investing
-    private final String date; // current date for user
-    // TODO: might just get date automatically =, instead of relying on input?
-    private final int gameDay; // current day (out of 5) that the player is on
-
+    private Double startAmount;
 
     // initialise attributes
-    public PlayStockGameInputData(Double startAmount, String date, int gameDay) {
+    public PlayStockGameInputData(Double startAmount, Player player) {
         this.startAmount = startAmount;
-        this.date = date;
-        this.gameDay = gameDay;
+        this.player = player;
     }
 
     public Double getStartAmount() {
         return startAmount;
     }
-    public String getDate() {
-        return date;
-    }
-    public int getGameDay() {
-        return gameDay;
-    }
+    public Player getPlayer() {return player;}
 }

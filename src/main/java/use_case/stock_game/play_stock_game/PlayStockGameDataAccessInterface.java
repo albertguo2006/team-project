@@ -1,7 +1,7 @@
 package use_case.stock_game.play_stock_game;
 
 /**
- * DAO interface for the stock game use case.
+ * DAO interface for the PLAY stock game use case.
  */
 
 public interface PlayStockGameDataAccessInterface {
@@ -12,6 +12,8 @@ public interface PlayStockGameDataAccessInterface {
      * @return the user with the given username
      */
     //User get(String username);
+
+    //TODO:???
 
 
 
