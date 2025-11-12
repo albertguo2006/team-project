@@ -9,5 +9,5 @@ public interface PaybillInputBoundary {
     /**
      * Executes the paybill use case
      */
-    void execute(PaybillInputData paybillInputData);
+    void execute();
 }
