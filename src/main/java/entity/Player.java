@@ -112,9 +112,7 @@ public class Player {
         }
     }
 
-    public void removeNPC(NPC npc) {
-        relationships.remove(npc);
-    }
+    public void removeNPC(NPC npc) { relationships.remove(npc); }
 
     public void addEvent(Event event) {
         if (!events.contains(event)) {
