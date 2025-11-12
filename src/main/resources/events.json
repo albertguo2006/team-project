@@ -13,5 +13,25 @@
 
       }
     }
+  },
+  {"id": 01, "name": "Test Event A", "description": "Test Description A",
+    "outcomes": {
+      0: {
+        "description": "Test Outcome A",
+        "chance": 0.3,
+        "result": 100
+      },
+      1: {
+        "description": "Test Outcome B",
+        "chance": 0.3,
+        "result": -100
+
+      },
+      2: {
+        "description": "Test Outcome C",
+        "chance": 0.4,
+        "result": 0
+      }
+    }
   }
 ]
