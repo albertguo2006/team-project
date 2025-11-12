@@ -9,7 +9,12 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -25,6 +30,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
     private final Timer gameTimer;
     private final GameMap gameMap;
+    
+    // Background image cache
+    private final Map<String, BufferedImage> backgroundImageCache = new HashMap<>();
 
     // Virtual (internal) resolution - game logic operates in this space
     private static final int VIRTUAL_WIDTH = 1920;
@@ -182,7 +190,7 @@ public class GamePanel extends JPanel implements ActionListener {
     /**
      * Checks if the player has reached the edge of the screen and transitions to the next zone if needed.
      * First checks for special transitions (tunnels, elevators), then normal zone connections.
-     * Now uses VIRTUAL dimensions instead of actual window size.
+     * Transitions trigger when player reaches the visible edge of the screen.
      */
     private void checkZoneTransition() {
         Player player = playerMovementUseCase.getPlayer();
@@ -191,21 +199,21 @@ public class GamePanel extends JPanel implements ActionListener {
         double y = player.getY();
         boolean transitioned = false;
 
-        // Determine which edge the player crossed (using VIRTUAL dimensions)
-        Zone.Edge edgeCrossed = null;
-        if (y >= VIRTUAL_HEIGHT) {
-            edgeCrossed = Zone.Edge.DOWN;
-        } else if (y <= -PLAYER_HEIGHT) {
-            edgeCrossed = Zone.Edge.UP;
-        } else if (x >= VIRTUAL_WIDTH) {
-            edgeCrossed = Zone.Edge.RIGHT;
-        } else if (x <= -PLAYER_WIDTH) {
-            edgeCrossed = Zone.Edge.LEFT;
+        // Determine which edge the player has reached (at the visible screen bounds)
+        Zone.Edge edgeReached = null;
+        if (y >= VIRTUAL_HEIGHT - PLAYER_HEIGHT) {
+            edgeReached = Zone.Edge.DOWN;
+        } else if (y <= 0) {
+            edgeReached = Zone.Edge.UP;
+        } else if (x >= VIRTUAL_WIDTH - PLAYER_WIDTH) {
+            edgeReached = Zone.Edge.RIGHT;
+        } else if (x <= 0) {
+            edgeReached = Zone.Edge.LEFT;
         }
 
-        if (edgeCrossed != null) {
+        if (edgeReached != null) {
             // First check for special transitions (tunnels, elevators, etc.)
-            Transition specialTransition = gameMap.getSpecialTransition(edgeCrossed);
+            Transition specialTransition = gameMap.getSpecialTransition(edgeReached);
             if (specialTransition != null) {
                 // Use special transition
                 gameMap.setCurrentZone(specialTransition.getToZone());
@@ -213,15 +221,14 @@ public class GamePanel extends JPanel implements ActionListener {
                 transitioned = true;
             } else {
                 // Fall back to normal zone connection
-                String nextZone = currentZone.getNeighbor(edgeCrossed);
+                String nextZone = currentZone.getNeighbor(edgeReached);
                 if (nextZone != null) {
                     gameMap.setCurrentZone(nextZone);
-                    repositionPlayerFromEdge(player, edgeCrossed);
+                    repositionPlayerFromEdge(player, edgeReached);
                     transitioned = true;
-                } else {
-                    // Block movement if no connection
-                    blockPlayerMovement(player, edgeCrossed);
                 }
+                // Note: No need to block movement here since PlayerMovementUseCase
+                // will clamp the position within screen bounds
             }
 
             // Update background color if zone changed
@@ -272,25 +279,6 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    /**
-     * Blocks the player from moving beyond the edge when there's no valid connection.
-     */
-    private void blockPlayerMovement(Player player, Zone.Edge edgeTouched) {
-        switch (edgeTouched) {
-            case DOWN:
-                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT);
-                break;
-            case UP:
-                player.setY(0);
-                break;
-            case RIGHT:
-                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH);
-                break;
-            case LEFT:
-                player.setX(0);
-                break;
-        }
-    }
     
     /**
      * Renders the current game state.
@@ -315,9 +303,18 @@ public class GamePanel extends JPanel implements ActionListener {
         g2d.setColor(Color.BLACK);
         g2d.fillRect(0, 0, getWidth(), getHeight());
         
-        // Fill the game viewport with zone background color
-        g2d.setColor(gameMap.getCurrentZone().getBackgroundColor());
-        g2d.fillRect(viewportX, viewportY, viewportWidth, viewportHeight);
+        // Draw the game viewport background (image or color fallback)
+        Zone currentZone = gameMap.getCurrentZone();
+        BufferedImage backgroundImage = loadBackgroundImage(currentZone.getBackgroundImagePath());
+        
+        if (backgroundImage != null) {
+            // Draw the background image scaled to viewport
+            g2d.drawImage(backgroundImage, viewportX, viewportY, viewportWidth, viewportHeight, null);
+        } else {
+            // Fallback to solid color if image not available
+            g2d.setColor(currentZone.getBackgroundColor());
+            g2d.fillRect(viewportX, viewportY, viewportWidth, viewportHeight);
+        }
         
         // Create clipped viewport for game content
         g2d.setClip(viewportX, viewportY, viewportWidth, viewportHeight);
@@ -459,6 +456,40 @@ public class GamePanel extends JPanel implements ActionListener {
             g.setColor(new Color(0, 255, 0));
             g.setFont(new Font("Arial", Font.BOLD, 24));  // Scaled up
             g.drawString("MOVING", VIRTUAL_WIDTH - 200, 50);
+        }
+    }
+    
+    /**
+     * Loads a background image from resources with caching.
+     * Returns null if the image cannot be loaded.
+     *
+     * @param imagePath the path to the image resource
+     * @return the loaded BufferedImage, or null if loading fails
+     */
+    private BufferedImage loadBackgroundImage(String imagePath) {
+        if (imagePath == null || imagePath.isEmpty()) {
+            return null;
+        }
+        
+        // Check cache first
+        if (backgroundImageCache.containsKey(imagePath)) {
+            return backgroundImageCache.get(imagePath);
+        }
+        
+        // Try to load the image
+        try {
+            BufferedImage image = ImageIO.read(getClass().getResourceAsStream(imagePath));
+            if (image != null) {
+                backgroundImageCache.put(imagePath, image);
+                System.out.println("Loaded background image: " + imagePath);
+            }
+            return image;
+        } catch (IOException | IllegalArgumentException e) {
+            System.err.println("Failed to load background image: " + imagePath);
+            System.err.println("Error: " + e.getMessage());
+            // Cache null to avoid repeated load attempts
+            backgroundImageCache.put(imagePath, null);
+            return null;
         }
     }
 }
