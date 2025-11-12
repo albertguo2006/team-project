@@ -5,19 +5,25 @@ import entity.Bill;
 import java.util.List;
 
 public class PaybillOutputData {
-    private final List<Bill> billList;
-    private final boolean useCaseFailed;
+    private final double amount;
+    private final String message;
+    private final boolean sucess;
 
-    public PaybillOutputData(List<Bill> billList, boolean useCaseFailed) {
-        this.billList = billList;
-        this.useCaseFailed = useCaseFailed;
+    public PaybillOutputData(boolean sucess, String message) {
+        this.sucess = sucess;
+        this.message = message;
+        this.amount = amount;
     }
 
-    public List<Bill> getBillList() {
-        return billList;
+    public String getMessage() {
+        return message;
     }
 
-    public boolean isUseCaseFailed() {
-        return useCaseFailed;
+    public double getAmount() {
+        return amount;
+    }
+
+    public boolean isSucess() {
+        return sucess;
     }
 }

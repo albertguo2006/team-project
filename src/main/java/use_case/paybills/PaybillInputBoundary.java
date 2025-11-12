@@ -7,7 +7,12 @@ package use_case.paybills;
 public interface PaybillInputBoundary {
 
     /**
-     * Executes the paybill use case
+     * Pay all unpaid bills at once
      */
-    void execute();
+    void payAllbill();
+
+    /**
+     * Pay a specific bill
+     */
+    void paySingleBill(String id);
 }

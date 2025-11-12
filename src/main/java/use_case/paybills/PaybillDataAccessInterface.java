@@ -10,9 +10,20 @@ public interface PaybillDataAccessInterface {
      * Returns the bills not yet paid by the player
      */
     List<Bill> getUnpaidBills();
+
     /**
-     * Returns all the bills the player has
+     * Returns all the bills the player has (both paid and unpaid)
      */
-    List<Bill> getALLBills();
+    List<Bill> getAllBills();
+
+    /**
+     * Saves the updated bill's information (for when the bill is paid)
+     */
+    void saveBill(Bill bill);
+
+    /**
+     * Gets a specific bill by ID
+     */
+    Bill getBillById(String id);
 
 }
