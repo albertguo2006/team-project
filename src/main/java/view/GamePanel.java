@@ -240,20 +240,22 @@ public class GamePanel extends JPanel implements ActionListener {
 
     /**
      * Repositions the player when entering a zone via a normal edge connection.
+     * Places player slightly away from edge to prevent immediate re-triggering of transition.
      */
     private void repositionPlayerFromEdge(Player player, Zone.Edge edgeExited) {
+        final int EDGE_OFFSET = 5; // Pixels away from edge
         switch (edgeExited) {
             case DOWN:
-                player.setY(0); // Enter from top
+                player.setY(EDGE_OFFSET); // Enter from top, slightly below edge
                 break;
             case UP:
-                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT); // Enter from bottom
+                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT - EDGE_OFFSET); // Enter from bottom, slightly above edge
                 break;
             case RIGHT:
-                player.setX(0); // Enter from left
+                player.setX(EDGE_OFFSET); // Enter from left, slightly right of edge
                 break;
             case LEFT:
-                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH); // Enter from right
+                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH - EDGE_OFFSET); // Enter from right, slightly left of edge
                 break;
         }
     }
@@ -261,20 +263,22 @@ public class GamePanel extends JPanel implements ActionListener {
     /**
      * Repositions the player when entering a zone via a special transition.
      * The toEdge indicates which edge of the destination zone the player enters from.
+     * Places player slightly away from edge to prevent immediate re-triggering of transition.
      */
     private void repositionPlayerFromTransition(Player player, Zone.Edge toEdge) {
+        final int EDGE_OFFSET = 5; // Pixels away from edge
         switch (toEdge) {
             case DOWN:
-                player.setY(0); // Enter from top
+                player.setY(EDGE_OFFSET); // Enter from top, slightly below edge
                 break;
             case UP:
-                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT); // Enter from bottom
+                player.setY(VIRTUAL_HEIGHT - PLAYER_HEIGHT - EDGE_OFFSET); // Enter from bottom, slightly above edge
                 break;
             case RIGHT:
-                player.setX(0); // Enter from left
+                player.setX(EDGE_OFFSET); // Enter from left, slightly right of edge
                 break;
             case LEFT:
-                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH); // Enter from right
+                player.setX(VIRTUAL_WIDTH - PLAYER_WIDTH - EDGE_OFFSET); // Enter from right, slightly left of edge
                 break;
         }
     }
