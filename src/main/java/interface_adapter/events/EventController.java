@@ -17,7 +17,7 @@ public class EventController {
     }
 
     public void attemptRandomEvent(ArrayList<Event> events){
-        int randInt =  random.nextInt(1,101);
+        int randInt =  random.nextInt(101);
         if (eventPity >= randInt){
             StartRandomEventInputData startRandomEventInputData = new StartRandomEventInputData(events);
             startRandomEventInputBoundary.selectRandomEvent(startRandomEventInputData);
