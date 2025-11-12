@@ -67,7 +67,6 @@ public class ProgressFileUserDataObject implements SaveProgressDataAccessInterfa
         saveData.put(eventData);
 
         return saveData;
-
     }
 
     @Override
