@@ -1,15 +1,14 @@
 package data_access;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import entity.Event;
+import entity.Item;
 import entity.NPC;
 import entity.Player;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import use_case.load_progress.LoadProgressDataAccessInterface;
 import use_case.save_progress.SaveProgressDataAccessInterface;
 
-import java.io.File;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -21,45 +20,51 @@ public class ProgressFileUserDataObject implements SaveProgressDataAccessInterfa
     public void save(Player player) throws IOException {
         try{
             FileWriter file = new FileWriter(SAVE_FILE, false);
-            file.write(JsonFileWriter(player).toString());
+            file.write(JSONFileWriter(player).toString());
             file.close();
         }
         catch(IOException e){
-            e.printStackTrace();
+            // e.printStackTrace();
         }
     }
 
-    public JsonArray JsonFileWriter(Player player){
-        JsonArray saveData = new JsonArray();
+    public JSONArray JSONFileWriter(Player player){
+        JSONArray saveData = new JSONArray();
 
         Map <NPC, Integer> npcMap = player.getRelationships();
         List<Event> eventList = player.getEvents();
+        Map <Integer, Item> inventory = player.getInventory();
 
-        JsonObject playerData = new JsonObject();
-        playerData.addProperty("name", player.getName());
-        playerData.addProperty("balance", player.getBalance());
-        playerData.addProperty("xLocation", player.getX());
-        playerData.addProperty("yLocation", player.getY());
+        JSONObject playerData = new JSONObject();
+        playerData.put("name", player.getName());
+        playerData.put("balance", player.getBalance());
+        playerData.put("xLocation", player.getX());
+        playerData.put("yLocation", player.getY());
 
-        JsonObject stats = new JsonObject();
+        JSONObject stats = new JSONObject();
         for (String stat: player.getStats().keySet()) {
-            stats.addProperty(stat, player.getStats().get(stat));
+            stats.put(stat, player.getStats().get(stat));
         }
-        playerData.add("stats", stats);
+        playerData.put("stats", stats);
 
-        JsonObject npcData = new JsonObject();
+        JSONObject npcData = new JSONObject();
         for (NPC npc : npcMap.keySet()) {
-            npcData.addProperty(npc.getName(), npcMap.get(npc));
+            npcData.put(npc.getName(), npcMap.get(npc));
         }
 
-        JsonObject eventData = new JsonObject();
+        JSONObject eventData = new JSONObject();
         for (Event event : eventList) {
-            eventData.addProperty(event.getEventName(), event.getEventID());
+            eventData.put(event.getEventName(), event.getEventID());
         }
 
-        saveData.add(playerData);
-        saveData.add(npcData);
-        saveData.add(eventData);
+        JSONObject inventoryData= new JSONObject();
+        for(int index: inventory.keySet()){
+            inventoryData.put(String.valueOf(index), inventory.get(index).getName());
+        }
+
+        saveData.put(playerData);
+        saveData.put(npcData);
+        saveData.put(eventData);
 
         return saveData;
     }
@@ -69,7 +74,7 @@ public class ProgressFileUserDataObject implements SaveProgressDataAccessInterfa
         // TODO: finish load function for loading JSON data into entities.
     }
 
-    public void JsonFileReader(){
+    public void JSONFileReader(){
         // TODO: finish JsonFIle Reader function
     }
 
