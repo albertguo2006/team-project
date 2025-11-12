@@ -57,8 +57,8 @@ public class GameMap {
         subway1.setNeighbor(Zone.Edge.UP, "Street 1");
 
         // Subway Station 1 <-> Subway Station 2
-        subway1.setNeighbor(Zone.Edge.DOWN, "Subway Station 2");
-        subway2.setNeighbor(Zone.Edge.UP, "Subway Station 1");
+        // NOTE: These use special zone-based transitions, not edge-based
+        // Handled specially in GamePanel with 300-pixel trigger zones
 
         // Street 2 <-> Grocery Store
         street2.setNeighbor(Zone.Edge.RIGHT, "Grocery Store");

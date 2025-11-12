@@ -189,52 +189,76 @@ public class GamePanel extends JPanel implements ActionListener {
 
     /**
      * Checks if the player has reached the edge of the screen and transitions to the next zone if needed.
-     * First checks for special transitions (tunnels, elevators), then normal zone connections.
+     * Special handling for subway zones with 300-pixel trigger areas.
+     * Then checks for special transitions (tunnels, elevators), and finally normal zone connections.
      * Transitions trigger when player reaches the visible edge of the screen.
      */
     private void checkZoneTransition() {
         Player player = playerMovementUseCase.getPlayer();
         Zone currentZone = gameMap.getCurrentZone();
+        String currentZoneName = currentZone.getName();
         double x = player.getX();
         double y = player.getY();
         boolean transitioned = false;
 
-        // Determine which edge the player has reached (at the visible screen bounds)
-        Zone.Edge edgeReached = null;
-        if (y >= VIRTUAL_HEIGHT - PLAYER_HEIGHT) {
-            edgeReached = Zone.Edge.DOWN;
-        } else if (y <= 0) {
-            edgeReached = Zone.Edge.UP;
-        } else if (x >= VIRTUAL_WIDTH - PLAYER_WIDTH) {
-            edgeReached = Zone.Edge.RIGHT;
-        } else if (x <= 0) {
-            edgeReached = Zone.Edge.LEFT;
+        // Special handling for subway station transitions (300-pixel trigger zones)
+        final int SUBWAY_TRANSITION_ZONE = 300;
+        
+        if ("Subway Station 1".equals(currentZoneName)) {
+            // Check if player is in bottom 300 pixels
+            if (y >= VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE) {
+                gameMap.setCurrentZone("Subway Station 2");
+                player.setY(SUBWAY_TRANSITION_ZONE); // Spawn 300 pixels from top
+                transitioned = true;
+            }
+        } else if ("Subway Station 2".equals(currentZoneName)) {
+            // Check if player is in top 300 pixels
+            if (y <= SUBWAY_TRANSITION_ZONE) {
+                gameMap.setCurrentZone("Subway Station 1");
+                player.setY(VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE); // Spawn 300 pixels from bottom
+                transitioned = true;
+            }
         }
 
-        if (edgeReached != null) {
-            // First check for special transitions (tunnels, elevators, etc.)
-            Transition specialTransition = gameMap.getSpecialTransition(edgeReached);
-            if (specialTransition != null) {
-                // Use special transition
-                gameMap.setCurrentZone(specialTransition.getToZone());
-                repositionPlayerFromTransition(player, specialTransition.getToEdge());
-                transitioned = true;
-            } else {
-                // Fall back to normal zone connection
-                String nextZone = currentZone.getNeighbor(edgeReached);
-                if (nextZone != null) {
-                    gameMap.setCurrentZone(nextZone);
-                    repositionPlayerFromEdge(player, edgeReached);
-                    transitioned = true;
-                }
-                // Note: No need to block movement here since PlayerMovementUseCase
-                // will clamp the position within screen bounds
+        // If no subway transition occurred, check normal edge-based transitions
+        if (!transitioned) {
+            // Determine which edge the player has reached (at the visible screen bounds)
+            Zone.Edge edgeReached = null;
+            if (y >= VIRTUAL_HEIGHT - PLAYER_HEIGHT) {
+                edgeReached = Zone.Edge.DOWN;
+            } else if (y <= 0) {
+                edgeReached = Zone.Edge.UP;
+            } else if (x >= VIRTUAL_WIDTH - PLAYER_WIDTH) {
+                edgeReached = Zone.Edge.RIGHT;
+            } else if (x <= 0) {
+                edgeReached = Zone.Edge.LEFT;
             }
 
-            // Update background color if zone changed
-            if (transitioned) {
-                setBackground(gameMap.getCurrentZone().getBackgroundColor());
+            if (edgeReached != null) {
+                // First check for special transitions (tunnels, elevators, etc.)
+                Transition specialTransition = gameMap.getSpecialTransition(edgeReached);
+                if (specialTransition != null) {
+                    // Use special transition
+                    gameMap.setCurrentZone(specialTransition.getToZone());
+                    repositionPlayerFromTransition(player, specialTransition.getToEdge());
+                    transitioned = true;
+                } else {
+                    // Fall back to normal zone connection
+                    String nextZone = currentZone.getNeighbor(edgeReached);
+                    if (nextZone != null) {
+                        gameMap.setCurrentZone(nextZone);
+                        repositionPlayerFromEdge(player, edgeReached);
+                        transitioned = true;
+                    }
+                    // Note: No need to block movement here since PlayerMovementUseCase
+                    // will clamp the position within screen bounds
+                }
             }
+        }
+
+        // Update background color if zone changed
+        if (transitioned) {
+            setBackground(gameMap.getCurrentZone().getBackgroundColor());
         }
     }
 
