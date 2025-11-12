@@ -1,9 +1,6 @@
 package data_access;
 
-import entity.Event;
-import entity.Item;
-import entity.NPC;
-import entity.Player;
+import entity.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import use_case.load_progress.LoadProgressDataAccessInterface;
@@ -11,11 +8,16 @@ import use_case.save_progress.SaveProgressDataAccessInterface;
 
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ProgressFileUserDataObject implements SaveProgressDataAccessInterface, LoadProgressDataAccessInterface {
+public class SaveFileUserDataObject implements SaveProgressDataAccessInterface, LoadProgressDataAccessInterface {
     private static final String SAVE_FILE = "saveFile.json";
+    private static final String EVENT_FILE = "events.json";
 
     public void save(Player player) throws IOException {
         try{
@@ -24,7 +26,7 @@ public class ProgressFileUserDataObject implements SaveProgressDataAccessInterfa
             file.close();
         }
         catch(IOException e){
-            // e.printStackTrace();
+            // TODO: handle exception
         }
     }
 
@@ -61,7 +63,6 @@ public class ProgressFileUserDataObject implements SaveProgressDataAccessInterfa
         for(int index: inventory.keySet()){
             inventoryData.put(String.valueOf(index), inventory.get(index).getName());
         }
-
         saveData.put(playerData);
         saveData.put(npcData);
         saveData.put(eventData);
@@ -70,12 +71,39 @@ public class ProgressFileUserDataObject implements SaveProgressDataAccessInterfa
     }
 
     @Override
-    public void load(Player player) throws IOException {
-        // TODO: finish load function for loading JSON data into entities.
+    public Player load() throws IOException {
+        return new Player("bob");
+        // TODO: properly implement this function.
     }
 
-    public void JSONFileReader(){
-        // TODO: finish JsonFIle Reader function
+    public Player loadPlayer() throws IOException{
+        JSONArray data = JSONFileReader(SAVE_FILE);
+        JSONObject playerData = data.getJSONObject(0);
+        JSONObject statsData = playerData.getJSONObject("stats");
+
+        Map<String, Integer> stats = new HashMap<>();
+        for (String stat: statsData.keySet()) {
+            stats.put(stat, statsData.getInt(stat));
+        }
+
+        Player player = new Player(playerData.getString("name"),
+                playerData.getDouble("balance"),
+                playerData.getDouble("xLocation"),
+                playerData.getDouble("yLocation"),
+                stats);
+
+        return player;
+    }
+
+    public JSONArray JSONFileReader(String FILE_NAME) throws IOException {
+        try{
+            String data = Files.readString(Paths.get(FILE_NAME));
+            return new JSONArray(data);
+        }
+        catch(IOException e){
+            throw new IOException(e.getMessage());
+            // TODO handle exception. Idk if the above is right or not
+        }
     }
 
 }

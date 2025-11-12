@@ -9,5 +9,5 @@ import java.io.IOException;
  */
 
 public interface LoadProgressDataAccessInterface {
-    void load(Player player) throws IOException;
+    Player load() throws IOException;
 }
