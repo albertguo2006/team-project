@@ -12,6 +12,8 @@ public class Player {
     private final Map<NPC, Integer> relationships = new HashMap<>();
     private final List<Event> events =  new ArrayList<>();
     private Portfolio portfolio =  new Portfolio();
+    Map <Integer, Item> inventory = new HashMap<>();
+    // Maps inventory slot number to item in that slot.
     
     // Movement properties (for Use Case 1: Environment Interaction)
     private double x;
@@ -56,11 +58,45 @@ public class Player {
         return balance;
     }
 
+    public void setStat(String stat, int score){ stats.put(stat, score); }
+
     public void setStats(int hunger, int energy, int mood) {
         stats.put("Hunger", hunger);
         stats.put("Energy", energy);
         stats.put("Mood", mood);
     }
+
+    public Map<Integer, Item> getInventory() { return inventory; }
+
+    public void addInventory(Item item) {
+        if (inventory.isEmpty()) {
+            inventory.put(1, item);
+        }
+        else if (inventory.size() == 5){
+            System.out.println("Your inventory is full!");
+        }
+        else {
+            for (int i = 1; i <= 5; i++) {
+                if (!inventory.containsKey(i)){
+                    inventory.put(i, item);
+                }
+                // Places the item in the first open slot in the player's inventory.
+                // For example, if both slots 3 and 5 are empty, the item picked up will be placed in inventory slot 3.
+            }
+        }
+    }
+
+    public void removeInventory(int index){
+        inventory.remove(index);
+        // Assuming we always know the index of the item the Player wants to remove based on the user's
+        // interactions with the UI.
+    }
+
+    public void itemUsed(int index) {
+        Item item = inventory.get(index);
+        setStat(item.getType(), item.getScore());
+    }
+
 
     public Map<String, Integer> getStats(){
         return stats;
