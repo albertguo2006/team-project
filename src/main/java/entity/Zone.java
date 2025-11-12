@@ -12,15 +12,18 @@ public class Zone {
 
     private final String name;
     private final Color backgroundColor;
+    private final String backgroundImagePath;
     private final Map<Edge, String> neighbors = new HashMap<>();
 
-    public Zone(String name, Color backgroundColor) {
+    public Zone(String name, Color backgroundColor, String backgroundImagePath) {
         this.name = name;
         this.backgroundColor = backgroundColor;
+        this.backgroundImagePath = backgroundImagePath;
     }
 
     public String getName() { return name; }
     public Color getBackgroundColor() { return backgroundColor; }
+    public String getBackgroundImagePath() { return backgroundImagePath; }
 
     public void setNeighbor(Edge edge, String neighborZoneName) {
         neighbors.put(edge, neighborZoneName);

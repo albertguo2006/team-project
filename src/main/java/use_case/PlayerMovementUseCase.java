@@ -99,13 +99,11 @@ public class PlayerMovementUseCase {
         double newX = player.getX() + (velocityX * deltaTime);
         double newY = player.getY() + (velocityY * deltaTime);
         
-        // Allow position to go slightly beyond boundaries for zone transitions
-        // The GamePanel will handle zone transitions when position exceeds bounds
-        // Only prevent huge out-of-bounds jumps
-        if (newX < -50) newX = -50;
-        if (newX > WORLD_WIDTH + 50) newX = WORLD_WIDTH + 50;
-        if (newY < -50) newY = -50;
-        if (newY > WORLD_HEIGHT + 50) newY = WORLD_HEIGHT + 50;
+        // Clamp position to stay within visible screen bounds
+        // This keeps the player sprite completely visible and prevents jagged motion
+        // GamePanel will trigger zone transitions when player reaches these edges
+        newX = clampPosition(newX, PLAYER_WIDTH, WORLD_WIDTH);
+        newY = clampPosition(newY, PLAYER_HEIGHT, WORLD_HEIGHT);
         
         // Update player position
         player.setX(newX);
