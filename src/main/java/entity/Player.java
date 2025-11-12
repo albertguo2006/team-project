@@ -86,6 +86,11 @@ public class Player {
         }
     }
 
+    // Overload method for addInventory when we know which index to fill
+    public void addInventory(int index, Item item){
+        inventory.put(index, item);
+    }
+
     public void removeInventory(int index){
         inventory.remove(index);
         // Assuming we always know the index of the item the Player wants to remove based on the user's
