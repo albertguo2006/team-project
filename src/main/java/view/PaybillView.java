@@ -31,9 +31,10 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final String[] columnNames = {"Name", "Due Date", "Amount", "Pay", "Status"};
     private final Object[][] data = new Object[][]{}; // TODO: I don't understand
 
-    public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController) {
+    public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController, JTable billsTable) {
         this.paybillViewModel = paybillViewModel;
         this.paybillController = paybillController;
+        this.billsTable = billsTable;
         this.paybillViewModel.addPropertyChangeListener(this);
 
         // Create table with uneditable model
