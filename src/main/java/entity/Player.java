@@ -8,8 +8,12 @@ import java.util.Map;
 public class Player {
     private String name;
     private double balance;
+    private final Map<String, Integer> stats = new HashMap<>();
     private final Map<NPC, Integer> relationships = new HashMap<>();
     private final List<Event> events =  new ArrayList<>();
+    private Portfolio portfolio =  new Portfolio();
+    Map <Integer, Item> inventory = new HashMap<>();
+    // Maps inventory slot number to item in that slot.
     
     // Movement properties (for Use Case 1: Environment Interaction)
     private double x;
@@ -19,9 +23,22 @@ public class Player {
     public Player(String name) {
         this.name = name;
         balance = 1000.0;
-        this.x = 400.0;  // Default starting position (center-ish)
-        this.y = 300.0;
-        this.speed = 150.0;  // pixels per second
+        stats.put("Hunger", 100);
+        stats.put("Energy", 100);
+        stats.put("Mood", 100);
+        // Updated for 1920x1200 virtual resolution
+        this.x = 960.0;  // Center of 1920 width
+        this.y = 600.0;  // Center of 1200 height
+        this.speed = 360.0;  // Scaled up for 1920x1200 (was 150 for 800x600)
+    }
+
+    public Player (String name, double balance, double x, double y, Map<String, Integer> stats) {
+        this.name = name;
+        this.balance = balance;
+        this.x = x;
+        this.y = y;
+        this.speed = 360.0;  // Scaled up for 1920x1200 virtual resolution
+        this.stats.putAll(stats);
     }
 
     public void setName(String name) {
@@ -41,6 +58,55 @@ public class Player {
         return balance;
     }
 
+    public void setStat(String stat, int score){ stats.put(stat, score); }
+
+    public void setStats(int hunger, int energy, int mood) {
+        stats.put("Hunger", hunger);
+        stats.put("Energy", energy);
+        stats.put("Mood", mood);
+    }
+
+    public Map<Integer, Item> getInventory() { return inventory; }
+
+    public void addInventory(Item item) {
+        if (inventory.isEmpty()) {
+            inventory.put(1, item);
+        }
+        else if (inventory.size() == 5){
+            System.out.println("Your inventory is full!");
+        }
+        else {
+            for (int i = 1; i <= 5; i++) {
+                if (!inventory.containsKey(i)){
+                    inventory.put(i, item);
+                }
+                // Places the item in the first open slot in the player's inventory.
+                // For example, if both slots 3 and 5 are empty, the item picked up will be placed in inventory slot 3.
+            }
+        }
+    }
+
+    // Overload method for addInventory when we know which index to fill
+    public void addInventory(int index, Item item){
+        inventory.put(index, item);
+    }
+
+    public void removeInventory(int index){
+        inventory.remove(index);
+        // Assuming we always know the index of the item the Player wants to remove based on the user's
+        // interactions with the UI.
+    }
+
+    public void itemUsed(int index) {
+        Item item = inventory.get(index);
+        setStat(item.getType(), item.getScore());
+    }
+
+
+    public Map<String, Integer> getStats(){
+        return stats;
+    }
+
     public int getNPCScore(NPC npc) {
         return relationships.get(npc);
     }
@@ -51,14 +117,16 @@ public class Player {
         }
     }
 
-    public void removeNPC(NPC npc) {
-        relationships.remove(npc);
-    }
+    public void removeNPC(NPC npc) { relationships.remove(npc); }
 
     public void addEvent(Event event) {
         if (!events.contains(event)) {
             events.add(event);
         }
+    }
+
+    public Map <NPC, Integer> getRelationships() {
+        return relationships;
     }
 
     public List<Event> getEvents() {

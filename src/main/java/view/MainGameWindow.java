@@ -1,9 +1,11 @@
 package view;
 
+import java.awt.Dimension;
+
+import javax.swing.JFrame;
+
 import interface_adapter.events.PlayerInputController;
 import use_case.PlayerMovementUseCase;
-
-import javax.swing.*;
 
 /**
  * MainGameWindow is the top-level JFrame for the application.
@@ -33,15 +35,23 @@ public class MainGameWindow extends JFrame {
         // Window setup
         this.setTitle("California Prop. 65 - Environment Interaction");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        this.setResizable(false);
-        this.setLocationRelativeTo(null);  // Center on screen
+        this.setResizable(true);  // Enable resizing
+        
+        // Set minimum size to maintain playability (maintains 16:10 aspect ratio)
+        this.setMinimumSize(new Dimension(640, 400));  // 16:10 ratio minimum
+        
+        // Set initial preferred size (half of virtual 1920x1200)
+        this.setPreferredSize(new Dimension(1280, 800));  // 16:10 ratio
         
         // Create and add the game panel
         this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController);
         this.add(gamePanel);
         
-        // Pack the frame to fit the panel's preferred size
+        // Pack the frame to fit the preferred size
         this.pack();
+        
+        // Center on screen after packing
+        this.setLocationRelativeTo(null);
     }
     
     /**

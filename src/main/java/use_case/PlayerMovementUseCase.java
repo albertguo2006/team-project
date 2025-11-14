@@ -18,13 +18,13 @@ public class PlayerMovementUseCase {
     
     private final Player player;
     
-    // World bounds for collision detection
-    private static final double WORLD_WIDTH = 800.0;
-    private static final double WORLD_HEIGHT = 600.0;
+    // World bounds for collision detection (virtual resolution 1920x1200)
+    private static final double WORLD_WIDTH = 1920.0;
+    private static final double WORLD_HEIGHT = 1200.0;
     
     // Player sprite dimensions (for more accurate collision detection)
-    private static final double PLAYER_WIDTH = 32.0;
-    private static final double PLAYER_HEIGHT = 32.0;
+    private static final double PLAYER_WIDTH = 64.0;
+    private static final double PLAYER_HEIGHT = 64.0;
     
     // Movement state flags: which directions are currently active
     private boolean movingUp = false;
@@ -72,7 +72,7 @@ public class PlayerMovementUseCase {
      * This method:
      * 1. Calculates velocity based on active movement directions
      * 2. Computes new position: newPos = currentPos + (velocity * deltaTime)
-     * 3. Checks for collisions and boundary violations
+     * 3. Checks for collisions and boundary violations (but allows edge crossing for zone transitions)
      * 4. Updates the player's x and y coordinates
      * 
      * @param deltaTime the time elapsed since the last update, in seconds
@@ -99,7 +99,9 @@ public class PlayerMovementUseCase {
         double newX = player.getX() + (velocityX * deltaTime);
         double newY = player.getY() + (velocityY * deltaTime);
         
-        // Apply collision detection and boundary checking
+        // Clamp position to stay within visible screen bounds
+        // This keeps the player sprite completely visible and prevents jagged motion
+        // GamePanel will trigger zone transitions when player reaches these edges
         newX = clampPosition(newX, PLAYER_WIDTH, WORLD_WIDTH);
         newY = clampPosition(newY, PLAYER_HEIGHT, WORLD_HEIGHT);
         

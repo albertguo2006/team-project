@@ -1,0 +1,65 @@
+package data_access;
+
+import entity.Event;
+import entity.EventOutcome;
+import entity.EventBuilder;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Objects;
+
+public class EventDataAccessObject {
+    EventBuilder eventBuilder = new EventBuilder();
+
+    public ArrayList<Event> createEventList(){
+        ArrayList<Event> events = new ArrayList<>();
+        try {
+            String eventSource = "events.json";
+            String jsonString = Files.readString(Paths.get(Objects.requireNonNull(getClass().getClassLoader()
+                    .getResource(eventSource)).toURI()));
+            JSONArray jsonArray = new JSONArray(jsonString);
+
+            for (int i = 0; i < jsonArray.length(); i++){
+                JSONObject newEvent = jsonArray.getJSONObject(i);
+                int eventID = newEvent.getInt("id");
+                String eventName = newEvent.getString("name");
+                String eventDescription = newEvent.getString("description");
+                JSONObject eventOutcomes = newEvent.getJSONObject("outcomes");
+                HashMap<Integer, EventOutcome> OutcomeMap = createEventOutcomeList(eventOutcomes);
+                events.add(eventBuilder.createEvent(eventID, eventName, eventDescription, OutcomeMap));
+            }
+            return events;
+        }
+        catch (IOException | URISyntaxException e) {
+            throw new RuntimeException();
+        }
+    }
+
+    public HashMap<Integer, EventOutcome> createEventOutcomeList(JSONObject eventOutcomes){
+        HashMap<Integer, EventOutcome> outcomeMap = new HashMap<>();
+        for (String key : eventOutcomes.keySet()) {
+            JSONObject newOutcome = eventOutcomes.getJSONObject(key);
+            String outcomeDescription = newOutcome.getString("description");
+            double outcomeChance = newOutcome.getDouble("chance");
+            int outcomeResult = newOutcome.getInt("result");
+            outcomeMap.put(Integer.parseInt(key), eventBuilder.createOutcome(Integer.parseInt(key), outcomeDescription,
+                    outcomeChance, outcomeResult));
+        }
+        return outcomeMap;
+    }
+
+    public static void main(String[] args) {
+        EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
+        eventDataAccessObject.createEventList();
+    }
+}
+
+
