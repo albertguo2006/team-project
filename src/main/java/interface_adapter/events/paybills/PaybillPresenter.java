@@ -11,34 +11,42 @@ import use_case.paybills.PaybillOutputData;
 
 public class PaybillPresenter implements PaybillOutputBoundary {
     private final PaybillViewModel paybillViewModel;
-    private final ViewManager viewManager;
+    private final ViewManagerModel viewManagerModel;
 
-    public PaybillPresenter(PaybillViewModel paybillViewModel, ViewManager viewManager) {
+    public PaybillPresenter(PaybillViewModel paybillViewModel, ViewManagerModel viewManagerModel) {
         this.paybillViewModel = paybillViewModel;
-        this.viewManager = viewManager;
+        this.viewManagerModel = viewManagerModel;
     }
 
     @Override
     public void prepareSuccessView(PaybillOutputData paybillOutputData) {
         PaybillState state = paybillViewModel.getState();
+        if (state == null) {
+            state = new PaybillState();
+        }
+
         state.setSuccessMessage(paybillOutputData.getMessage());
         state.setAmountPaid(paybillOutputData.getAmount());
         state.setPaymentSuccess(true);
         state.setErrorMessage(null);
 
         paybillViewModel.setState(state);
-        paybillViewModel.firePropertyChanged();
+        paybillViewModel.firePropertyChange();
     }
 
     @Override
     public void prepareFailureView(PaybillOutputData paybillOutputData) {
         PaybillState state = paybillViewModel.getState();
+        if (state == null) {
+            state = new PaybillState();
+        }
+
         state.setErrorMessage(paybillOutputData.getMessage());
         state.setSuccessMessage(null);
         state.setAmountDue(paybillOutputData.getAmount());
         state.setPaymentSuccess(false);
 
         paybillViewModel.setState(state);
-        paybillViewModel.firePropertyChanged();
+        paybillViewModel.firePropertyChange();
     }
 }
