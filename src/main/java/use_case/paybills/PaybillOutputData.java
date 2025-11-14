@@ -7,10 +7,10 @@ import java.util.List;
 public class PaybillOutputData {
     private final double amount;
     private final String message;
-    private final boolean sucess;
+    private final boolean success;
 
-    public PaybillOutputData(boolean sucess, String message) {
-        this.sucess = sucess;
+    public PaybillOutputData(boolean success, String message, double amount) {
+        this.success = success;
         this.message = message;
         this.amount = amount;
     }
@@ -23,7 +23,7 @@ public class PaybillOutputData {
         return amount;
     }
 
-    public boolean isSucess() {
-        return sucess;
+    public boolean isSuccess() {
+        return success;
     }
 }
