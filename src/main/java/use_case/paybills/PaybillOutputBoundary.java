@@ -13,9 +13,9 @@ public interface PaybillOutputBoundary {
     void prepareSuccessView(PaybillOutputData paybillOutputData);
 
     /**
-     * Prepares the failure view for the Paubill Use Case.
+     * Prepares the failure view for the Paybill Use Case.
      * When the player fails to pay a single or all bills due to insufficient balance.
-     * @param errorMessage the explanation of the failure
+     * @param paybillOutputData contains failure details and error message.
      */
-    void prepareFailureView(String errorMessage);
+    void prepareFailureView(PaybillOutputData paybillOutputData);
 }

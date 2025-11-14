@@ -15,9 +15,19 @@ public class PaybillController {
     }
 
     /**
-     * Executes the Paybill Use Case
+     * Executes Pay All Bills
+     * Called when the "Pay All" button is clicked
      */
-    public void execute() {
-        paybillUseCaseInteractor.execute();
+    public void payAllBills() {
+        paybillUseCaseInteractor.payAllBills();
+    }
+
+    /**
+     * Executes Pay Single Bill
+     * Called when an individual "Pay" button is clicked for a specific bill
+     * @param id The ID of the bill to pay
+     */
+    public void paySingleBill(String id) {
+        paybillUseCaseInteractor.paySingleBill(id);
     }
 }

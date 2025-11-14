@@ -9,7 +9,7 @@ public interface PaybillInputBoundary {
     /**
      * Pay all unpaid bills at once
      */
-    void payAllbill();
+    void payAllBills();
 
     /**
      * Pay a specific bill

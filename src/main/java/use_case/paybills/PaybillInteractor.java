@@ -18,10 +18,6 @@ public class PaybillInteractor implements PaybillInputBoundary {
 
     @Override
     public void payAllBills() {
-        // TODO: implement logic of paybill use case
-        //* set respective bill to paid and update player balance
-        //* instantiate the 'paybillOutputData' which needs to contain everything
-        //* tell the presenter to prepare a success view
         List<Bill> unpaidBills = paybillDataAccess.getUnpaidBills();
         double totalDue = calculateTotalDue(unpaidBills);
 
@@ -79,5 +75,6 @@ public class PaybillInteractor implements PaybillInputBoundary {
                 return bill;
             }
         }
+        return null;
     }
 }
