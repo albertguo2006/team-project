@@ -220,9 +220,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         if (currentBills == null) return;
 
         double total = 0;
-        for (Bill bill: currentbills){
-            total += bill.getAmount();
-        }
+        for (Bill bill: currentBills) total += bill.getAmount();
 
         totalLabel.setText(String.format("%.2f", total));
     }
