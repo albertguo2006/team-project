@@ -124,7 +124,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
      * Load new bills (called each week by game system)
      * @param bills list of bills for the current period - can be any number
      */
-    public void loadBillsForWeek(List<bill> bills) {
+    public void loadBillsForWeek(List<Bill> bills) {
         this.currentBills = bills;
 
         // Clear existing data
@@ -213,6 +213,8 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         loadBills(updatedBills);
 
     }
+
+    public void loadBills(List<Bill> bills){}
 
     private void updateTotal(){
         if (currentBills == null) return;
