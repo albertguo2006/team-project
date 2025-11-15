@@ -8,14 +8,21 @@ public class Bill {
     private String name;
     private Date dueDate;
     private Boolean isPaid;
+    private BillType type;
+
+    public enum BillType {
+        RENT, CREDIT_CARD, INSURANCE, TAX, SUBSCRIPTION, MORTGAGE, ELECTRICITY, INTERNET, CELLPHONE, WATER,
+        GAS, LOAN
+    }
 
 
-    public Bill(String id, double amount, String name, Date dueDate, Boolean isPaid) {
+    public Bill(String id, double amount, String name, Date dueDate, Boolean isPaid, BillType type) {
         this.id = id;
         this.amount = amount;
         this.name = name;
         this.dueDate = dueDate;
         this.isPaid = isPaid;
+        this.type = type;
     }
     public String getId() {
         return id;
@@ -32,6 +39,7 @@ public class Bill {
     public double getAmount() {
         return amount;
     }
+    public BillType getBillType() {return type;}
     public void setIsPaid(boolean isPaid){
         this.isPaid = isPaid;
     }
