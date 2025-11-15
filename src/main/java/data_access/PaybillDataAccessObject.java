@@ -10,7 +10,26 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
     private final Map<String, Bill> bills = new HashMap<>();
     private int currentWeek = 1;
 
-    // Templates???
+    // Available bill types for random selection
+    private final Bill.BillType[] billtypes = Bill.BillType.values();
+
+    // Bill name mappings for each type
+    private final Map<Bill.BillType, String> billNames = Map.ofEntries(
+            Bill.BillType.RENT, "Rent",
+            Bill.BillType.CREDIT_CARD, "Credit Card Payment",
+            Bill.BillType.INSURANCE, "Insurance Premium",
+            Bill.BillType.TAX, "Property Tax",
+            Bill.BillType.SUBSCRIPTION, "Streaming Subscription",
+            Bill.BillType.MORTGAGE, "Mortgage Payment",
+            Bill.BillType.ELECTRICITY, "Electricity Bill",
+            Bill.BillType.INTERNET, "Internet Service",
+            Bill.BillType.CELLPHONE, "Cell Phone Bill",
+            Bill.BillType.WATER, "Water Bill",
+            Bill.BillType.GAS, "Gas Bill",
+            Bill.BillType.LOAN, "Loan Payment"
+    );
+
+    //Amount ranges for each bill type (min, max)
 
     public PaybillDataAccessObject() {
         // Generate initial bills
@@ -34,8 +53,9 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
     }
 
     @Override
-    public Bill getBillbyId(String id){
+    public Bill getBillById(String id) {
         return bills.get(id);
+        }
     }
 
 
@@ -51,7 +71,8 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
         }
     }
 
-    public void advanceToNextMonth(){
+    @Override
+    public void advanceToNextWeek() {
         // Mark all current bills as overdue
         bills.values().forEach(bill -> {
             if (!bill.getPaid()){
@@ -64,7 +85,8 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
         generateWeeklyBills();
     }
 
-    private Date calculateDueDate(){
+
+    private Date calculateDueDate() {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
         return  cal.getTime();
