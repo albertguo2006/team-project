@@ -26,4 +26,15 @@ public interface PaybillDataAccessInterface {
      */
     Bill getBillById(String id);
 
+    /**
+     * Generates new bills for the current period (weekly)
+     */
+    List<Bill> generateWeeklyBills();
+
+    /**
+     * Marks all current bills as paid and generates new ones
+     * Used when advancing to a new week
+     */
+    void advanceToNextWeek();
+
 }
