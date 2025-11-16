@@ -15,6 +15,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 /**
  * The View for the Paybill Use Case
@@ -30,8 +31,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final JLabel title = new JLabel("Bills");
     private final JTable billsTable;
     private final JLabel weekLabel = new JLabel("Weekly Payments");
-    private final JTable weeklyPaymentsTable;
-    private final JLabel totalLabel = new JLabel("Total: $0.00")
+    private final JLabel totalLabel = new JLabel("Total: $0.00");
     private final JButton payAllButton = new JButton("Pay All Bills");
     private final JLabel statusMessage = new JLabel("");
 
@@ -43,10 +43,9 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private List<Bill> currentBills;
     private final JPanel actionButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-    public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController, JTable billsTable, DefaultTableModel tableModel) {
+    public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController, DefaultTableModel tableModel){
         this.paybillViewModel = paybillViewModel;
         this.paybillController = paybillController;
-        this.billsTable = billsTable;
         this.paybillViewModel.addPropertyChangeListener(this);
 
         // Initialize table model
@@ -61,7 +60,12 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         setupUI();
         setupListeners();
 
-        loadSampleBillsForWeek(1); // Load initial bills
+        loadInitialBills(); // Load initial bills
+    }
+
+    private void loadInitialBills(){
+        List<Bill> initialBills = paybillDataAccessObject.getAllBills();
+        loadBills(initialBills);
     }
 
     private void setupUI() {
@@ -214,7 +218,36 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
     }
 
-    public void loadBills(List<Bill> bills){}
+    public void loadBills(List<Bill> bills){
+        this.currentBills = bills;
+
+        // Clear existing data
+        tableModel.setRowCount(0);
+        actionButtonsPanel.removeAll();
+
+        // Add bills to table and create action buttons
+        for (Bill bill: bills){
+            String status = bill.getPaid() ? "Paid" : "Unpaid";
+            String dueDate = formatDueDate(bill.getDueDate());
+            String amount = String.format("%.2f", bill.getAmount());
+
+            // Add to table
+            tableModel.addRow(new Object[]{bill.getName(), dueDate, status, amount});
+
+            // Create individual button for unpaid bills
+            if (!bill.getPaid()){
+                JButton payButton = createBillButton(bill);
+                actionButtonsPanel.add(payButton);
+            }
+
+            // Update UI Labels
+            updateTotal();
+
+            // Refresh the panels
+            actionButtonsPanel.revalidate();
+            actionButtonsPanel.repaint();
+        }
+    }
 
     private void updateTotal(){
         if (currentBills == null) return;
@@ -223,6 +256,15 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         for (Bill bill: currentBills) total += bill.getAmount();
 
         totalLabel.setText(String.format("%.2f", total));
+
+        // Enable/Disable pay all button based on whether there are unpaid bills
+        boolean hasUnpaidBills = true;
+        for (Bill bill: currentBills){
+            if (!bill.getPaid()){
+                hasUnpaidBills = false;
+            }
+        }
+        payAllButton.setEnabled(hasUnpaidBills && total > 0);
     }
 
 }
