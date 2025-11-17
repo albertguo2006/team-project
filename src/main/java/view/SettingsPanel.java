@@ -42,10 +42,10 @@ public class SettingsPanel extends JPanel {
     private static final Color BUTTON_TEXT_COLOR = Color.WHITE;
     
     private final GameSettings settings;
-    private final JSlider volumeSlider;
-    private final JComboBox<String> resolutionComboBox;
-    private final JButton saveButton;
-    private final JButton cancelButton;
+    private JSlider volumeSlider;
+    private JComboBox<String> resolutionComboBox;
+    private JButton saveButton;
+    private JButton cancelButton;
     
     // Store original values for cancel operation
     private float originalVolume;
@@ -77,21 +77,21 @@ public class SettingsPanel extends JPanel {
         
         add(Box.createRigidArea(new Dimension(0, 60)));
         
-        // Volume control section
+        // Volume control section - creates and stores volumeSlider
         JPanel volumePanel = createVolumePanel();
         volumePanel.setAlignmentX(CENTER_ALIGNMENT);
         add(volumePanel);
         
         add(Box.createRigidArea(new Dimension(0, 40)));
         
-        // Resolution control section
+        // Resolution control section - creates and stores resolutionComboBox
         JPanel resolutionPanel = createResolutionPanel();
         resolutionPanel.setAlignmentX(CENTER_ALIGNMENT);
         add(resolutionPanel);
         
         add(Box.createRigidArea(new Dimension(0, 60)));
         
-        // Buttons
+        // Buttons - creates and stores saveButton and cancelButton
         JPanel buttonPanel = createButtonPanel();
         buttonPanel.setAlignmentX(CENTER_ALIGNMENT);
         add(buttonPanel);
@@ -99,12 +99,7 @@ public class SettingsPanel extends JPanel {
         // Add vertical glue at bottom
         add(Box.createVerticalGlue());
         
-        // Initialize controls with current settings
-        volumeSlider = (JSlider) volumePanel.getComponent(1);
-        resolutionComboBox = (JComboBox<String>) resolutionPanel.getComponent(1);
-        saveButton = (JButton) buttonPanel.getComponent(0);
-        cancelButton = (JButton) buttonPanel.getComponent(2);
-        
+        // Update controls with current settings
         updateControlsFromSettings();
     }
     
@@ -122,6 +117,7 @@ public class SettingsPanel extends JPanel {
     
     /**
      * Creates the volume control panel with label and slider.
+     * Stores the slider in the volumeSlider field.
      * @return panel containing volume controls
      */
     private JPanel createVolumePanel() {
@@ -139,15 +135,15 @@ public class SettingsPanel extends JPanel {
         
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        // Volume slider
-        JSlider slider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
-        slider.setBackground(BACKGROUND_COLOR);
-        slider.setForeground(LABEL_COLOR);
-        slider.setMajorTickSpacing(25);
-        slider.setMinorTickSpacing(5);
-        slider.setPaintTicks(true);
-        slider.setPaintLabels(true);
-        slider.setAlignmentX(LEFT_ALIGNMENT);
+        // Volume slider - store reference
+        volumeSlider = new JSlider(JSlider.HORIZONTAL, 0, 100, 50);
+        volumeSlider.setBackground(BACKGROUND_COLOR);
+        volumeSlider.setForeground(LABEL_COLOR);
+        volumeSlider.setMajorTickSpacing(25);
+        volumeSlider.setMinorTickSpacing(5);
+        volumeSlider.setPaintTicks(true);
+        volumeSlider.setPaintLabels(true);
+        volumeSlider.setAlignmentX(LEFT_ALIGNMENT);
         
         // Customize slider labels
         Hashtable<Integer, JLabel> labelTable = new Hashtable<>();
@@ -156,9 +152,9 @@ public class SettingsPanel extends JPanel {
         labelTable.put(50, createSliderLabel("50%"));
         labelTable.put(75, createSliderLabel("75%"));
         labelTable.put(100, createSliderLabel("100%"));
-        slider.setLabelTable(labelTable);
+        volumeSlider.setLabelTable(labelTable);
         
-        panel.add(slider);
+        panel.add(volumeSlider);
         
         return panel;
     }
@@ -177,6 +173,7 @@ public class SettingsPanel extends JPanel {
     
     /**
      * Creates the resolution control panel with label and dropdown.
+     * Stores the combo box in the resolutionComboBox field.
      * @return panel containing resolution controls
      */
     private JPanel createResolutionPanel() {
@@ -194,7 +191,7 @@ public class SettingsPanel extends JPanel {
         
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        // Resolution combo box
+        // Resolution combo box - store reference
         String[] resolutionOptions = {
             "Small (1280x800)",
             "Medium (1600x1000)",
@@ -202,17 +199,18 @@ public class SettingsPanel extends JPanel {
             "Extra Large (2560x1600)"
         };
         
-        JComboBox<String> comboBox = new JComboBox<>(resolutionOptions);
-        comboBox.setFont(new Font("Arial", Font.PLAIN, 18));
-        comboBox.setMaximumSize(new Dimension(400, 40));
-        comboBox.setAlignmentX(LEFT_ALIGNMENT);
-        panel.add(comboBox);
+        resolutionComboBox = new JComboBox<>(resolutionOptions);
+        resolutionComboBox.setFont(new Font("Arial", Font.PLAIN, 18));
+        resolutionComboBox.setMaximumSize(new Dimension(400, 40));
+        resolutionComboBox.setAlignmentX(LEFT_ALIGNMENT);
+        panel.add(resolutionComboBox);
         
         return panel;
     }
     
     /**
      * Creates the button panel with Save and Cancel buttons.
+     * Stores the buttons in saveButton and cancelButton fields.
      * @return panel containing action buttons
      */
     private JPanel createButtonPanel() {
@@ -220,12 +218,12 @@ public class SettingsPanel extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
         panel.setBackground(BACKGROUND_COLOR);
         
-        JButton saveBtn = createActionButton("Save");
-        JButton cancelBtn = createActionButton("Cancel");
+        saveButton = createActionButton("Save");
+        cancelButton = createActionButton("Cancel");
         
-        panel.add(saveBtn);
+        panel.add(saveButton);
         panel.add(Box.createRigidArea(new Dimension(40, 0)));
-        panel.add(cancelBtn);
+        panel.add(cancelButton);
         
         return panel;
     }
