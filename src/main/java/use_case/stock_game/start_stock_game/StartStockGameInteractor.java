@@ -1,5 +1,7 @@
 package use_case.stock_game.start_stock_game;
 
+import api.AlphaStockDataBase;
+import api.StockDataBase;
 import entity.Player;
 import entity.Stock;
 
@@ -12,17 +14,23 @@ public class StartStockGameInteractor implements StartStockGameInputBoundary {
 
     private final StartStockGameDataAccessInterface stockGameDataAccessObject;
     private final StartStockGameOutputBoundary stockGamePresenter;
+    private StockDataBase stockDataBase;
 
     public StartStockGameInteractor(StartStockGameDataAccessInterface stockGameDataAccessObject,
-                                    StartStockGameOutputBoundary stockGamePresenter) {
+                                    StartStockGameOutputBoundary stockGamePresenter,
+                                    StockDataBase stockDataBase) {
         this.stockGameDataAccessObject = stockGameDataAccessObject;
         this.stockGamePresenter = stockGamePresenter;
+        this.stockDataBase = stockDataBase;
+
     }
 
     @Override
     public void execute(StartStockGameInputData startStockGameInputData) {
         final Double startAmount = startStockGameInputData.getStartAmount();
         final Player player = startStockGameInputData.getPlayer();
+
+        this.stockDataBase.getStockPrices("VOO");
 
         if (player.getBalance() < startAmount || startAmount <= 0) {
             stockGamePresenter.prepareFailView(startAmount + " is not a valid investment amount. " +
