@@ -24,7 +24,35 @@ public class SleepInteractor {
      * @throws IllegalStateException if player is not in house
      */
     public void execute(){
-        if (!player.isInHouse())
+        if (!player.isInHouse()){
+            throw new IllegalStateException("Player must be in house to sleep");
+        }
+
+        // 1. Save game progress
+        saveProgressInteractor.save();
+
+        // 2. Advance to next day
+        currentDay++;
+
+        System.out.println("Current day: " + currentDay);
+    }
+
+    public int getCurrentDay(){
+        return currentDay;
+    }
+
+    public boolean isPlayerInHouse(){
+        return player.isInHouse();
+    }
+
+    public Player getPlayer(){
+        return player;
+    }
+
+    public void setCurrentDay(int currentDay){
+        if (this.currentDay != currentDay && currentDay > 0){
+            this.currentDay = currentDay;
+        }
     }
 
 }

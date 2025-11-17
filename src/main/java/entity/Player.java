@@ -14,6 +14,7 @@ public class Player {
     private Portfolio portfolio =  new Portfolio();
     Map <Integer, Item> inventory = new HashMap<>();
     // Maps inventory slot number to item in that slot.
+    private boolean isInHouse;
     
     // Movement properties (for Use Case 1: Environment Interaction)
     private double x;
@@ -30,6 +31,7 @@ public class Player {
         this.x = 960.0;  // Center of 1920 width
         this.y = 600.0;  // Center of 1200 height
         this.speed = 360.0;  // Scaled up for 1920x1200 (was 150 for 800x600)
+        this.isInHouse = false;
     }
 
     public Player (String name, double balance, double x, double y, Map<String, Integer> stats) {
@@ -39,6 +41,7 @@ public class Player {
         this.y = y;
         this.speed = 360.0;  // Scaled up for 1920x1200 virtual resolution
         this.stats.putAll(stats);
+        this.isInHouse = false;
     }
 
     public void setName(String name) {
@@ -56,6 +59,14 @@ public class Player {
 
     public double getBalance() {
         return balance;
+    }
+
+    public boolean isInHouse() {
+        return  isInHouse;
+    }
+
+    public void setInHouse(boolean inHouse) {
+        this.isInHouse = inHouse;
     }
 
     public void setStat(String stat, int score){ stats.put(stat, score); }
