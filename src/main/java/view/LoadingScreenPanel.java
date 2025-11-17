@@ -5,13 +5,15 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.io.File;
+import java.io.BufferedInputStream;
+import java.io.InputStream;
 
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.LineEvent;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 /**
@@ -30,7 +32,7 @@ public class LoadingScreenPanel extends JPanel {
     private static final Color BACKGROUND_COLOR = new Color(20, 20, 30);
     private static final Color TEXT_COLOR = new Color(255, 255, 255);
     private static final Color HIGHLIGHT_COLOR = new Color(255, 50, 50);  // Red for warning
-    private static final int DISPLAY_DURATION_MS = 5000;  // 5 seconds
+    private static final int DISPLAY_DURATION_MS = 3000;  // 3 seconds
     
     private Clip audioClip;
     private Runnable onComplete;
@@ -53,54 +55,79 @@ public class LoadingScreenPanel extends JPanel {
     
     /**
      * Starts the loading screen sequence (play audio and show warning).
+     * Uses invokeLater to ensure it starts after the panel is fully displayed.
      */
     public void start() {
-        playWarningAudio();
-        startTransitionTimer();
+        SwingUtilities.invokeLater(() -> {
+            System.out.println("LoadingScreenPanel.start() called at: " + System.currentTimeMillis());
+            playWarningAudio();
+            startTransitionTimer();
+        });
     }
     
     /**
      * Plays the warning siren audio.
+     * Audio playback is optional and will fail gracefully if not available.
      */
     private void playWarningAudio() {
-        try {
-            // Load audio file from resources (WAV format for Java AudioSystem compatibility)
-            String audioPath = "src/main/resources/audio/siren_cropped.wav";
-            File audioFile = new File(audioPath);
-            
-            if (audioFile.exists()) {
-                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(audioFile);
-                audioClip = AudioSystem.getClip();
-                audioClip.open(audioInputStream);
+        // Run audio loading in a separate thread to avoid blocking UI
+        new Thread(() -> {
+            try {
+                // Load audio file from resources using class loader (WAV format for Java AudioSystem compatibility)
+                InputStream audioStream = getClass().getResourceAsStream("/audio/siren_cropped.wav");
                 
-                // Add listener for when audio finishes
-                audioClip.addLineListener(event -> {
-                    if (event.getType() == LineEvent.Type.STOP) {
-                        audioClip.close();
+                if (audioStream != null) {
+                    // Wrap in BufferedInputStream for better performance
+                    BufferedInputStream bufferedStream = new BufferedInputStream(audioStream);
+                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
+                    
+                    // Check if audio system is available
+                    if (AudioSystem.getMixer(null) != null) {
+                        audioClip = AudioSystem.getClip();
+                        audioClip.open(audioInputStream);
+                        
+                        // Add listener for when audio finishes
+                        audioClip.addLineListener(event -> {
+                            if (event.getType() == LineEvent.Type.STOP) {
+                                audioClip.close();
+                            }
+                        });
+                        
+                        audioClip.start();
+                        System.out.println("Audio playback started successfully");
+                    } else {
+                        System.err.println("Warning: Audio mixer not available on this system");
                     }
-                });
-                
-                audioClip.start();
-            } else {
-                System.err.println("Warning: Audio file not found at " + audioPath);
+                } else {
+                    System.err.println("Warning: Audio file not found in resources: /audio/siren_cropped.wav");
+                }
+            } catch (Exception e) {
+                // Audio is optional, so just log the error and continue
+                System.err.println("Note: Audio playback unavailable (this is OK): " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("Error playing warning audio: " + e.getMessage());
-            e.printStackTrace();
-        }
+        }, "AudioLoader").start();
     }
     
     /**
      * Starts a timer to transition to the main menu after the display duration.
      */
     private void startTransitionTimer() {
+        long startTime = System.currentTimeMillis();
+        System.out.println("Timer starting at: " + startTime + " for " + DISPLAY_DURATION_MS + "ms");
+        
         transitionTimer = new Timer(DISPLAY_DURATION_MS, e -> {
+            long endTime = System.currentTimeMillis();
+            long actualDuration = endTime - startTime;
+            System.out.println("Timer fired at: " + endTime + " (actual duration: " + actualDuration + "ms)");
+            
             stopAudio();
             if (onComplete != null) {
+                System.out.println("Calling onComplete callback");
                 onComplete.run();
             }
         });
         transitionTimer.setRepeats(false);
+        transitionTimer.setInitialDelay(DISPLAY_DURATION_MS);
         transitionTimer.start();
     }
     

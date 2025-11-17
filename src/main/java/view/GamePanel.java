@@ -10,11 +10,17 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineEvent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -33,6 +39,10 @@ public class GamePanel extends JPanel implements ActionListener {
     
     // Background image cache
     private final Map<String, BufferedImage> backgroundImageCache = new HashMap<>();
+    
+    // Background music
+    private Clip backgroundMusicClip;
+    private String currentMusicPath;
 
     // Virtual (internal) resolution - game logic operates in this space
     private static final int VIRTUAL_WIDTH = 1920;
@@ -80,6 +90,9 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Initialize viewport
         calculateViewport();
+        
+        // Start background music for initial zone
+        playBackgroundMusic(gameMap.getCurrentZone().getBackgroundMusicPath());
     }
     
     /**
@@ -96,6 +109,7 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public void stopGameLoop() {
         gameTimer.stop();
+        stopBackgroundMusic();
     }
     
     /**
@@ -278,9 +292,11 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
 
-        // Update background color if zone changed
+        // Update background color and music if zone changed
         if (transitioned) {
-            setBackground(gameMap.getCurrentZone().getBackgroundColor());
+            Zone newZone = gameMap.getCurrentZone();
+            setBackground(newZone.getBackgroundColor());
+            playBackgroundMusic(newZone.getBackgroundMusicPath());
         }
     }
 
@@ -541,5 +557,78 @@ public class GamePanel extends JPanel implements ActionListener {
             backgroundImageCache.put(imagePath, null);
             return null;
         }
+    }
+    
+    /**
+     * Plays background music for the current zone.
+     * If music is already playing and matches the requested path, does nothing.
+     * Otherwise, stops current music and starts the new track.
+     *
+     * @param musicPath the path to the music file (MP3 format)
+     */
+    private void playBackgroundMusic(String musicPath) {
+        if (musicPath == null || musicPath.isEmpty()) {
+            stopBackgroundMusic();
+            return;
+        }
+        
+        // If the same music is already playing, don't restart it
+        if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
+            return;
+        }
+        
+        // Stop current music if any
+        stopBackgroundMusic();
+        
+        // Load and play new music in a separate thread
+        new Thread(() -> {
+            try {
+                InputStream musicStream = getClass().getResourceAsStream(musicPath);
+                
+                if (musicStream != null) {
+                    BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
+                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
+                    
+                    if (AudioSystem.getMixer(null) != null) {
+                        backgroundMusicClip = AudioSystem.getClip();
+                        backgroundMusicClip.open(audioInputStream);
+                        
+                        // Loop the music continuously
+                        backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
+                        
+                        // Add listener for cleanup
+                        backgroundMusicClip.addLineListener(event -> {
+                            if (event.getType() == LineEvent.Type.STOP) {
+                                // Don't close immediately as we're looping
+                            }
+                        });
+                        
+                        backgroundMusicClip.start();
+                        currentMusicPath = musicPath;
+                        System.out.println("Background music started: " + musicPath);
+                    } else {
+                        System.err.println("Warning: Audio mixer not available");
+                    }
+                } else {
+                    System.err.println("Warning: Music file not found: " + musicPath);
+                }
+            } catch (Exception e) {
+                System.err.println("Note: Background music unavailable: " + e.getMessage());
+            }
+        }, "MusicLoader").start();
+    }
+    
+    /**
+     * Stops the currently playing background music.
+     */
+    private void stopBackgroundMusic() {
+        if (backgroundMusicClip != null) {
+            if (backgroundMusicClip.isRunning()) {
+                backgroundMusicClip.stop();
+            }
+            backgroundMusicClip.close();
+            backgroundMusicClip = null;
+        }
+        currentMusicPath = null;
     }
 }

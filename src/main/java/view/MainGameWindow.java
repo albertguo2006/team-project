@@ -88,14 +88,24 @@ public class MainGameWindow extends JFrame {
         // Add card panel to frame
         this.add(cardPanel);
         
-        // Show loading screen initially
-        showLoadingScreen();
-        
         // Pack the frame to fit the preferred size
         this.pack();
         
         // Center on screen after packing
         this.setLocationRelativeTo(null);
+        
+        // Show loading screen initially (will be started when window becomes visible)
+        cardLayout.show(cardPanel, LOADING_CARD);
+    }
+    
+    @Override
+    public void setVisible(boolean visible) {
+        super.setVisible(visible);
+        // Start the loading screen only after the window is actually visible
+        if (visible) {
+            System.out.println("Window is now visible, starting loading screen");
+            loadingScreenPanel.start();
+        }
     }
     
     /**
