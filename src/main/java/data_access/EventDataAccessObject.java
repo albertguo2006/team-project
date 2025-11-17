@@ -2,7 +2,6 @@ package data_access;
 
 import entity.Event;
 import entity.EventOutcome;
-import entity.EventBuilder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -17,7 +16,6 @@ import java.util.HashMap;
 import java.util.Objects;
 
 public class EventDataAccessObject {
-    EventBuilder eventBuilder = new EventBuilder();
 
     public ArrayList<Event> createEventList(){
         ArrayList<Event> events = new ArrayList<>();
@@ -34,7 +32,7 @@ public class EventDataAccessObject {
                 String eventDescription = newEvent.getString("description");
                 JSONObject eventOutcomes = newEvent.getJSONObject("outcomes");
                 HashMap<Integer, EventOutcome> OutcomeMap = createEventOutcomeList(eventOutcomes);
-                events.add(eventBuilder.createEvent(eventID, eventName, eventDescription, OutcomeMap));
+                events.add(new Event(eventID, eventName, eventDescription, OutcomeMap));
             }
             return events;
         }
@@ -47,10 +45,11 @@ public class EventDataAccessObject {
         HashMap<Integer, EventOutcome> outcomeMap = new HashMap<>();
         for (String key : eventOutcomes.keySet()) {
             JSONObject newOutcome = eventOutcomes.getJSONObject(key);
+            String outcomeName = newOutcome.getString("name");
             String outcomeDescription = newOutcome.getString("description");
             double outcomeChance = newOutcome.getDouble("chance");
             int outcomeResult = newOutcome.getInt("result");
-            outcomeMap.put(Integer.parseInt(key), eventBuilder.createOutcome(Integer.parseInt(key), outcomeDescription,
+            outcomeMap.put(Integer.parseInt(key), new EventOutcome(Integer.parseInt(key), outcomeName, outcomeDescription,
                     outcomeChance, outcomeResult));
         }
         return outcomeMap;
