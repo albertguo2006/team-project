@@ -32,7 +32,9 @@ public class MainGameWindow extends JFrame {
     
     private final MainMenuPanel mainMenuPanel;
     private final SettingsPanel settingsPanel;
+    private InGameMenuPanel inGameMenuPanel;
     private GamePanel gamePanel;
+    private PlayerInputController playerInputController;
     
     private final GameSettings gameSettings;
     
@@ -40,6 +42,7 @@ public class MainGameWindow extends JFrame {
     private static final String MENU_CARD = "menu";
     private static final String SETTINGS_CARD = "settings";
     private static final String GAME_CARD = "game";
+    private static final String IN_GAME_MENU_CARD = "inGameMenu";
     
     /**
      * Constructs the MainGameWindow.
@@ -104,6 +107,18 @@ public class MainGameWindow extends JFrame {
     }
     
     /**
+     * Sets up action listeners for in-game menu buttons.
+     */
+    private void setupInGameMenuListeners() {
+        if (inGameMenuPanel != null) {
+            inGameMenuPanel.addResumeListener(e -> resumeGame());
+            inGameMenuPanel.addSaveListener(e -> saveGame());
+            inGameMenuPanel.addSettingsListener(e -> showSettingsFromGame());
+            inGameMenuPanel.addSaveAndExitListener(e -> saveAndExit());
+        }
+    }
+    
+    /**
      * Shows the main menu.
      */
     public void showMainMenu() {
@@ -150,14 +165,86 @@ public class MainGameWindow extends JFrame {
         PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(player);
         
         // Create controller
-        PlayerInputController playerInputController = new PlayerInputController(playerMovementUseCase);
+        this.playerInputController = new PlayerInputController(playerMovementUseCase);
         playerInputController.setParentFrame(this);
+        
+        // Set up pause menu listener
+        playerInputController.setPauseMenuListener(() -> showInGameMenu());
         
         // Create game panel
         this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController);
         
+        // Create in-game menu panel
+        this.inGameMenuPanel = new InGameMenuPanel();
+        setupInGameMenuListeners();
+        
         // Add to card panel
         cardPanel.add(gamePanel, GAME_CARD);
+        cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
+    }
+    
+    /**
+     * Shows the in-game pause menu and pauses the game.
+     */
+    private void showInGameMenu() {
+        if (gamePanel != null && inGameMenuPanel != null) {
+            gamePanel.pauseGame();
+            cardLayout.show(cardPanel, IN_GAME_MENU_CARD);
+            inGameMenuPanel.requestFocusInWindow();
+        }
+    }
+    
+    /**
+     * Resumes the game from the pause menu.
+     */
+    private void resumeGame() {
+        if (gamePanel != null) {
+            cardLayout.show(cardPanel, GAME_CARD);
+            gamePanel.resumeGame();
+            gamePanel.requestFocusInWindow();
+        }
+    }
+    
+    /**
+     * Saves the game (frontend stub - backend to be implemented).
+     */
+    private void saveGame() {
+        JOptionPane.showMessageDialog(
+            this,
+            "Game saved successfully!\n" +
+            "(Save functionality will be fully implemented later.\n" +
+            "The backend for save/load is being developed by another team member.)",
+            "Game Saved",
+            JOptionPane.INFORMATION_MESSAGE
+        );
+    }
+    
+    /**
+     * Shows settings from in-game menu.
+     */
+    private void showSettingsFromGame() {
+        cardLayout.show(cardPanel, SETTINGS_CARD);
+        settingsPanel.requestFocusInWindow();
+    }
+    
+    /**
+     * Saves and exits to main menu.
+     */
+    private void saveAndExit() {
+        int choice = JOptionPane.showConfirmDialog(
+            this,
+            "Save and return to main menu?",
+            "Save & Exit",
+            JOptionPane.YES_NO_OPTION
+        );
+        
+        if (choice == JOptionPane.YES_OPTION) {
+            saveGame();
+            if (gamePanel != null) {
+                gamePanel.stopGameLoop();
+            }
+            showMainMenu();
+        }
     }
     
     /**
@@ -196,11 +283,17 @@ public class MainGameWindow extends JFrame {
     }
     
     /**
-     * Cancels settings changes and returns to main menu.
+     * Cancels settings changes and returns to appropriate view.
      */
     private void cancelSettings() {
         settingsPanel.revertSettings();
-        showMainMenu();
+        
+        // Return to game if it was running, otherwise main menu
+        if (gamePanel != null && inGameMenuPanel != null) {
+            showInGameMenu();
+        } else {
+            showMainMenu();
+        }
     }
     
     /**
@@ -225,7 +318,7 @@ public class MainGameWindow extends JFrame {
      */
     private void startGame() {
         if (gamePanel != null) {
-            gamePanel.startGameLoop();
+            gamePanel.resumeGame();
             gamePanel.requestFocus();
         }
     }

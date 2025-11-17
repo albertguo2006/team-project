@@ -92,10 +92,31 @@ public class GamePanel extends JPanel implements ActionListener {
     
     /**
      * Stops the game loop.
-     * Useful for pausing or closing the game.
+     * Useful for closing the game.
      */
     public void stopGameLoop() {
         gameTimer.stop();
+    }
+    
+    /**
+     * Pauses the game loop.
+     * Stops the timer but maintains game state.
+     */
+    public void pauseGame() {
+        if (gameTimer.isRunning()) {
+            gameTimer.stop();
+        }
+    }
+    
+    /**
+     * Resumes the game loop.
+     * Restarts the timer and updates lastUpdateTime to prevent huge delta.
+     */
+    public void resumeGame() {
+        if (!gameTimer.isRunning()) {
+            lastUpdateTime = System.currentTimeMillis();  // Reset time to prevent delta jump
+            gameTimer.start();
+        }
     }
     
     /**
@@ -203,19 +224,20 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Special handling for subway station transitions (300-pixel trigger zones)
         final int SUBWAY_TRANSITION_ZONE = 300;
+        final int SUBWAY_SPAWN_OFFSET = 50; // Offset to prevent immediate re-triggering
         
         if ("Subway Station 1".equals(currentZoneName)) {
             // Check if player is in bottom 300 pixels
             if (y >= VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE) {
                 gameMap.setCurrentZone("Subway Station 2");
-                player.setY(SUBWAY_TRANSITION_ZONE); // Spawn 300 pixels from top
+                player.setY(SUBWAY_TRANSITION_ZONE + SUBWAY_SPAWN_OFFSET); // Spawn safely away from transition zone
                 transitioned = true;
             }
         } else if ("Subway Station 2".equals(currentZoneName)) {
             // Check if player is in top 300 pixels
             if (y <= SUBWAY_TRANSITION_ZONE) {
                 gameMap.setCurrentZone("Subway Station 1");
-                player.setY(VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE); // Spawn 300 pixels from bottom
+                player.setY(VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE - SUBWAY_SPAWN_OFFSET); // Spawn safely away from transition zone
                 transitioned = true;
             }
         }
