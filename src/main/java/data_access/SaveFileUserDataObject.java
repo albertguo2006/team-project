@@ -66,6 +66,7 @@ public class SaveFileUserDataObject implements SaveProgressDataAccessInterface, 
         saveData.put(playerData);
         saveData.put(npcData);
         saveData.put(eventData);
+        saveData.put(inventoryData);
 
         return saveData;
     }
