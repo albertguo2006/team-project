@@ -10,7 +10,8 @@ public class PaybillInteractor implements PaybillInputBoundary {
     private final PaybillOutputBoundary paybillPresenter;
     private final Player player;
 
-    public PaybillInteractor(PaybillDataAccessInterface paybillDataAccess, PaybillOutputBoundary paybillPresenter, Player player) {
+    public PaybillInteractor(PaybillDataAccessInterface paybillDataAccess, PaybillOutputBoundary paybillPresenter,
+                             Player player) {
         this.paybillDataAccess = paybillDataAccess;
         this.paybillPresenter = paybillPresenter;
         this.player = player;

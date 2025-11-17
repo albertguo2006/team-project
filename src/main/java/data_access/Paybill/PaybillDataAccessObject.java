@@ -5,7 +5,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import entity.Bill;
 import use_case.paybills.PaybillDataAccessInterface;
-import use_case.paybills.PaybillOutputData;
 
 import java.io.*;
 import java.lang.reflect.Type;

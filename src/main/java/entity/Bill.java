@@ -3,12 +3,12 @@ package entity;
 import java.util.Date;
 
 public class Bill {
-    private String id; // each bill has a unique id
-    private double amount; // Individual bill amount
-    private String name;
-    private Date dueDate;
+    private final String id; // each bill has a unique id
+    private final double amount; // Individual bill amount
+    private final String name;
+    private final Date dueDate;
     private Boolean isPaid;
-    private BillType type;
+    private final BillType type;
 
     public enum BillType {
         RENT, CREDIT_CARD, INSURANCE, TAX, SUBSCRIPTION, MORTGAGE, ELECTRICITY, INTERNET, CELLPHONE, WATER,
