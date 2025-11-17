@@ -13,6 +13,7 @@ import java.util.List;
 
 class PaybillInteractorTest {
 
+    @Test
     void successPaySingleBillTest(){
         InMemoryPaybillDataAccessObject paybillRepository = new InMemoryPaybillDataAccessObject();
         Player player = new Player("TestPlayer");
@@ -54,6 +55,8 @@ class PaybillInteractorTest {
         assertEquals(500.0, player.getBalance(), 0.01);
 
     }
+
+    @Test
     void successPayAllBillsTest(){
         InMemoryPaybillDataAccessObject paybillRepository = new InMemoryPaybillDataAccessObject();
         Player player = new Player("TestPlayer");

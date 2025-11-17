@@ -28,7 +28,7 @@ public class PaybillInteractor implements PaybillInputBoundary {
                 paybillDataAccess.saveBill(bill);
             }
             player.setBalance(player.getBalance() - totalDue);
-            PaybillOutputData outputData = new PaybillOutputData(true, "All bills paid successfully", totalDue);
+            PaybillOutputData outputData = new PaybillOutputData(true, "All bills paid successfully!", totalDue);
             paybillPresenter.prepareSuccessView(outputData);
         }
         else {
