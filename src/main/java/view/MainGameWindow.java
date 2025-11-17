@@ -30,6 +30,7 @@ public class MainGameWindow extends JFrame {
     private final CardLayout cardLayout;
     private final JPanel cardPanel;
     
+    private final LoadingScreenPanel loadingScreenPanel;
     private final MainMenuPanel mainMenuPanel;
     private final SettingsPanel settingsPanel;
     private InGameMenuPanel inGameMenuPanel;
@@ -39,6 +40,7 @@ public class MainGameWindow extends JFrame {
     private final GameSettings gameSettings;
     
     // Card names for CardLayout
+    private static final String LOADING_CARD = "loading";
     private static final String MENU_CARD = "menu";
     private static final String SETTINGS_CARD = "settings";
     private static final String GAME_CARD = "game";
@@ -67,6 +69,10 @@ public class MainGameWindow extends JFrame {
         this.cardLayout = new CardLayout();
         this.cardPanel = new JPanel(cardLayout);
         
+        // Create loading screen panel
+        this.loadingScreenPanel = new LoadingScreenPanel();
+        this.loadingScreenPanel.setOnComplete(() -> showMainMenu());
+        
         // Create menu and settings panels
         this.mainMenuPanel = new MainMenuPanel();
         this.settingsPanel = new SettingsPanel(gameSettings);
@@ -75,14 +81,15 @@ public class MainGameWindow extends JFrame {
         setupMenuListeners();
         
         // Add panels to card layout
+        cardPanel.add(loadingScreenPanel, LOADING_CARD);
         cardPanel.add(mainMenuPanel, MENU_CARD);
         cardPanel.add(settingsPanel, SETTINGS_CARD);
         
         // Add card panel to frame
         this.add(cardPanel);
         
-        // Show main menu initially
-        showMainMenu();
+        // Show loading screen initially
+        showLoadingScreen();
         
         // Pack the frame to fit the preferred size
         this.pack();
@@ -116,6 +123,14 @@ public class MainGameWindow extends JFrame {
             inGameMenuPanel.addSettingsListener(e -> showSettingsFromGame());
             inGameMenuPanel.addSaveAndExitListener(e -> saveAndExit());
         }
+    }
+    
+    /**
+     * Shows the loading screen and starts the loading sequence.
+     */
+    public void showLoadingScreen() {
+        cardLayout.show(cardPanel, LOADING_CARD);
+        loadingScreenPanel.start();
     }
     
     /**
