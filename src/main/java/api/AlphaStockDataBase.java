@@ -2,73 +2,66 @@ package api;
 
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.File;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import okhttp3.OkHttpClient;
-import okhttp3.MediaType;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
-
-/**
- * AlphaDataBase class.
+/*
+* stock data base from alpha vantage to fetch stock data from external database
  */
 
-public class AlphaStockDataBase implements StockDataBase{
+public class AlphaStockDataBase implements StockDataBase {
 
-    // define constants
-    private static final String API_URL = "https://www.alphavantage.co/query?";
+    private static final String BASE_URL = "https://www.alphavantage.co/query";
+    private final String apiKey;
+    private final HttpClient httpClient;
 
-    private static final String FUNCTION = "function";
-    private static final String SYMBOL = "symbol";
-    private static final String INTERVAL = "interval";
-
-    private static String API_KEY;
-    private static final String STATUS_CODE = "status_code";
-    private static final int SUCCESS_CODE = 200;
-
-    // load token from env variable.
-    public static String getAPIKey() {
-        return System.getenv("token");
+    // intialise things
+    public AlphaStockDataBase(String apiKey) {
+        this.apiKey = apiKey;
+        this.httpClient = HttpClient.newHttpClient();
     }
 
+    // function to
     @Override
-    public void getStockPrices(String stockSymbol) throws JSONException {
-        // Build the request to get the grade.
-        final OkHttpClient client = new OkHttpClient().newBuilder().build();
+    public void getStockPrices(String symbol) throws Exception {
+        String url = BASE_URL +
+                "?function=TIME_SERIES_DAILY" +
+                "&symbol=" + symbol +
+                "&apikey=" + apiKey;
 
-        final Request request = new Request.Builder()
-                .url(String.format("%sfunction=TIME_SERIES_INTRADAY&symbol=%s&interval=5min&apikey=%s",
-                        API_URL, stockSymbol, API_KEY))
-                //.addHeader(TOKEN, getAPIToken())
-                //.addHeader(CONTENT_TYPE, APPLICATION_JSON)
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .GET()
                 .build();
 
-        try {
-            final Response response = client.newCall(request).execute();
-            final JSONObject responseBody = new JSONObject(response.body().string());
+        HttpResponse<String> response =
+                httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (responseBody.getInt(STATUS_CODE) == SUCCESS_CODE) {
-                File stockFile = new File(stockSymbol + ".txt"); // make File object
-
-                if (stockFile.createNewFile()) {           // attempt making the file
-                    System.out.println("File created: " + stockFile.getName());
-                    FileWriter stockWriter = new FileWriter(stockSymbol + ".txt");
-                    stockWriter.write(responseBody.toString());
-                    stockWriter.close();  // must close manually
-
-                } else {
-                    System.out.println("File already exists.");
-                }
-
-            }
+        if (response.statusCode() != 200) {
+            throw new RuntimeException("API request failed with code: " + response.statusCode());
         }
-        catch (IOException | JSONException event) {
-                throw new RuntimeException(event);
-            }
+
+        saveToFile(response.body(), symbol);
+    }
+
+    // save fetched api data to a file with the stock symbol name as the file name
+    private void saveToFile(String json, String symbol) throws IOException {
+        try (FileWriter writer = new FileWriter(symbol)) {
+            writer.write(json);
+        }
+        catch  (IOException e) { // if there is an issue writing to the file
+            System.out.println("Error writing to file: " + symbol);
+            e.printStackTrace();
+        }
+    }
+
+    public static void main(String[] args) throws Exception {
+        AlphaStockDataBase db = new AlphaStockDataBase("YOUR_API_KEY");
+
+        db.getStockPrices("VOO");
+
+        System.out.println("Saved prices to VOO.json");
     }
 }

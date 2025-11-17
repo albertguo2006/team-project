@@ -7,6 +7,7 @@ import entity.Player;
 **/
 
 public class PlayStockGameInputData {
+    private final Player player;
     private Double startAmount;
 
     // initialise attributes

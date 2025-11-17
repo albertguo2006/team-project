@@ -26,7 +26,7 @@ public class StartStockGameInteractor implements StartStockGameInputBoundary {
     }
 
     @Override
-    public void execute(StartStockGameInputData startStockGameInputData) {
+    public void execute(StartStockGameInputData startStockGameInputData) throws Exception {
         final Double startAmount = startStockGameInputData.getStartAmount();
         final Player player = startStockGameInputData.getPlayer();
 

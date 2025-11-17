@@ -13,6 +13,6 @@ public interface StockDataBase {
      * @throws JSONException if there is an error (if stock symbol DNE)
      */
 
-    void getStockPrices(String stockSymbol) throws JSONException;
+    void getStockPrices(String stockSymbol) throws Exception;
 
 }
