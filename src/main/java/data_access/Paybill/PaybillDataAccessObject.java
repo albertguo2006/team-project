@@ -1,8 +1,14 @@
-package data_access;
+package data_access.Paybill;
 
+import com.google.common.reflect.TypeToken;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import entity.Bill;
 import use_case.paybills.PaybillDataAccessInterface;
+import use_case.paybills.PaybillOutputData;
 
+import java.io.*;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,8 +52,10 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
     ));
 
     public PaybillDataAccessObject() {
-        // Generate initial bills
-        generateWeeklyBills();
+        loadBillsFromFile();
+        if (bills.isEmpty()) {
+            generateWeeklyBills(); // Only generate if no saved bills
+        }
     }
 
     @Override
@@ -63,7 +71,34 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
     @Override
     public void saveBill(Bill bill){
         bills.put(bill.getId(), bill);
-        // TODO
+        saveBillsToFile();
+    }
+
+    private void saveBillsToFile(){
+        try (FileWriter file = new FileWriter("bills.json")){
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            gson.toJson(bills, file);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to save bills to file", e);
+        }
+    }
+
+    private void loadBillsFromFile(){
+        File file = new File("bills.json");
+        if (file.exists()){
+            try (FileReader fileReader = new FileReader(file)){
+                Gson gson = new Gson();
+                Type type = new TypeToken<Map<String, Bill>>(){}.getType();
+                Map<String, Bill> loadedBills = gson.fromJson(fileReader, type);
+                if (loadedBills != null){
+                    bills.putAll(loadedBills);
+                }
+            } catch (FileNotFoundException e) {
+                System.err.println("Bills file not found: " + e.getMessage());
+            } catch (IOException e) {
+                System.err.println("Failed to load bills from file: " + e.getMessage());
+            }
+        }
     }
 
     @Override

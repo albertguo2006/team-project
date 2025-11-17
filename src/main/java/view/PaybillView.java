@@ -1,6 +1,6 @@
 package view;
 
-import data_access.PaybillDataAccessObject;
+import data_access.Paybill.PaybillDataAccessObject;
 import entity.Bill;
 import interface_adapter.events.paybills.PaybillController;
 import interface_adapter.events.paybills.PaybillState;
@@ -37,18 +37,20 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
     // Table model
     private final DefaultTableModel tableModel;
-    private final String[] columnNames = {"Name", "Due Date", "Amount", "Status"};
 
     // Bill storage
     private List<Bill> currentBills;
     private final JPanel actionButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
-    public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController, DefaultTableModel tableModel){
+    public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController,
+                       DefaultTableModel tableModel, DefaultTableModel tableModel1){
         this.paybillViewModel = paybillViewModel;
         this.paybillController = paybillController;
+        this.tableModel = tableModel1;
         this.paybillViewModel.addPropertyChangeListener(this);
 
         // Initialize table model
+        String[] columnNames = {"Name", "Due Date", "Amount", "Status"};
         tableModel = new DefaultTableModel(columnNames, 0){
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -124,41 +126,8 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         payAllButton.addActionListener(this);
     }
 
-    /**
-     * Load new bills (called each week by game system)
-     * @param bills list of bills for the current period - can be any number
-     */
-    public void loadBillsForWeek(List<Bill> bills) {
-        this.currentBills = bills;
-
-        // Clear existing data
-        tableModel.setRowCount(0);
-        actionButtonsPanel.removeAll();
-
-        // Add bills to table and create action buttons
-        for (Bill bill: bills){
-            String status = bill.getPaid() ? "Paid" : "Unpaid";
-            String dueDate = formatDueDate(bill.getDueDate());
-            String amount = String.format("%.2f", bill.getAmount());
-
-            // Add to table
-            tableModel.addRow(new Object[]{bill.getName(), dueDate, status, amount});
-
-            // Create individual pay button for unpaid bills
-            if (!bill.getPaid()){
-                JButton payButton = createBillButton(bill);
-                actionButtonsPanel.add(payButton);
-            }
-        }
-        updateTotal();
-
-        // Refresh panels
-        actionButtonsPanel.revalidate();
-        actionButtonsPanel.repaint();
-    }
-
     private JButton createBillButton(Bill bill){
-        JButton button = new JButton("Pay" + bill.getName());
+        JButton button = new JButton("Pay " + bill.getName());
         button.setActionCommand(bill.getId());
         button.addActionListener(this);
 
@@ -177,6 +146,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        statusMessage.setText(""); // Clear previous message
         if (e.getSource() == payAllButton) {
             paybillController.payAllBills();
         }
@@ -229,10 +199,10 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         for (Bill bill: bills){
             String status = bill.getPaid() ? "Paid" : "Unpaid";
             String dueDate = formatDueDate(bill.getDueDate());
-            String amount = String.format("%.2f", bill.getAmount());
+            String amount = String.format("$%.2f", bill.getAmount());
 
             // Add to table
-            tableModel.addRow(new Object[]{bill.getName(), dueDate, status, amount});
+            tableModel.addRow(new Object[]{bill.getName(), dueDate, amount, status});
 
             // Create individual button for unpaid bills
             if (!bill.getPaid()){
@@ -240,30 +210,29 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
                 actionButtonsPanel.add(payButton);
             }
 
-            // Update UI Labels
-            updateTotal();
-
-            // Refresh the panels
-            actionButtonsPanel.revalidate();
-            actionButtonsPanel.repaint();
         }
+        // Update UI Labels
+        updateTotal();
+
+        // Refresh the panels
+        actionButtonsPanel.revalidate();
+        actionButtonsPanel.repaint();
     }
 
     private void updateTotal(){
         if (currentBills == null) return;
 
-        double total = 0;
-        for (Bill bill: currentBills) total += bill.getAmount();
-
-        totalLabel.setText(String.format("%.2f", total));
-
         // Enable/Disable pay all button based on whether there are unpaid bills
-        boolean hasUnpaidBills = true;
-        for (Bill bill: currentBills){
+        double total = 0;
+        boolean hasUnpaidBills = false;
+        for (Bill bill: currentBills) {
             if (!bill.getPaid()){
-                hasUnpaidBills = false;
+                total += bill.getAmount();
+                hasUnpaidBills = true;
             }
         }
+
+        totalLabel.setText(String.format("Total: $%.2f", total));
         payAllButton.setEnabled(hasUnpaidBills && total > 0);
     }
 
