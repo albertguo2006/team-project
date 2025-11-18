@@ -1,6 +1,5 @@
 package use_case.load_progress;
 
-import entity.GameMap;
 import entity.Player;
 
 import java.io.IOException;
@@ -10,5 +9,5 @@ import java.io.IOException;
  */
 
 public interface LoadProgressDataAccessInterface {
-    Player load(GameMap gameMap) throws IOException;
+    Player load() throws IOException;
 }
