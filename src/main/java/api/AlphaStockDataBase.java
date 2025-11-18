@@ -31,7 +31,7 @@ public class AlphaStockDataBase implements StockDataBase {
     }
 
     /**
-     * Fetches stock prices from the AlphaVantage API, and stores it in a JSON file
+     * get stock prices from the alphavantage, store it in a json file
      * @param symbol the symbol of the stock
      * @throws Exception if something goes wrong (api call doesn't work)
      */
@@ -62,17 +62,17 @@ public class AlphaStockDataBase implements StockDataBase {
     }
 
     /**
-     * Saves a string (JSON) to the file
-     * @param json the username to look up
-     * @param symbol the stock's symbol
-     * @throws IOException if something goes wrong when writing to file
+     * save a json string to the file
+     * @param json the string json from the api call
+     * @param symbol the stock's symbol (which is also used as the file name)
      */
+    @Override
     // save fetched api data to a file with the stock symbol name as the file name
-    private void saveToFile(String json, String symbol) throws IOException {
+    public void saveToFile(String json, String symbol) {
         try (FileWriter writer = new FileWriter(symbol)) {
             writer.write(json);
         }
-        catch  (IOException e) { // if there is an issue writing to the file
+        catch (IOException e) { // if there is an issue writing to the file
             System.out.println("Error writing to file: " + symbol);
             e.printStackTrace();
         }
@@ -82,10 +82,10 @@ public class AlphaStockDataBase implements StockDataBase {
      * returns the list of open stock prices for the given day
      * @param symbol the stock's symbol
      * @param gameDay day of gameplay (1-5)
-     * @returns list of stock prices (double)
+     * @return list of stock prices (double)
      * @throws Exception if JSON data doesn't have enough for the given day
      */
-    public static List<Double> getIntradayOpensForDayIndex(String symbol, int gameDay) throws Exception {
+    public static List<Double> getIntradayOpensForGameDay(String symbol, int gameDay) throws Exception {
         // only 5 days in the game (for now)
         if (5 < gameDay || gameDay < 1)
             throw new IllegalArgumentException("Invalid day of game: " + gameDay);
@@ -110,6 +110,7 @@ public class AlphaStockDataBase implements StockDataBase {
 
         // the first day of the game should correspond to the fifth most recent day of data
         String targetDate = dates.get(5-gameDay); // matching gameDay to corresponding irl date
+        // NOTE: data from api is already sorted by day, from most recent to oldest
 
         // add all the open stock values to a list for the given gameDay
         List<Double> openStockPrices = new ArrayList<>();
@@ -119,9 +120,11 @@ public class AlphaStockDataBase implements StockDataBase {
             }
         });
 
-        return openStockPrices; // return the list of stock prices for that day
+        Collections.reverse(openStockPrices);
+        // need to reverse the order of the list, since by default it start with end of day --> start of day
+        // we want it to start at the beginning of the day, so we reverse the list
+        return openStockPrices; // return the list of stock prices for that day (in the correct order)
     }
-
 
 
     public static void main(String[] args) throws Exception {
@@ -131,17 +134,17 @@ public class AlphaStockDataBase implements StockDataBase {
 
         System.out.println("Saved prices to VOO.json");
 
-        // 1 = most recent
-        List<Double> mostRecent = getIntradayOpensForDayIndex("VOO", 1);
-        System.out.println("Most recent prices for VOO: " + mostRecent);
+        // gameday 1 = fifth most recent
+        List<Double> mostRecent = getIntradayOpensForGameDay("VOO", 1);
+        System.out.println("5th most recent prices for VOO: " + mostRecent);
 
-        // 2 = second most recent
-        List<Double> secondMostRecent = getIntradayOpensForDayIndex("VOO", 2);
-        System.out.println("Second most recent prices for VOO: " + secondMostRecent);
+        // gameday 2 = fourth most recent
+        List<Double> secondMostRecent = getIntradayOpensForGameDay("VOO", 2);
+        System.out.println("4th most recent prices for VOO: " + secondMostRecent);
 
-        // 5 = fifth most recent
-        List<Double> fifthMostRecent = getIntradayOpensForDayIndex("VOO", 5);
-        System.out.println("Fifth recent prices for VOO: " + fifthMostRecent);
+        // gameday 5 = MOST recent day
+        List<Double> fifthMostRecent = getIntradayOpensForGameDay("VOO", 5);
+        System.out.println("MOST recent prices for VOO: " + fifthMostRecent);
 
     }
 }
