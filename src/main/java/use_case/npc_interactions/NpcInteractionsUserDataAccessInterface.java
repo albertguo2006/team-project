@@ -1,4 +1,10 @@
 package use_case.npc_interactions;
 
-public class NpcInteractionsUserDataAccessInterface {
+import entity.NPC;
+
+import java.util.HashMap;
+
+public interface NpcInteractionsUserDataAccessInterface {
+    HashMap<String, NPC> getNPCMap();
 }
+
