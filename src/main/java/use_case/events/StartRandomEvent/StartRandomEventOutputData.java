@@ -1,29 +1,23 @@
 package use_case.events.StartRandomEvent;
 
+import entity.Event;
 import entity.EventOutcome;
 
 import java.util.HashMap;
 
 public class StartRandomEventOutputData {
-    private final String eventName;
-    private final String eventDescription;
-    private final  HashMap<Integer, EventOutcome> outcomes;
-    public StartRandomEventOutputData(String eventName, String eventDescription,
-                                      HashMap<Integer, EventOutcome> outcomes) {
-        this.eventName = eventName;
-        this.eventDescription = eventDescription;
-        this.outcomes = outcomes;
+    private final Event event;
+    public StartRandomEventOutputData(Event event) {
+        this.event = event;
     }
-    public String getEventName() {
-        return eventName;
-    }
+    public String getEventName() {return event.getEventName();}
     public String getEventDescription() {
-        return eventDescription;
+        return event.getEventDescription();
     }
     public HashMap<Integer, EventOutcome> getOutcomes() {
-        return outcomes;
+        return event.getOutcomes();
     }
     public int getOutcomeCount(){
-        return outcomes.size();
+        return event.getOutcomes().size();
     }
 }
