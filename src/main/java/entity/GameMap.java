@@ -30,16 +30,20 @@ public class GameMap {
         Color officeColor = new Color(255, 220, 200);
         Color lobbyColor = new Color(255, 240, 220);
 
-        // Create zones with background images
-        Zone home = new Zone("Home", homeColor, "/backgrounds/home.png");
-        Zone subway1 = new Zone("Subway Station 1", subwayColor, "/backgrounds/subway_1.png");
-        Zone street1 = new Zone("Street 1", streetColor, "/backgrounds/street_1.png");
-        Zone street2 = new Zone("Street 2", streetColor, "/backgrounds/street_2.png");
-        Zone grocery = new Zone("Grocery Store", groceryColor, "/backgrounds/store.png");
-        Zone subway2 = new Zone("Subway Station 2", subwayColor, "/backgrounds/subway_2.png");
-        Zone office = new Zone("Office (Your Cubicle)", officeColor, "/backgrounds/office.png");
-        Zone street3 = new Zone("Street 3", streetColor, "/backgrounds/street_3.png");
-        Zone lobby = new Zone("Office Lobby", lobbyColor, "/backgrounds/office_lobby.png");
+        // Music paths (WAV format for Java AudioSystem compatibility)
+        String lofiMusic = "/audio/lofi-lofi-song-2-434695.wav";
+        String elevatorMusic = "/audio/local-forecast-elevator.wav";
+
+        // Create zones with background images and music
+        Zone home = new Zone("Home", homeColor, "/backgrounds/home.png", lofiMusic);
+        Zone subway1 = new Zone("Subway Station 1", subwayColor, "/backgrounds/subway_1.png", lofiMusic);
+        Zone street1 = new Zone("Street 1", streetColor, "/backgrounds/street_1.png", lofiMusic);
+        Zone street2 = new Zone("Street 2", streetColor, "/backgrounds/street_2.png", lofiMusic);
+        Zone grocery = new Zone("Grocery Store", groceryColor, "/backgrounds/store.png", lofiMusic);
+        Zone subway2 = new Zone("Subway Station 2", subwayColor, "/backgrounds/subway_2.png", lofiMusic);
+        Zone office = new Zone("Office (Your Cubicle)", officeColor, "/backgrounds/office.png", elevatorMusic);
+        Zone street3 = new Zone("Street 3", streetColor, "/backgrounds/street_3.png", lofiMusic);
+        Zone lobby = new Zone("Office Lobby", lobbyColor, "/backgrounds/office_lobby.png", elevatorMusic);
 
         // Set neighbors (edges) - Based on the map layout
         // Each connection must be bidirectional for proper zone transitions
