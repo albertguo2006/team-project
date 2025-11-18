@@ -15,27 +15,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SaveFileUserDataObject implements SaveProgressDataAccessInterface, LoadProgressDataAccessInterface {
-    private static final String SAVE_FILE = "saveFile.json";
-    private static final String EVENT_FILE = "events.json";
+public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
+    public static final String SAVE_FILE = "saveFile.json";
+    EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
 
-    public void save(Player player) throws IOException {
+    @Override
+    public void save(Player player, String currentZone) {
         try{
             FileWriter file = new FileWriter(SAVE_FILE, false);
-            file.write(JSONFileWriter(player).toString());
+            file.write(JSONFileWriter(player, eventDataAccessObject.createEventList(), currentZone).toString());
             file.close();
         }
         catch(IOException e){
-            // TODO: handle exception
+            throw new RuntimeException();
         }
     }
 
-    public JSONArray JSONFileWriter(Player player){
+    public JSONArray JSONFileWriter(Player player, List<Event> events, String currentZone) {
         JSONArray saveData = new JSONArray();
 
         Map <NPC, Integer> npcMap = player.getRelationships();
         List<Event> eventList = player.getEvents();
         Map <Integer, Item> inventory = player.getInventory();
+        Portfolio portfolio = player.getPortfolio();
+        Map<Stock, Double> investments = portfolio.getInvestments();
 
         JSONObject playerData = new JSONObject();
         playerData.put("name", player.getName());
@@ -56,55 +59,35 @@ public class SaveFileUserDataObject implements SaveProgressDataAccessInterface, 
 
         JSONObject eventData = new JSONObject();
         for (Event event : eventList) {
-            eventData.put(event.getEventName(), event.getEventID());
+            eventData.put(event.getEventName(), events.indexOf(event));
         }
 
-        JSONObject inventoryData= new JSONObject();
+        JSONObject inventoryData = new JSONObject();
         for(int index: inventory.keySet()){
             inventoryData.put(String.valueOf(index), inventory.get(index).getName());
         }
+
+        JSONObject portfolioData = new JSONObject();
+        portfolioData.put("totalEquity", portfolio.getTotalEquity());
+        JSONObject investmentData = new JSONObject();
+        for (Stock stock: investments.keySet()) {
+            JSONObject stockData = new JSONObject();
+            stockData.put("ticketSymbol", stock.getTicketSymbol());
+            stockData.put("companyName", stock.getCompanyName());
+            stockData.put("stockPrice", stock.getStockPrice());
+
+            investmentData.put(String.valueOf(investments.get(stock)), stockData);
+        }
+        portfolioData.put("investments", investmentData);
+
         saveData.put(playerData);
         saveData.put(npcData);
         saveData.put(eventData);
         saveData.put(inventoryData);
+        saveData.put(portfolioData);
+        saveData.put(currentZone);
 
         return saveData;
-    }
-
-    @Override
-    public Player load() throws IOException {
-        return new Player("bob");
-        // TODO: properly implement this function.
-    }
-
-    public Player loadPlayer() throws IOException{
-        JSONArray data = JSONFileReader(SAVE_FILE);
-        JSONObject playerData = data.getJSONObject(0);
-        JSONObject statsData = playerData.getJSONObject("stats");
-
-        Map<String, Integer> stats = new HashMap<>();
-        for (String stat: statsData.keySet()) {
-            stats.put(stat, statsData.getInt(stat));
-        }
-
-        Player player = new Player(playerData.getString("name"),
-                playerData.getDouble("balance"),
-                playerData.getDouble("xLocation"),
-                playerData.getDouble("yLocation"),
-                stats);
-
-        return player;
-    }
-
-    public JSONArray JSONFileReader(String FILE_NAME) throws IOException {
-        try{
-            String data = Files.readString(Paths.get(FILE_NAME));
-            return new JSONArray(data);
-        }
-        catch(IOException e){
-            throw new IOException(e.getMessage());
-            // TODO handle exception. Idk if the above is right or not
-        }
     }
 
 }

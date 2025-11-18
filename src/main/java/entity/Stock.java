@@ -15,4 +15,16 @@ public class Stock {
         this.stockPrice = stockPrice;
     }
 
+    public String getTicketSymbol() {
+        return ticketSymbol;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public Double getStockPrice() {
+        return stockPrice;
+    }
+
 }

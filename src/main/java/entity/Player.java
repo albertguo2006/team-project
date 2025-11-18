@@ -99,7 +99,12 @@ public class Player {
 
     public void itemUsed(int index) {
         Item item = inventory.get(index);
-        setStat(item.getType(), item.getScore());
+        if (item.getType().equals("Speed")){
+            setSpeed(speed + item.getScore());
+        }
+        else{
+            setStat(item.getType(), item.getScore());
+        }
     }
 
 
@@ -117,6 +122,10 @@ public class Player {
         }
     }
 
+    public void addNPCScore(NPC npc, int score) {
+        relationships.put(npc, score);
+    }
+
     public void removeNPC(NPC npc) { relationships.remove(npc); }
 
     public void addEvent(Event event) {
@@ -132,6 +141,10 @@ public class Player {
     public List<Event> getEvents() {
         return events;
     }
+
+    public Portfolio getPortfolio() { return portfolio; };
+
+    public void setPortfolio(Portfolio portfolio) { this.portfolio = portfolio; }
 
     // Movement getters and setters
     public double getX() {

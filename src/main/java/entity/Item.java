@@ -6,7 +6,7 @@ public class Item {
     private final String type;
     private final int score;
 
-    // 'type' attribute should only be one of the stat options: 'Hunger', 'Energy', or 'Mood'.
+    // 'type' attribute should only be one of the stat options: 'Hunger', 'Energy', or 'Mood', or 'Speed'.
 
     public Item(String name, String description, String type, int score) {
         this.name = name;
