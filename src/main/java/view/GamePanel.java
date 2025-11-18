@@ -20,7 +20,6 @@ import javax.imageio.ImageIO;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineEvent;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -41,8 +40,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private final Map<String, BufferedImage> backgroundImageCache = new HashMap<>();
     
     // Background music
-    private Clip backgroundMusicClip;
-    private String currentMusicPath;
+    private volatile Clip backgroundMusicClip;
+    private volatile String currentMusicPath;
+    private final Object musicLock = new Object();
 
     // Virtual (internal) resolution - game logic operates in this space
     private static final int VIRTUAL_WIDTH = 1920;
@@ -564,7 +564,7 @@ public class GamePanel extends JPanel implements ActionListener {
      * If music is already playing and matches the requested path, does nothing.
      * Otherwise, stops current music and starts the new track.
      *
-     * @param musicPath the path to the music file (MP3 format)
+     * @param musicPath the path to the music file (WAV format)
      */
     private void playBackgroundMusic(String musicPath) {
         if (musicPath == null || musicPath.isEmpty()) {
@@ -572,63 +572,79 @@ public class GamePanel extends JPanel implements ActionListener {
             return;
         }
         
-        // If the same music is already playing, don't restart it
-        if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
-            return;
-        }
-        
-        // Stop current music if any
-        stopBackgroundMusic();
-        
-        // Load and play new music in a separate thread
-        new Thread(() -> {
-            try {
-                InputStream musicStream = getClass().getResourceAsStream(musicPath);
-                
-                if (musicStream != null) {
-                    BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
-                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
-                    
-                    if (AudioSystem.getMixer(null) != null) {
-                        backgroundMusicClip = AudioSystem.getClip();
-                        backgroundMusicClip.open(audioInputStream);
-                        
-                        // Loop the music continuously
-                        backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
-                        
-                        // Add listener for cleanup
-                        backgroundMusicClip.addLineListener(event -> {
-                            if (event.getType() == LineEvent.Type.STOP) {
-                                // Don't close immediately as we're looping
-                            }
-                        });
-                        
-                        backgroundMusicClip.start();
-                        currentMusicPath = musicPath;
-                        System.out.println("Background music started: " + musicPath);
-                    } else {
-                        System.err.println("Warning: Audio mixer not available");
-                    }
-                } else {
-                    System.err.println("Warning: Music file not found: " + musicPath);
-                }
-            } catch (Exception e) {
-                System.err.println("Note: Background music unavailable: " + e.getMessage());
+        synchronized (musicLock) {
+            // If the same music is already playing, don't restart it
+            if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
+                return;
             }
-        }, "MusicLoader").start();
+            
+            // Stop current music if any
+            stopBackgroundMusic();
+            
+            // Store the path immediately to prevent race conditions
+            final String pathToLoad = musicPath;
+            
+            // Load and play new music in a separate thread
+            new Thread(() -> {
+                try {
+                    InputStream musicStream = getClass().getResourceAsStream(pathToLoad);
+                    
+                    if (musicStream != null) {
+                        BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
+                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
+                        
+                        synchronized (musicLock) {
+                            // Check if we should still load this music
+                            if (!pathToLoad.equals(currentMusicPath) && currentMusicPath != null) {
+                                audioInputStream.close();
+                                return;
+                            }
+                            
+                            if (AudioSystem.getMixer(null) != null) {
+                                Clip newClip = AudioSystem.getClip();
+                                newClip.open(audioInputStream);
+                                
+                                // Set the clip and path atomically
+                                backgroundMusicClip = newClip;
+                                currentMusicPath = pathToLoad;
+                                
+                                // Loop the music continuously
+                                backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
+                                backgroundMusicClip.start();
+                                
+                                System.out.println("Background music started: " + pathToLoad);
+                            } else {
+                                System.err.println("Warning: Audio mixer not available");
+                            }
+                        }
+                    } else {
+                        System.err.println("Warning: Music file not found: " + pathToLoad);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Note: Background music unavailable: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }, "MusicLoader").start();
+        }
     }
     
     /**
      * Stops the currently playing background music.
      */
     private void stopBackgroundMusic() {
-        if (backgroundMusicClip != null) {
-            if (backgroundMusicClip.isRunning()) {
-                backgroundMusicClip.stop();
+        synchronized (musicLock) {
+            if (backgroundMusicClip != null) {
+                try {
+                    if (backgroundMusicClip.isRunning()) {
+                        backgroundMusicClip.stop();
+                    }
+                    backgroundMusicClip.close();
+                } catch (Exception e) {
+                    System.err.println("Error stopping music: " + e.getMessage());
+                }
+                backgroundMusicClip = null;
             }
-            backgroundMusicClip.close();
-            backgroundMusicClip = null;
+            currentMusicPath = null;
         }
-        currentMusicPath = null;
     }
 }

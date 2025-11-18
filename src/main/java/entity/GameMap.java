@@ -30,9 +30,9 @@ public class GameMap {
         Color officeColor = new Color(255, 220, 200);
         Color lobbyColor = new Color(255, 240, 220);
 
-        // Music paths
-        String lofiMusic = "/audio/lofi-lofi-song-2-434695.mp3";
-        String elevatorMusic = "/audio/local-forecast-elevator.mp3";
+        // Music paths (WAV format for Java AudioSystem compatibility)
+        String lofiMusic = "/audio/lofi-lofi-song-2-434695.wav";
+        String elevatorMusic = "/audio/local-forecast-elevator.wav";
 
         // Create zones with background images and music
         Zone home = new Zone("Home", homeColor, "/backgrounds/home.png", lofiMusic);
