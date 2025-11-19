@@ -8,5 +8,5 @@ import java.io.IOException;
  * DAO interface for the Save Progress Use Case.
  */
 public interface SaveProgressDataAccessInterface {
-    void save(Player player, String currentZone) throws IOException;
+    void save(Player player, String currentZone, String SAVE_FILE) throws IOException;
 }

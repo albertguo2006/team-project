@@ -12,8 +12,8 @@ public class LoadProgressInteractor {
         this.loadProgressDataAccessObject = loadProgressDataAccessObject;
     }
 
-    public Player loadGame(GameMap gameMap) throws IOException {
-        return loadProgressDataAccessObject.load(gameMap);
+    public Player loadGame(GameMap gameMap, String SAVE_FILE) throws IOException {
+        return loadProgressDataAccessObject.load(gameMap, SAVE_FILE);
     }
 
 }

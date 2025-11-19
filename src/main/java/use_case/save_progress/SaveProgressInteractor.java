@@ -12,8 +12,8 @@ public class SaveProgressInteractor {
         this.saveProgressDataAccessObject = saveProgressDataAccessObject;
     }
 
-    public void saveGame(Player player, String currentZone) throws IOException {
-        saveProgressDataAccessObject.save(player, currentZone);
+    public void saveGame(Player player, String currentZone, String SAVE_FILE) throws IOException {
+        saveProgressDataAccessObject.save(player, currentZone, SAVE_FILE);
     }
 }
 

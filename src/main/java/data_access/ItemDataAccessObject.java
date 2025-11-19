@@ -12,7 +12,7 @@ import java.util.HashMap;
 import static data_access.LoadFileUserDataAccessObject.JSONFileReader;
 
 public class ItemDataAccessObject implements ItemDataAccessInterface {
-    public static final String ITEM_FILE = "items.json";
+    public static final String ITEM_FILE = "src/main/resources/items.json";
 
     @Override
     public HashMap<String, Item> getItemMap() {
@@ -22,7 +22,7 @@ public class ItemDataAccessObject implements ItemDataAccessInterface {
             for (int i = 0; i < data.length(); i++) {
                 JSONObject itemData = data.getJSONObject(i);
                 Item item = new Item(itemData.getString("name"), itemData.getString("description"),
-                        itemData.getString("type"), itemData.getInt("Score"));
+                        itemData.getString("type"), itemData.getInt("score"));
                 items.put(item.getName(), item);
             }
             return items;

@@ -10,6 +10,6 @@ import java.io.IOException;
  */
 
 public interface LoadProgressDataAccessInterface {
-    Player load(GameMap gameMap) throws IOException;
+    Player load(GameMap gameMap, String SAVE_FILE) throws IOException;
 }
 

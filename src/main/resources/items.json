@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Coffee",
+    "type": "Speed",
+    "description": "The Coffee item adds +20 speed!",
+    "score": 20
+  },
+  {
+    "name": "Steak",
+    "type": "Hunger",
+    "description": "The Steak item adds +30 hunger!",
+    "score": 30
+  },
+  {
+    "name": "Energy Drink",
+    "type": "Energy",
+    "description": "The Energy Drink adds +20 energy!",
+    "score": 20
+  }
+]

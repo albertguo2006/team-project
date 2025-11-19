@@ -11,7 +11,7 @@ import java.util.HashMap;
 import static data_access.LoadFileUserDataAccessObject.JSONFileReader;
 
 public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterface {
-    private static final String NPC_FILE = "npc.json";
+    private static final String NPC_FILE = "src/main/resources/npc.json";
 
     @Override
     public HashMap<String, NPC> getNPCMap() {

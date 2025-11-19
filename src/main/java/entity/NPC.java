@@ -5,14 +5,14 @@ public class NPC {
     private String dialoguePrompt;
     private String location;
     private double cashBalance;
-    private final int defaultscore;
+    private final int defaultScore;
 
-    public NPC(String name, String dialoguePrompt, String location, double cashBalance, int defaultscore) {
+    public NPC(String name, String dialoguePrompt, String location, double cashBalance, int defaultScore) {
         this.name = name;
         this.dialoguePrompt = dialoguePrompt;
         this.location = location;
         this.cashBalance = cashBalance;
-        this.defaultscore = defaultscore;
+        this.defaultScore = defaultScore;
     }
 
     public String getName() {
@@ -43,8 +43,8 @@ public class NPC {
         return cashBalance;
     }
 
-    public int getDefaultscore() {
-        return defaultscore;
+    public int getDefaultScore() {
+        return defaultScore;
     }
     // added a default score just in case certain NPCs start out with different default relationship
     // scores (for example, some NPCs may start out friendlier than others, thus having higher starting scores).
