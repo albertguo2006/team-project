@@ -11,6 +11,13 @@ public class Portfolio {
     // investments is a hashmap from the stock (which includes symbol and price)
     // to the number of shares they have of that stock
 
+    public Portfolio() {}
+
+    public Portfolio(Double totalEquity, HashMap<Stock, Double> investments) {
+        this.totalEquity = totalEquity;
+        this.investments = investments;
+    }
+
     /**
      * Set the total equity (total money) from the stock shares, prices and cash.
      */
@@ -31,4 +38,7 @@ public class Portfolio {
         return totalEquity;
     }
 
+    public HashMap<Stock, Double> getInvestments() { return investments; }
+
 }
+

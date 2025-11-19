@@ -2,17 +2,20 @@ package entity;
 
 public class EventOutcome {
     private final int outcomeID;
+    private final String outcomeName;
     private final String outcomeDescription;
     private final double outcomeChance;
     private final int outcomeResult;
 
-    public EventOutcome(int outcomeID, String outcomeDescription, double outcomeChance,
+    public EventOutcome(int outcomeID, String outcomeName, String outcomeDescription, double outcomeChance,
                         int outcomeResult) {
         this.outcomeID = outcomeID;
+        this.outcomeName = outcomeName;
         this.outcomeDescription = outcomeDescription;
         this.outcomeChance = outcomeChance;
         this.outcomeResult = outcomeResult;
     }
+    public String getOutcomeName() {return outcomeName;}
     public int  getOutcomeID() {
         return outcomeID;
     }

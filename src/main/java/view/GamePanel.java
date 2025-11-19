@@ -10,11 +10,16 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -33,6 +38,11 @@ public class GamePanel extends JPanel implements ActionListener {
     
     // Background image cache
     private final Map<String, BufferedImage> backgroundImageCache = new HashMap<>();
+    
+    // Background music
+    private volatile Clip backgroundMusicClip;
+    private volatile String currentMusicPath;
+    private final Object musicLock = new Object();
 
     // Virtual (internal) resolution - game logic operates in this space
     private static final int VIRTUAL_WIDTH = 1920;
@@ -80,6 +90,9 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Initialize viewport
         calculateViewport();
+        
+        // Start background music for initial zone
+        playBackgroundMusic(gameMap.getCurrentZone().getBackgroundMusicPath());
     }
     
     /**
@@ -92,10 +105,32 @@ public class GamePanel extends JPanel implements ActionListener {
     
     /**
      * Stops the game loop.
-     * Useful for pausing or closing the game.
+     * Useful for closing the game.
      */
     public void stopGameLoop() {
         gameTimer.stop();
+        stopBackgroundMusic();
+    }
+    
+    /**
+     * Pauses the game loop.
+     * Stops the timer but maintains game state.
+     */
+    public void pauseGame() {
+        if (gameTimer.isRunning()) {
+            gameTimer.stop();
+        }
+    }
+    
+    /**
+     * Resumes the game loop.
+     * Restarts the timer and updates lastUpdateTime to prevent huge delta.
+     */
+    public void resumeGame() {
+        if (!gameTimer.isRunning()) {
+            lastUpdateTime = System.currentTimeMillis();  // Reset time to prevent delta jump
+            gameTimer.start();
+        }
     }
     
     /**
@@ -203,19 +238,20 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Special handling for subway station transitions (300-pixel trigger zones)
         final int SUBWAY_TRANSITION_ZONE = 300;
+        final int SUBWAY_SPAWN_OFFSET = 50; // Offset to prevent immediate re-triggering
         
         if ("Subway Station 1".equals(currentZoneName)) {
             // Check if player is in bottom 300 pixels
             if (y >= VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE) {
                 gameMap.setCurrentZone("Subway Station 2");
-                player.setY(SUBWAY_TRANSITION_ZONE); // Spawn 300 pixels from top
+                player.setY(SUBWAY_TRANSITION_ZONE + SUBWAY_SPAWN_OFFSET); // Spawn safely away from transition zone
                 transitioned = true;
             }
         } else if ("Subway Station 2".equals(currentZoneName)) {
             // Check if player is in top 300 pixels
             if (y <= SUBWAY_TRANSITION_ZONE) {
                 gameMap.setCurrentZone("Subway Station 1");
-                player.setY(VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE); // Spawn 300 pixels from bottom
+                player.setY(VIRTUAL_HEIGHT - SUBWAY_TRANSITION_ZONE - SUBWAY_SPAWN_OFFSET); // Spawn safely away from transition zone
                 transitioned = true;
             }
         }
@@ -256,9 +292,11 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
 
-        // Update background color if zone changed
+        // Update background color and music if zone changed
         if (transitioned) {
-            setBackground(gameMap.getCurrentZone().getBackgroundColor());
+            Zone newZone = gameMap.getCurrentZone();
+            setBackground(newZone.getBackgroundColor());
+            playBackgroundMusic(newZone.getBackgroundMusicPath());
         }
     }
 
@@ -518,6 +556,95 @@ public class GamePanel extends JPanel implements ActionListener {
             // Cache null to avoid repeated load attempts
             backgroundImageCache.put(imagePath, null);
             return null;
+        }
+    }
+    
+    /**
+     * Plays background music for the current zone.
+     * If music is already playing and matches the requested path, does nothing.
+     * Otherwise, stops current music and starts the new track.
+     *
+     * @param musicPath the path to the music file (WAV format)
+     */
+    private void playBackgroundMusic(String musicPath) {
+        if (musicPath == null || musicPath.isEmpty()) {
+            stopBackgroundMusic();
+            return;
+        }
+        
+        synchronized (musicLock) {
+            // If the same music is already playing, don't restart it
+            if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
+                return;
+            }
+            
+            // Stop current music if any
+            stopBackgroundMusic();
+            
+            // Store the path immediately to prevent race conditions
+            final String pathToLoad = musicPath;
+            
+            // Load and play new music in a separate thread
+            new Thread(() -> {
+                try {
+                    InputStream musicStream = getClass().getResourceAsStream(pathToLoad);
+                    
+                    if (musicStream != null) {
+                        BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
+                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
+                        
+                        synchronized (musicLock) {
+                            // Check if we should still load this music
+                            if (!pathToLoad.equals(currentMusicPath) && currentMusicPath != null) {
+                                audioInputStream.close();
+                                return;
+                            }
+                            
+                            if (AudioSystem.getMixer(null) != null) {
+                                Clip newClip = AudioSystem.getClip();
+                                newClip.open(audioInputStream);
+                                
+                                // Set the clip and path atomically
+                                backgroundMusicClip = newClip;
+                                currentMusicPath = pathToLoad;
+                                
+                                // Loop the music continuously
+                                backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
+                                backgroundMusicClip.start();
+                                
+                                System.out.println("Background music started: " + pathToLoad);
+                            } else {
+                                System.err.println("Warning: Audio mixer not available");
+                            }
+                        }
+                    } else {
+                        System.err.println("Warning: Music file not found: " + pathToLoad);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Note: Background music unavailable: " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }, "MusicLoader").start();
+        }
+    }
+    
+    /**
+     * Stops the currently playing background music.
+     */
+    private void stopBackgroundMusic() {
+        synchronized (musicLock) {
+            if (backgroundMusicClip != null) {
+                try {
+                    if (backgroundMusicClip.isRunning()) {
+                        backgroundMusicClip.stop();
+                    }
+                    backgroundMusicClip.close();
+                } catch (Exception e) {
+                    System.err.println("Error stopping music: " + e.getMessage());
+                }
+                backgroundMusicClip = null;
+            }
+            currentMusicPath = null;
         }
     }
 }

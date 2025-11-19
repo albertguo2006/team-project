@@ -2,7 +2,9 @@ package use_case.npc_interactions;
 
 import entity.NPC;
 
+import java.util.HashMap;
+
 public interface NpcInteractionsUserDataAccessInterface {
-    NPC getNpcByName(String name);
-    void saveNpc(NPC npc);
+    HashMap<String, NPC> getNPCMap();
 }
+
