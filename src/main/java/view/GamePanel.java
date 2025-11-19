@@ -586,7 +586,7 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Draw health bar
         g.drawString("Health:", 30, 170);
-        drawHealthBar(g, 130, 155, 300, 20, player.getHealth());
+        drawHealthBar(g, 135, 150, 305, 20, player.getHealth());
         
         // Draw instructions at bottom (using virtual dimensions)
         g.setColor(new Color(200, 200, 200));
