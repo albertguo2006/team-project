@@ -43,11 +43,18 @@ public class GamePanel extends JPanel implements ActionListener {
     private volatile Clip backgroundMusicClip;
     private volatile String currentMusicPath;
     private final Object musicLock = new Object();
-
+    
     // Virtual (internal) resolution - game logic operates in this space
     private static final int VIRTUAL_WIDTH = 1920;
     private static final int VIRTUAL_HEIGHT = 1200;
     private static final double ASPECT_RATIO = 16.0 / 10.0;
+    
+    // Sleep zone (top-right 400x400px in Home)
+    private static final int SLEEP_ZONE_X = VIRTUAL_WIDTH - 400;
+    private static final int SLEEP_ZONE_Y = 0;
+    private static final int SLEEP_ZONE_WIDTH = 400;
+    private static final int SLEEP_ZONE_HEIGHT = 400;
+    private boolean inSleepZone = false;
     
     // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
     private int viewportWidth;
@@ -158,6 +165,7 @@ public class GamePanel extends JPanel implements ActionListener {
         // === UPDATE PHASE ===
         playerMovementUseCase.updatePosition(deltaTime);
         checkZoneTransition();
+        checkSleepZone();
 
         // === RENDER PHASE ===
         this.repaint();
@@ -420,6 +428,12 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Draw player
         drawPlayer(g);
+        
+        // Draw sleep zone indicator if in Home and player is in zone
+        if (gameMap.getCurrentZone().getName().equals("Home") && inSleepZone) {
+            drawSleepZone(g);
+        }
+        
         drawUI(g);
     }
     
@@ -489,8 +503,64 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     
     /**
+     * Checks if the player is in the sleep zone (top-right 400x400px in Home).
+     */
+    private void checkSleepZone() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        
+        // Only check if in Home zone
+        if (!"Home".equals(currentZone.getName())) {
+            inSleepZone = false;
+            return;
+        }
+        
+        double playerX = player.getX();
+        double playerY = player.getY();
+        
+        // Check if player is within sleep zone bounds
+        inSleepZone = playerX >= SLEEP_ZONE_X &&
+                     playerX <= SLEEP_ZONE_X + SLEEP_ZONE_WIDTH &&
+                     playerY >= SLEEP_ZONE_Y &&
+                     playerY <= SLEEP_ZONE_Y + SLEEP_ZONE_HEIGHT;
+    }
+    
+    /**
+     * Draws the sleep zone indicator and prompt.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawSleepZone(Graphics2D g) {
+        // Draw semi-transparent overlay
+        g.setColor(new Color(100, 150, 255, 77));  // Light blue with 30% opacity
+        g.fillRect(SLEEP_ZONE_X, SLEEP_ZONE_Y, SLEEP_ZONE_WIDTH, SLEEP_ZONE_HEIGHT);
+        
+        // Draw border
+        g.setColor(new Color(100, 150, 255, 200));
+        g.setStroke(new BasicStroke(4));
+        g.drawRect(SLEEP_ZONE_X, SLEEP_ZONE_Y, SLEEP_ZONE_WIDTH, SLEEP_ZONE_HEIGHT);
+        
+        // Draw prompt text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 32));
+        String prompt = "Press E to Sleep";
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int promptX = SLEEP_ZONE_X + (SLEEP_ZONE_WIDTH - promptWidth) / 2;
+        int promptY = SLEEP_ZONE_Y + SLEEP_ZONE_HEIGHT / 2;
+        g.drawString(prompt, promptX, promptY);
+    }
+    
+    /**
+     * Checks if the player is currently in the sleep zone.
+     * @return true if in sleep zone, false otherwise
+     */
+    public boolean isInSleepZone() {
+        return inSleepZone;
+    }
+    
+    /**
      * Draws UI elements (HUD, status, debug info).
-     * 
+     *
      * @param g the Graphics2D context
      */
     private void drawUI(Graphics2D g) {
@@ -498,7 +568,7 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Draw semi-transparent background panel for HUD (scaled for 1920x1200)
         g.setColor(new Color(0, 0, 0, 100));
-        g.fillRect(10, 10, 500, 120);
+        g.fillRect(10, 10, 500, 180);  // Increased height for day and health
         
         // Draw position and balance text
         g.setColor(Color.WHITE);
@@ -509,6 +579,14 @@ public class GamePanel extends JPanel implements ActionListener {
         
         g.drawString(positionText, 30, 50);
         g.drawString(balanceText, 30, 90);
+        
+        // Draw current day
+        String dayText = player.getCurrentDay().getProgressString();
+        g.drawString(dayText, 30, 130);
+        
+        // Draw health bar
+        g.drawString("Health:", 30, 170);
+        drawHealthBar(g, 130, 155, 300, 20, player.getHealth());
         
         // Draw instructions at bottom (using virtual dimensions)
         g.setColor(new Color(200, 200, 200));
@@ -523,6 +601,38 @@ public class GamePanel extends JPanel implements ActionListener {
             g.setFont(new Font("Arial", Font.BOLD, 24));  // Scaled up
             g.drawString("MOVING", VIRTUAL_WIDTH - 200, 50);
         }
+    }
+    
+    /**
+     * Draws a health bar.
+     *
+     * @param g the Graphics2D context
+     * @param x x position
+     * @param y y position
+     * @param width bar width
+     * @param height bar height
+     * @param health current health (0-100)
+     */
+    private void drawHealthBar(Graphics2D g, int x, int y, int width, int height, int health) {
+        // Background (red)
+        g.setColor(new Color(100, 0, 0));
+        g.fillRect(x, y, width, height);
+        
+        // Health fill (green)
+        int fillWidth = (int) (width * (health / 100.0));
+        g.setColor(new Color(0, 200, 0));
+        g.fillRect(x, y, fillWidth, height);
+        
+        // Border
+        g.setColor(Color.WHITE);
+        g.setStroke(new BasicStroke(2));
+        g.drawRect(x, y, width, height);
+        
+        // Health text
+        g.setFont(new Font("Arial", Font.BOLD, 16));
+        String healthText = health + "/100";
+        int textWidth = g.getFontMetrics().stringWidth(healthText);
+        g.drawString(healthText, x + (width - textWidth) / 2, y + 15);
     }
     
     /**
