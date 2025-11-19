@@ -30,9 +30,25 @@ public class PlayerInputController implements KeyListener {
         void onPauseRequested();
     }
     
+    /**
+     * Callback interface for sleep zone checks.
+     */
+    public interface SleepZoneChecker {
+        boolean isInSleepZone();
+    }
+    
+    /**
+     * Callback interface for sleep actions.
+     */
+    public interface SleepActionListener {
+        void onSleepRequested();
+    }
+    
     private final PlayerMovementUseCase playerMovementUseCase;
     private JFrame parentFrame;  // Optional: for frame reference
     private PauseMenuListener pauseMenuListener;
+    private SleepZoneChecker sleepZoneChecker;
+    private SleepActionListener sleepActionListener;
     
     /**
      * Constructs a PlayerInputController with the given use case.
@@ -59,6 +75,24 @@ public class PlayerInputController implements KeyListener {
      */
     public void setPauseMenuListener(PauseMenuListener listener) {
         this.pauseMenuListener = listener;
+    }
+    
+    /**
+     * Sets the sleep zone checker callback.
+     *
+     * @param checker the sleep zone checker
+     */
+    public void setSleepZoneChecker(SleepZoneChecker checker) {
+        this.sleepZoneChecker = checker;
+    }
+    
+    /**
+     * Sets the sleep action listener callback.
+     *
+     * @param listener the sleep action listener
+     */
+    public void setSleepActionListener(SleepActionListener listener) {
+        this.sleepActionListener = listener;
     }
     
     /**
@@ -95,6 +129,13 @@ public class PlayerInputController implements KeyListener {
                 break;
             case KeyEvent.VK_D:
                 playerMovementUseCase.setMovementState(Direction.RIGHT, true);
+                break;
+            case KeyEvent.VK_E:
+                // Handle sleep action if in sleep zone
+                if (sleepZoneChecker != null && sleepZoneChecker.isInSleepZone() &&
+                    sleepActionListener != null) {
+                    sleepActionListener.onSleepRequested();
+                }
                 break;
         }
     }

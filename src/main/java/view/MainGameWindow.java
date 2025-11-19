@@ -7,9 +7,18 @@ import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import data_access.SleepDataAccessObject;
 import entity.GameSettings;
+import entity.Player;
 import interface_adapter.events.PlayerInputController;
+import interface_adapter.events.ViewManagerModel;
+import interface_adapter.sleep.SleepController;
+import interface_adapter.sleep.SleepPresenter;
+import interface_adapter.sleep.SleepViewModel;
 import use_case.PlayerMovementUseCase;
+import use_case.sleep.SleepDataAccessInterface;
+import use_case.sleep.SleepInputBoundary;
+import use_case.sleep.SleepInteractor;
 
 /**
  * MainGameWindow is the top-level JFrame for the application.
@@ -39,12 +48,22 @@ public class MainGameWindow extends JFrame {
     
     private final GameSettings gameSettings;
     
+    // Sleep system components
+    private ViewManagerModel viewManagerModel;
+    private SleepViewModel sleepViewModel;
+    private SleepController sleepController;
+    private DaySummaryView daySummaryView;
+    private EndGameView endGameView;
+    private Player player;
+    
     // Card names for CardLayout
     private static final String LOADING_CARD = "loading";
     private static final String MENU_CARD = "menu";
     private static final String SETTINGS_CARD = "settings";
     private static final String GAME_CARD = "game";
     private static final String IN_GAME_MENU_CARD = "inGameMenu";
+    private static final String DAY_SUMMARY_CARD = "daySummary";
+    private static final String END_GAME_CARD = "endGame";
     
     /**
      * Constructs the MainGameWindow.
@@ -184,7 +203,26 @@ public class MainGameWindow extends JFrame {
      */
     private void initializeGamePanel() {
         // Create player entity
-        entity.Player player = new entity.Player("Player");
+        this.player = new Player("Player");
+        
+        // Create view manager model
+        this.viewManagerModel = new ViewManagerModel();
+        
+        // Create sleep system components (following Clean Architecture)
+        // 1. View Model
+        this.sleepViewModel = new SleepViewModel();
+        
+        // 2. Data Access
+        SleepDataAccessInterface sleepDataAccess = new SleepDataAccessObject();
+        
+        // 3. Presenter (output boundary)
+        SleepPresenter sleepPresenter = new SleepPresenter(viewManagerModel, sleepViewModel);
+        
+        // 4. Interactor (input boundary)
+        SleepInputBoundary sleepInteractor = new SleepInteractor(sleepPresenter, sleepDataAccess);
+        
+        // 5. Controller
+        this.sleepController = new SleepController(sleepInteractor);
         
         // Create use case
         PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(player);
@@ -199,6 +237,14 @@ public class MainGameWindow extends JFrame {
         // Create game panel
         this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController);
         
+        // Set up sleep system callbacks
+        playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
+        playerInputController.setSleepActionListener(() -> sleepController.sleep(player));
+        
+        // Create sleep views
+        this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
+        this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
+        
         // Create in-game menu panel
         this.inGameMenuPanel = new InGameMenuPanel();
         setupInGameMenuListeners();
@@ -206,6 +252,8 @@ public class MainGameWindow extends JFrame {
         // Add to card panel
         cardPanel.add(gamePanel, GAME_CARD);
         cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
+        cardPanel.add(daySummaryView, DAY_SUMMARY_CARD);
+        cardPanel.add(endGameView, END_GAME_CARD);
     }
     
     /**
