@@ -1,3 +1,6 @@
+// still needs to fix (temp commented out)
+
+
 package data_access;
 
 import entity.NPC;
@@ -7,8 +10,11 @@ import use_case.npc_interactions.NpcInteractionsUserDataAccessInterface;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
+
 
 import static data_access.LoadFileUserDataAccessObject.JSONFileReader;
+
 
 public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterface {
     private static final String NPC_FILE = "npc.json";
@@ -30,6 +36,22 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
         catch (IOException e){
             throw new RuntimeException();
         }
+    }
+
+
+    // -- ignore (to be changed)
+    private final Map<String, NPC> npcs = new HashMap<>();
+    //
+
+    // temporary
+    @Override
+    public NPC getNpcByName(String name) {
+        return npcs.get(name);
+    }
+
+    @Override
+    public void saveNpc(NPC npc) {
+        npcs.put(npc.getName(), npc);
     }
 }
 
