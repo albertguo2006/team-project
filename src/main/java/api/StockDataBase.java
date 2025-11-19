@@ -20,7 +20,4 @@ public interface StockDataBase {
 
     void saveToFile(String json, String symbol);
 
-    static List<Double> getIntradayOpensForDayIndex(String symbol, int gameDay) throws Exception {
-        return null;
-    }
 }

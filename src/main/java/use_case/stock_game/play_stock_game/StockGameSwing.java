@@ -1,13 +1,15 @@
 package use_case.stock_game.play_stock_game;
 
+import api.AlphaStockDataBase;
 import entity.Portfolio;
 import entity.Stock;
 
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.lang.Math;
 import java.util.List;
+import java.util.Random;
 
 public class StockGameSwing {
 
@@ -20,18 +22,17 @@ public class StockGameSwing {
 
     private double lastPrice;
 
-    public StockGameSwing(List<Double> realPrices, String symbol) {
-
-        // Create the stock and the portfolio
-        Stock stock = new Stock(symbol, realPrices.get(0));
-
-        Portfolio portfolio = new Portfolio();
-        portfolio.setCash(10_000);  // starting cash
-        portfolio.setInvestments(new HashMap<>()); // required initialization
-
+    public StockGameSwing(List<Double> realPrices, String symbol, Double startAmount) {
         lastPrice = realPrices.get(0);
 
-        // --- Build Swing UI ---
+        // create instances portfolio investments, and load the stock into there
+        Portfolio portfolio = new Portfolio();
+        Stock stock = new Stock(symbol, lastPrice);
+        portfolio.loadStock(stock);
+        portfolio.setCash(startAmount);  // starting investing amount (inputData from user)
+
+
+        // using java swing to make ui
         frame = new JFrame("Stock Game: " + symbol);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(420, 330);
@@ -48,10 +49,10 @@ public class StockGameSwing {
         buyButton.setFont(new Font("Arial", Font.BOLD, 18));
         sellButton.setFont(new Font("Arial", Font.BOLD, 18));
 
-        // Portfolio display
-        cashLabel = new JLabel("Cash: " + portfolio.getCash());
-        sharesLabel = new JLabel("Shares: " + portfolio.getShares(stock));
-        totalEquityLabel = new JLabel("Total Equity: " + portfolio.getTotalEquity());
+        // show details regarding portfolio, (with numbers rounded for easier visuals)
+        cashLabel = new JLabel("Cash: " + Math.round(portfolio.getCash()*100)/100.0);
+        sharesLabel = new JLabel("Shares: " + Math.round(portfolio.getShares(stock)*100)/100.0);
+        totalEquityLabel = new JLabel("Total Equity: " + Math.round(portfolio.getTotalEquity()*100)/100.0);
 
         JPanel portfolioPanel = new JPanel();
         portfolioPanel.setLayout(new GridLayout(3, 1));
@@ -61,7 +62,7 @@ public class StockGameSwing {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(buyButton);
-        buttonPanel.add(sellButton);
+        //buttonPanel.add(sellButton);
 
         frame.setLayout(new BorderLayout());
         frame.add(priceLabel, BorderLayout.NORTH);
@@ -71,26 +72,47 @@ public class StockGameSwing {
 
         frame.setVisible(true);
 
-        // --- Button Logic ---
+        // buttons to buy and sell
         buyButton.addActionListener(e -> {
-            stock.stockPrice = lastPrice;      // update stock's internal price
+            stock.stockPrice = lastPrice;      // update stock's price
             portfolio.buy(stock);              // buy using all cash
             refreshPortfolioUI(portfolio, stock);
+
+            buttonPanel.remove(buyButton);
+            buttonPanel.add(sellButton);            // add SELL button, and remove buy button
+            frame.repaint();
+
+
         });
 
         sellButton.addActionListener(e -> {
             stock.stockPrice = lastPrice;      // update price
             portfolio.sell(stock);             // sell all shares
             refreshPortfolioUI(portfolio, stock);
+
+            buttonPanel.remove(sellButton);
+            buttonPanel.add(buyButton);            // add BUY button, and remove sell button
+            frame.repaint();
         });
 
-        // --- Price Auto-Update Every Second ---
+        // update each second (1000ms)
         new Timer(1000, e -> {
 
             // shift to next price
+            /*
             realPrices.add(realPrices.remove(0));
             double price = realPrices.get(0);
             stock.stockPrice = price;
+             */
+            // shift to next price
+            realPrices.add(realPrices.remove(0));   // removed already used price from the list of prices
+            double diff =  realPrices.get(0) - lastPrice;
+            // make random object
+            Random random = new Random();
+            //double newPrice = lastPrice + 0.01*diff*(lastPrice/(random.nextDouble(1.0, 3.0)));
+            //double newPrice = lastPrice + Math.random()*diff*(lastPrice);
+            double price = lastPrice + diff*(lastPrice/10);
+            // use random algorithm to calculate new price based on previous and next price
 
             priceLabel.setText(String.format("Price: %.2f", price));
 
@@ -107,7 +129,7 @@ public class StockGameSwing {
 
             lastPrice = price;
 
-            // update equity
+            // update details shown on screen, shares, cash, equity etc
             refreshPortfolioUI(portfolio, stock);
 
         }).start();
@@ -115,8 +137,18 @@ public class StockGameSwing {
 
     private void refreshPortfolioUI(Portfolio portfolio, Stock stock) {
 
-        cashLabel.setText(String.format("Cash: %.2f", portfolio.getCash()));
-        sharesLabel.setText("Shares: " + portfolio.getShares(stock));
-        totalEquityLabel.setText(String.format("Total Equity: %.2f", portfolio.getTotalEquity()));
+        // show details regarding portfolio, (with numbers rounded for easier visuals)
+        cashLabel.setText("Cash: " + Math.round(portfolio.getCash()*100)/100.0);
+        sharesLabel.setText("Shares: " + Math.round(portfolio.getShares(stock)*100)/100.0);
+        totalEquityLabel.setText("Total Equity: " + Math.round(portfolio.getTotalEquity()*100)/100.0);
+    }
+
+
+    public static void main(String[] args) throws Exception {
+
+        List<Double> opens = AlphaStockDataBase.getIntradayOpensForGameDay("VOO", 5);
+
+        List<Double> finalOpens = opens;
+        SwingUtilities.invokeLater(() -> new StockGameSwing(finalOpens, "VOO", 10000.0));
     }
 }

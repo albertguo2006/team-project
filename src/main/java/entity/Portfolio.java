@@ -1,13 +1,14 @@
 package entity;
 
 import java.util.HashMap;
+import java.util.Map;
 
 // this is a class to represent the portfolio of the playet
 // current only has one type of stock, but could be altered to add more?
 public class Portfolio {
 
     public double cash;   // starting cash
-    public HashMap<Stock, Double> investments;
+    public HashMap<Stock, Double> investments = new HashMap<>();
     // investments is a hashmap from the stock (which includes symbol and price)
     // to the number of shares they have of that stock (open for extension)
 
@@ -17,6 +18,12 @@ public class Portfolio {
      */
     // TODO: should this be in the portfolio class or somewhere else?
     //  need to load the api data into the stock class
+
+    public void loadStock(Stock stock){
+        // add to the investments portfolio, with currently 0.0 shares bought
+        investments.put(stock, 0.0);
+
+    }
 
     public Double getTotalEquity() {
         Double equity = 0.0; // initialise equity
@@ -28,9 +35,9 @@ public class Portfolio {
     }
 
     public void buy(Stock stock) {
-        cash = 0; // no more cash (use all of it to buy)
         investments.put(stock, cash/stock.stockPrice);
         // add the number of shares bought in the investments dict
+        cash = 0; // no more cash (use all of it to buy)
     }
 
     public void sell(Stock stock) {
@@ -53,12 +60,12 @@ public class Portfolio {
         this.cash = cash;
     }
 
-    public HashMap<Stock, Double> getInvestments() {
+    public Map<Stock, Double> getInvestments() {
         return investments;
     }
 
-    public void  setInvestments(HashMap<Stock, Double> investments) {
-        this.investments = investments;
+    public void  setInvestments(Map<Stock, Double> investments) {
+        this.investments = (HashMap<Stock, Double>) investments;
     }
 }
 

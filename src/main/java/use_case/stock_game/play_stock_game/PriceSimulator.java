@@ -20,8 +20,14 @@ public class PriceSimulator {
         this.targetPrice = realPrices.get(1);
     }
 
-    // get next price once every second
+    // get new next price once every second
     public double nextPrice() {
+        double newPrice;
+
+        double diff = targetPrice - currentPrice;
+        newPrice = realPrices.get(realIndex++) + diff*50*(currentPrice/2);
+
+        /*
         // if there is a small jump in the data, then can just use the next data point
         if (Math.abs(currentPrice - targetPrice) < 0.05 && realIndex < realPrices.size() - 1) {
             realIndex++;
@@ -35,7 +41,8 @@ public class PriceSimulator {
             double drift = (targetPrice - currentPrice) * 0.02;
             currentPrice += noise + drift;      // calculate the next price
         }
+         */
 
-        return currentPrice;
+        return newPrice;
     }
 }

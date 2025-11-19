@@ -108,22 +108,23 @@ public class AlphaStockDataBase implements StockDataBase {
             // if date not already included, then add
         });
 
-        // the first day of the game should correspond to the fifth most recent day of data
-        String targetDate = dates.get(5-gameDay); // matching gameDay to corresponding irl date
-        // NOTE: data from api is already sorted by day, from most recent to oldest
+        // sort dates from most recent to the least recent
+        Collections.sort(dates, Collections.reverseOrder());
+        // get data from the right day, where day 1 is the 5th most recent day, day 5 is the most recent past day
+        String targetDate = dates.get(5-gameDay);
 
-        // add all the open stock values to a list for the given gameDay
-        List<Double> openStockPrices = new ArrayList<>();
+        // list of stock prices for that day
+        List<Double> prices = new ArrayList<>();
+
         timeSeries.fieldNames().forEachRemaining(timestamp -> {
             if (timestamp.startsWith(targetDate)) {
-                openStockPrices.add(timeSeries.get(timestamp).get("1. open").asDouble());
+                prices.add(timeSeries.get(timestamp).get("1. open").asDouble());
             }
         });
 
-        Collections.reverse(openStockPrices);
-        // need to reverse the order of the list, since by default it start with end of day --> start of day
-        // we want it to start at the beginning of the day, so we reverse the list
-        return openStockPrices; // return the list of stock prices for that day (in the correct order)
+        // sort the stock prices in reverse order (start of the day to end of the day)
+        Collections.reverse(prices);
+        return prices; // return the list of stock prices for that day (in the correct order)
     }
 
 
