@@ -1,3 +1,5 @@
+// still needs to fix (reverted so code wont crash)
+
 package data_access;
 
 import entity.NPC;
@@ -28,5 +30,11 @@ public class NpcInteractionsDataAccess implements NpcInteractionsUserDataAccessI
     @Override
     public void saveNpc(NPC npc) {
         npcs.put(npc.getName(), npc);
+    }
+
+    // temporary
+    @Override
+    public HashMap<String, NPC> getNPCMap(){
+        return new HashMap<>(npcs);
     }
 }
