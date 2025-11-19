@@ -1,4 +1,8 @@
 package use_case.npc_interactions;
 
-public class NpcInteractionsUserDataAccessInterface {
+import entity.NPC;
+
+public interface NpcInteractionsUserDataAccessInterface {
+    NPC getNpcByName(String name);
+    void saveNpc(NPC npc);
 }

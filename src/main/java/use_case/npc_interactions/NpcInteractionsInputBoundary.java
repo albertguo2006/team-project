@@ -1,4 +1,5 @@
 package use_case.npc_interactions;
 
-public class NpcInteractionsInputBoundary {
+public interface NpcInteractionsInputBoundary {
+    void execute(NpcInteractionsInputData inputData);
 }
