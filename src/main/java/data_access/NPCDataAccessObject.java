@@ -54,7 +54,7 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
                         "default location",  // you can change if you have locations
                         0.0,                 // starting cash
                         0                    // default relationship score
-                );
+                ); // NPC cash is not implemented and default relationship score is also not implmented (its too complex)
 
                 npcMap.put(name, npc);
             }
