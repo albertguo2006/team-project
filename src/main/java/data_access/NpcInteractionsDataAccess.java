@@ -1,5 +1,4 @@
-//// still needs to fix (reverted so code wont crash)
-//
+///// ALL THIS NEEDS TO BE DELETED
 //package data_access;
 //
 //import entity.NPC;
