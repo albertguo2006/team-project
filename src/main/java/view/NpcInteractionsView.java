@@ -1,6 +1,10 @@
 package view;
 
+import data_access.NPCDataAccessObject;
+import entity.NPC;
 import interface_adapter.events.npc_interactions.*;
+import use_case.npc_interactions.NpcInteractionsUserDataAccessInterface;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -8,7 +12,13 @@ public class NpcInteractionsView {
 
     public static void show(NpcInteractionsController controller,
                             NpcInteractionsViewModel viewModel,
-                            String npcName) {
+                            NpcInteractionsUserDataAccessInterface dataAccess) {
+        NPC npc = ((NPCDataAccessObject) dataAccess).getRandomNpc();
+        if (npc == null) {
+            JOptionPane.showMessageDialog(null, "No NPCs found!");
+            return;
+        }
+        String npcName = npc.getName();
 
         JFrame frame = new JFrame("Chat with " + npcName);
         frame.setSize(400, 500);
