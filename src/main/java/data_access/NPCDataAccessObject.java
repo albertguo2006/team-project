@@ -70,13 +70,13 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
     //
 
     // temporary
-    @Override
-    public NPC getNpcByName(String name) {
-        return npcs.get(name);
-    }
-
-    @Override
-    public void saveNpc(NPC npc) {
-        npcs.put(npc.getName(), npc);
-    }
+//    @Override
+//    public NPC getNpcByName(String name) {
+//        return npcs.get(name);
+//    }
+//
+//    @Override
+//    public void saveNpc(NPC npc) {
+//        npcs.put(npc.getName(), npc);
+//    }
 }
