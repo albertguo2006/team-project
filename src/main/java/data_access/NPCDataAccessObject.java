@@ -1,3 +1,6 @@
+// still needs to fix (temp commented out)
+
+
 package data_access;
 
 import entity.NPC;
@@ -10,6 +13,10 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+
+
+import static data_access.LoadFileUserDataAccessObject.JSONFileReader;
+
 
 public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterface {
     private Map<String, NPC> allNpcs;
@@ -55,5 +62,21 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
             e.printStackTrace();
         }
         return npcMap;
+    }
+
+
+    // -- ignore (to be changed)
+    private final Map<String, NPC> npcs = new HashMap<>();
+    //
+
+    // temporary
+    @Override
+    public NPC getNpcByName(String name) {
+        return npcs.get(name);
+    }
+
+    @Override
+    public void saveNpc(NPC npc) {
+        npcs.put(npc.getName(), npc);
     }
 }
