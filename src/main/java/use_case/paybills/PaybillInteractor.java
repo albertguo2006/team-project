@@ -32,7 +32,7 @@ public class PaybillInteractor implements PaybillInputBoundary {
             paybillPresenter.prepareSuccessView(outputData);
         }
         else {
-            PaybillOutputData outputData = new PaybillOutputData(false, "Insufficent funds to pay all bills", totalDue);
+            PaybillOutputData outputData = new PaybillOutputData(false, "Insufficient funds!", totalDue);
             paybillPresenter.prepareFailureView(outputData);
         }
     }
@@ -51,7 +51,7 @@ public class PaybillInteractor implements PaybillInputBoundary {
         Bill billToPay = findBillById(allBills, id);
 
         if (billToPay == null){
-            PaybillOutputData outputData = new PaybillOutputData(false, "Bill not found: " + id, 0);
+            PaybillOutputData outputData = new PaybillOutputData(false, "Bill not found!", 0);
             paybillPresenter.prepareFailureView(outputData);
             return;
         }
