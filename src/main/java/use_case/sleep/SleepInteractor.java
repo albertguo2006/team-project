@@ -34,6 +34,11 @@ public class SleepInteractor implements SleepInputBoundary {
     @Override
     public void execute(SleepInputData inputData) {
         Player player = inputData.getPlayer();
+
+        if (player == null){
+            presenter.presentSleepError("Player not found.");
+            return;
+        }
         
         // Validate: check if player has already slept today
         if (player.hasSleptToday()) {
@@ -43,6 +48,12 @@ public class SleepInteractor implements SleepInputBoundary {
         
         // Get current day before advancing
         Day completedDay = player.getCurrentDay();
+
+        // Calculate new balance
+        double currentBalance = player.getBalance();
+        double dailyEarnings = player.getDailyEarnings();
+        double dailySpendings = player.getDailySpending();
+        double newBalance = currentBalance + dailyEarnings - dailySpendings;
         
         // Restore health to 100
         player.setHealth(100);
@@ -55,8 +66,11 @@ public class SleepInteractor implements SleepInputBoundary {
             completedDay,
             player.getDailyEarnings(),
             player.getDailySpending(),
-            player.getBalance()
+            newBalance
         );
+
+        // Set player's balance
+        player.setBalance(newBalance);
         
         // Check if this was Friday (end of week)
         if (completedDay.isLastDay()) {

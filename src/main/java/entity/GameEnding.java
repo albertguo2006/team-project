@@ -10,10 +10,14 @@ public class GameEnding {
      * Types of endings based on player's financial success.
      */
     public enum EndingType {
-        WEALTHY("The Wealthy Executive", "You've mastered the art of financial success! Your portfolio is impressive and your future looks bright."),
-        COMFORTABLE("The Comfortable Professional", "You made it through the week with money to spare. You're on the right track to financial stability."),
-        STRUGGLING("The Struggling Worker", "You survived the week, but barely. Every dollar counts when you're living paycheck to paycheck."),
-        BROKE("The Defeated", "The city has defeated you... for now. With negative or minimal balance, the challenges ahead look daunting.");
+        WEALTHY("The Wealthy Executive", "You've mastered the art of financial success! " +
+                "Your portfolio is impressive and your future looks bright."),
+        COMFORTABLE("The Comfortable Professional", "You made it through the week with money to spare. " +
+                "You're on the right track to financial stability."),
+        STRUGGLING("The Struggling Worker", "You survived the week, but barely. " +
+                "Every dollar counts when you're living paycheck to paycheck."),
+        BROKE("The Defeated", "The city has defeated you... for now. " +
+                "With negative or minimal balance, the challenges ahead look daunting.");
         
         private final String title;
         private final String message;

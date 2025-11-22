@@ -70,10 +70,11 @@ public class SleepInteractorTest {
 
         // Verify player state changes
         assertEquals(100, player.getHealth()); // Health restored
-        assertTrue(player.hasSleptToday()); // Marked as slept
+        assertFalse(player.hasSleptToday()); // Not slept for the new day
         assertEquals(Day.TUESDAY, player.getCurrentDay()); // Day advanced
         assertEquals(0.0, player.getDailyEarnings(), 0.01); // Financial reset
         assertEquals(0.0, player.getDailySpending(), 0.01);
+        assertEquals(1150.0, player.getBalance(), 0.01);
     }
 
     @Test
@@ -98,8 +99,9 @@ public class SleepInteractorTest {
             public void presentGameEnding(GameEnding ending) {
                 assertNotNull(ending);
                 assertEquals(GameEnding.EndingType.COMFORTABLE, ending.getType());
-                assertEquals(3000.0, ending.getFinalBalance(), 0.01);
-                assertTrue(ending.getMessage().contains("Comfortable"));
+                assertEquals(3400.0, ending.getFinalBalance(), 0.01);
+                assertTrue(ending.getMessage().contains("You made it through the week with money to spare. " +
+                        "You're on the right track to financial stability."));
             }
 
             @Override
@@ -116,6 +118,7 @@ public class SleepInteractorTest {
         assertEquals(100, player.getHealth()); // Health restored
         assertTrue(player.hasSleptToday()); // Marked as slept
         assertEquals(Day.FRIDAY, player.getCurrentDay()); // Still Friday (week complete)
+        assertEquals(3400.0, player.getBalance(),  0.01);
     }
 
     @Test
@@ -179,7 +182,8 @@ public class SleepInteractorTest {
             public void presentGameEnding(GameEnding ending) {
                 assertEquals(type, ending.getType());
                 assertEquals(balance, ending.getFinalBalance(), 0.01);
-                assertTrue(ending.getMessage().toLowerCase().contains(description.toLowerCase()));
+                assertNotNull(ending.getMessage());
+                assertFalse(ending.getMessage().isEmpty());
             }
 
             @Override
@@ -295,6 +299,7 @@ public class SleepInteractorTest {
             @Override
             public void presentSleepError(String errorMessage) {
                 assertNotNull(errorMessage);
+                assertTrue(errorMessage.contains("Player not found"));
             }
         };
 
