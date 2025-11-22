@@ -277,7 +277,7 @@ public class SleepInteractorTest {
         assertEquals(100, player.getHealth(), 0.01);
     }
 
-
+    @Test
     void failureNullPlayerTest(){
         // Test handling of null player
         testPresenter = new  SleepOutputBoundary(){
