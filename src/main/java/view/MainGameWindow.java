@@ -11,7 +11,7 @@ import data_access.SleepDataAccessObject;
 import entity.GameSettings;
 import entity.Player;
 import interface_adapter.events.PlayerInputController;
-import interface_adapter.events.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.sleep.SleepController;
 import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
@@ -254,6 +254,28 @@ public class MainGameWindow extends JFrame {
         cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
         cardPanel.add(daySummaryView, DAY_SUMMARY_CARD);
         cardPanel.add(endGameView, END_GAME_CARD);
+
+        // Connect ViewManagerModel to CardLayout
+        viewManagerModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                String viewName = (String) evt.getNewValue();
+                System.out.println("ViewManager: Switching to view: " + viewName);
+                cardLayout.show(cardPanel, viewName);
+
+                // Request focus for the new view
+                switch (viewName) {
+                    case GAME_CARD:
+                        gamePanel.requestFocusInWindow();
+                        break;
+                    case DAY_SUMMARY_CARD:
+                        daySummaryView.requestFocusInWindow();
+                        break;
+                    case END_GAME_CARD:
+                        endGameView.requestFocusInWindow();
+                        break;
+                }
+            }
+        });
     }
     
     /**

@@ -1,4 +1,4 @@
-package interface_adapter.events;
+package interface_adapter;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -12,6 +12,7 @@ public class ViewModel<T> {
     private final String viewName;
     private final PropertyChangeSupport support = new PropertyChangeSupport(this);
     private T state;
+    private T previousState; // Track previous state
 
     public ViewModel(String viewName) {
         this.viewName = viewName;
@@ -26,6 +27,8 @@ public class ViewModel<T> {
     }
 
     public void setState(T State){
+
+        this.previousState = this.state; // Store old state
         this.state = State;
     }
 
@@ -33,7 +36,7 @@ public class ViewModel<T> {
      * Fires a property changed event for the state of this ViewModel.
      */
     public void firePropertyChange(){
-        support.firePropertyChange("state", null, null);
+        support.firePropertyChange("state", this.previousState, this.state);
     }
 
     /**
@@ -41,7 +44,7 @@ public class ViewModel<T> {
      * to specify a different propertyName.
      */
     public void firePropertyChange(String propertyName){
-        this.support.firePropertyChange(propertyName, null, this.state);
+        this.support.firePropertyChange(propertyName, this.previousState, this.state);
     }
 
     /**

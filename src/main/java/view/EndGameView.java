@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.Timer;
 
 import entity.GameEnding;
-import interface_adapter.events.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import interface_adapter.sleep.SleepViewModel;
 
 /**

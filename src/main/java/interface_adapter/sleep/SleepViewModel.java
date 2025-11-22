@@ -3,7 +3,7 @@ package interface_adapter.sleep;
 import entity.Day;
 import entity.DaySummary;
 import entity.GameEnding;
-import interface_adapter.events.ViewModel;
+import interface_adapter.ViewModel;
 
 /**
  * View model for the sleep system.

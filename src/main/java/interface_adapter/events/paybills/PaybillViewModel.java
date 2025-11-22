@@ -1,6 +1,6 @@
 package interface_adapter.events.paybills;
 
-import interface_adapter.events.ViewModel;
+import interface_adapter.ViewModel;
 
 /**
  * The View Model for the Paybill View
