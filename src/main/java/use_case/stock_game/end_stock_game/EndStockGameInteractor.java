@@ -5,51 +5,23 @@ import entity.Stock;
 import java.util.List;
 
 /**
- * The stock game Interactor.
+ * The END stock game Interactor.
  */
 public class EndStockGameInteractor implements EndStockGameInputBoundary {
 
     private final EndStockGameDataAccessInterface stockGameDataAccessObject;
-    private final EndStockGameOutputBoundary loginPresenter;
+    private final EndStockGameOutputBoundary stockGamePresenter;
 
     public EndStockGameInteractor(EndStockGameDataAccessInterface endStockGameDataAccessInterface,
-                                  EndStockGameOutputBoundary endStockGameOutputBoundary){
+                                  EndStockGameOutputBoundary stockGamePresenter) {
         this.stockGameDataAccessObject = endStockGameDataAccessInterface;
-        this.loginPresenter = endStockGameOutputBoundary;
+        this.stockGamePresenter = stockGamePresenter;
     }
-
-    public void execute(EndStockGameInputData endStockGameInputData){
-
-    }
-
-
-
-    // TODO: these methods below need to go somewhere else but i dont know where so thats a later problem
-    /**
-     * Returns the list of stock prices given the stock, date, gameday.
-     * @param stock which stock you want data on
-     * @param date (String?) for the date of the data
-     * @param gameday integer from 1-5 for which day of the game thy're on
-     * @return stockPastPrices which are that stock's prices for that day
-     **/
-    //List<Double> getStockPastPrices(Stock stock, String date, int gameday){
-
-   // };
-
 
     //TODO
     /**
-     * Returns the number of stock shares bought given the stock price and cash amount.
+     * End game, by selling all stock share and going to end screen
      * @param //
-     * @return //
-     */
-
-
-    //TODO
-    /**
-     * Returns the total equity given the current stock shares, stock prices AND cash.
-     * @param //
-     * @return //
      */
 
     //TODO
@@ -59,23 +31,14 @@ public class EndStockGameInteractor implements EndStockGameInputBoundary {
      * @return //
      */
 
-    //TODO
-    /**
-     * Adjusts player cash and stock share numbers so that player "buys" shares
-     * @param //
-     */
 
-    //TODO
-    /**
-     * Adjusts player cash and stock share numbers so that player "sells" shares
-     * @param //
-     */
+    public void execute() {
+        // Implement the end/leave game logic:
+        // 1. remember the total equity/ earnings
+        final Double totalEquity = this.stockGameDataAccessObject.getTotalEquity();
 
-    //TODO
-    /**
-     * End game, by selling all stock share and going to end screen
-     * @param //
-     */
-
-
+        // 2. create output data and notify the presenter
+        final EndStockGameOutputData outputData = new EndStockGameOutputData(totalEquity);
+        this.stockGamePresenter.prepareSuccessView(outputData);
+    }
 }

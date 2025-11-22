@@ -1,35 +1,22 @@
 package use_case.stock_game.play_stock_game;
 
-import java.util.List;
-
 /**
- * output data for stock game use case
+ * output data for PLAY stock game use case
  **/
 
 public class PlayStockGameOutputData {
 
-    private List<Double> stockPriceHistory;
-    private Double shareNumber;
-    private Double totalEquity;
-    // TODO should this instead be portfolio?????
+    public final double cash; // cash the player has
+    public final double shares; // number of shares
+    public final double totalEquity; // total equity currently from the shares and cash
+    public final double price; // price of the stock at the moment
 
-    // initialise
-    public PlayStockGameOutputData(List<Double> stockPriceHistory, Double shareNumber, Double totalEquity) {
-        this.stockPriceHistory = stockPriceHistory;
-        this.shareNumber = shareNumber;
+    // intialise the variables
+    public PlayStockGameOutputData(double cash, double shares, double totalEquity, double price) {
+        this.cash = cash;
+        this.shares = shares;
         this.totalEquity = totalEquity;
-    }
-
-    public List<Double> getStockPriceHistory() {
-        return stockPriceHistory;
-    }
-
-    public Double getShareNumber() {
-        return shareNumber;
-    }
-
-    public Double getTotalEquity() {
-        return totalEquity;
+        this.price = price;
     }
 
 }

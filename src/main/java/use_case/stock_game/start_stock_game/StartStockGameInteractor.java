@@ -1,80 +1,62 @@
 package use_case.stock_game.start_stock_game;
 
+import api.AlphaStockDataBase;
+import api.StockDataBase;
+import entity.Player;
 import entity.Stock;
 
 import java.util.List;
 
+import static api.AlphaStockDataBase.getIntradayOpensForGameDay;
+
 /**
- * The stock game Interactor.
+ * The START stock game Interactor.
  */
-//TODO eventually break this up into multiple interactors?
-// single responsibility or something
 public class StartStockGameInteractor implements StartStockGameInputBoundary {
 
     private final StartStockGameDataAccessInterface stockGameDataAccessObject;
-    private final StartStockGameOutputBoundary loginPresenter;
+    private final StartStockGameOutputBoundary stockGamePresenter;
+    private StockDataBase stockDataBase;
 
-    public StartStockGameInteractor(StartStockGameDataAccessInterface startStockGameDataAccessInterface,
-                                    StartStockGameOutputBoundary startStockGameOutputBoundary){
-        this.stockGameDataAccessObject = startStockGameDataAccessInterface;
-        this.loginPresenter = startStockGameOutputBoundary;
+    public StartStockGameInteractor(StartStockGameDataAccessInterface stockGameDataAccessObject,
+                                    StartStockGameOutputBoundary stockGamePresenter,
+                                    StockDataBase stockDataBase) {
+        this.stockGameDataAccessObject = stockGameDataAccessObject;
+        this.stockGamePresenter = stockGamePresenter;
+        this.stockDataBase = stockDataBase;
+
     }
 
-    public void execute(StartStockGameInputData startStockGameInputData){
+    @Override
+    public void execute(StartStockGameInputData startStockGameInputData) throws Exception {
+        final Double startAmount = startStockGameInputData.getStartAmount();
+        final Player player = startStockGameInputData.getPlayer();
 
+        // check that the input starting amount is valid
+        if (player.getBalance() < startAmount || startAmount <= 0) {
+            stockGamePresenter.prepareFailView(startAmount + " is not a valid investment amount. " +
+                    "\n Your investment amount must be greater than zero and less than your current balance.");
+        }
+
+        // save the json data from the api call to a file with the stock symbol as the filename
+        this.stockDataBase.getStockPrices("VOO");
+
+
+        // TODO: how to check if player has already "gone to work" (played stock game today), given player and game day?
+        // else if (player.clockedIn(gameDay)) {
+//           stockGamePresenter.prepareFailView("Sorry, you've already worked today! \n" +
+//                   "come back tomorrow to clock back in again!");};
+        //else {
+
+            final StartStockGameOutputData stockOutputData = new StartStockGameOutputData(startAmount);
+
+            stockGamePresenter.prepareSuccessView(stockOutputData);
+
+            // call database methods
+            // fetch the api data for the given game day
+            AlphaStockDataBase.getIntradayOpensForGameDay("VOO", 2);
+
+        // }
     }
-
-
-
-    // TODO: these methods below need to go somewhere else but i dont know where so thats a later problem
-    /**
-     * Returns the list of stock prices given the stock, date, gameday.
-     * @param stock which stock you want data on
-     * @param date (String?) for the date of the data
-     * @param gameday integer from 1-5 for which day of the game thy're on
-     * @return stockPastPrices which are that stock's prices for that day
-     */
-    //List<Double> getStockPastPrices(Stock stock, String date, int gameday);
-
-
-    //TODO
-    /**
-     * Returns the number of stock shares bought given the stock price and cash amount.
-     * @param //
-     * @return //
-     */
-
-    //TODO
-    /**
-     * Returns the total equity given the current stock shares, stock prices AND cash.
-     * @param //
-     * @return //
-     */
-
-    //TODO
-    /**
-     * Returns the NET profit/loss given the current stock shares and stock prices.
-     * @param //
-     * @return //
-     */
-
-    //TODO
-    /**
-     * Adjusts player cash and stock share numbers so that player "buys" shares
-     * @param //
-     */
-
-    //TODO
-    /**
-     * Adjusts player cash and stock share numbers so that player "sells" shares
-     * @param //
-     */
-
-    //TODO
-    /**
-     * End game, by selling all stock share and going to end screen
-     * @param //
-     */
-
 
 }

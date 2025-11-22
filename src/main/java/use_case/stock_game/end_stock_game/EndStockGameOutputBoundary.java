@@ -1,22 +1,15 @@
 package use_case.stock_game.end_stock_game;
 
 /**
- * The output boundary for the stock game Use Case.
+ * The output boundary for the END stock game Use Case.
  */
 public interface EndStockGameOutputBoundary {
     /**
      * Prepares the success view for the stock game Use Case.
-     * for when the amount the player invests is right
+     * for when the player leaves the game
      * @param outputData the output data
      */
     void prepareSuccessView(EndStockGameOutputData outputData);
 
-    /**
-     * Prepares the failure view for the stock game Use Case.
-     * for when the amount the player invests is invalid
-     * meaning it is not 0<x<=savings
-     * @param errorMessage the explanation of the failure
-     */
-    void prepareFailView(String errorMessage);
 
 }

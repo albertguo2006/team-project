@@ -1,0 +1,11 @@
+dd20dfd (HEAD -> userstory6-step1, origin/userstory6-step1) finished main structure of end stock game interactor
+5eb59dd mostly finished StartStockGameInteractor i think
+1266d41 working on interactor for start game, starting to work on the logic
+23838a5 removed unnecessary attributes from the start stock game OutputData class, and removed stuff from the other classes (that were a result of me copy and pasting the prev use cases)
+071c198 Merge branch 'main' into userstory6-step1
+525aa93 Merge pull request #15 from albertguo2006/usecase-1
+d5ce725 (origin/usecase-1) fixed some issues with the map
+13108f0 cleaning up the errors so i can merge to the main without transferring all my errors
+b33ac54 Merge pull request #14 from albertguo2006/usecase-1
+a96fdf3 transitions between scene
+faa2598 game map
