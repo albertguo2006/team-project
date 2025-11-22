@@ -1,0 +1,140 @@
+package view;
+
+import entity.Portfolio;
+import entity.Stock;
+import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
+import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
+
+import javax.swing.*;
+import java.awt.*;
+
+/**
+ * view for the stock game
+ */
+public class StockGameView implements PlayStockGameOutputBoundary {
+
+    private final StockGameViewModel viewModel = new StockGameViewModel();
+
+    private JFrame frame;
+    private JLabel priceLabel;
+    private JLabel cashLabel;
+    private JLabel sharesLabel;
+    private JLabel equityLabel;
+    private JLabel arrowLabel;
+
+    private Portfolio portfolio;
+    private Stock stock;
+
+    // view at the start of the game
+    @Override
+    public void presentGameStart(Portfolio portfolio, Stock stock, Timer timer) {
+        this.portfolio = portfolio;
+        this.stock = stock;
+
+        viewModel.lastPrice = stock.stockPrice;  // set initial price
+
+        buildUI();
+        timer.start();
+    }
+
+    // update the view after price is changed
+    @Override
+    public void presentPriceUpdate(PlayStockGameOutputData data) {
+
+        // change viewmodel
+        viewModel.update(data);
+        // set text
+        priceLabel.setText("Price: " + String.format("%.2f", viewModel.price));
+        cashLabel.setText("Cash: " + String.format("%.2f", viewModel.cash));
+        sharesLabel.setText("Shares: " + String.format("%.2f", viewModel.shares));
+        equityLabel.setText("Total Equity: " + String.format("%.2f", viewModel.equity));
+
+        // change arrow (compare new price to last price)
+        if (viewModel.price > viewModel.lastPrice) {
+            arrowLabel.setText("▲");
+            arrowLabel.setForeground(Color.GREEN);
+        } else if (viewModel.price < viewModel.lastPrice) {
+            arrowLabel.setText("▼");
+            arrowLabel.setForeground(Color.RED);
+        } else {
+            arrowLabel.setText("—");
+            arrowLabel.setForeground(Color.BLACK);
+        }
+
+        viewModel.lastPrice = viewModel.price; // store new price as last price
+    }
+
+    // end of game view
+    @Override
+    public void presentGameOver(PlayStockGameOutputData data) {
+        JOptionPane.showMessageDialog(frame, "Game Over!\nFinal Equity: " + data.totalEquity);
+    }
+
+    // if there is an error...
+    @Override
+    public void presentError(String message) {
+        JOptionPane.showMessageDialog(frame, "Error: " + message);
+    }
+
+    // details for making the panels, buttons etc.
+    private void buildUI() {
+        JButton sellButton;
+        JButton buyButton;
+
+        frame = new JFrame("Stock Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(450, 330);
+        frame.setLayout(new BorderLayout());
+
+        priceLabel = new JLabel("Price: 0", SwingConstants.CENTER);
+        priceLabel.setFont(new Font("Arial", Font.BOLD, 26));
+
+        arrowLabel = new JLabel("—", SwingConstants.CENTER);
+        arrowLabel.setFont(new Font("Arial", Font.BOLD, 48));
+
+        cashLabel = new JLabel("Cash: 0");
+        sharesLabel = new JLabel("Shares: 0");
+        equityLabel = new JLabel("Total Equity: 0");
+
+        JPanel east = new JPanel(new GridLayout(3, 1));
+        east.add(cashLabel);
+        east.add(sharesLabel);
+        east.add(equityLabel);
+
+        // buy and sell buttons
+        buyButton = new JButton("BUY (All In)");
+        sellButton = new JButton("SELL (All Out)");
+
+        // at the start, only buy button is visible (must start by buying)
+        sellButton.setVisible(false);
+
+        buyButton.addActionListener(e -> {
+            stock.stockPrice = viewModel.price;
+            portfolio.buy(stock);
+
+            // switch which buttons are visible (so only 1 button at a time)
+            buyButton.setVisible(false);
+            sellButton.setVisible(true);
+        });
+
+        sellButton.addActionListener(e -> {
+            stock.stockPrice = viewModel.price;
+            portfolio.sell(stock);
+
+            // switch which buttons are visible (so only 1 button at a time)
+            sellButton.setVisible(false);
+            buyButton.setVisible(true);
+        });
+
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(buyButton);     // add buttons
+        buttonPanel.add(sellButton);
+
+        frame.add(priceLabel, BorderLayout.NORTH);
+        frame.add(arrowLabel, BorderLayout.CENTER);
+        frame.add(buttonPanel, BorderLayout.SOUTH);
+        frame.add(east, BorderLayout.EAST);
+
+        frame.setVisible(true);
+    }
+}

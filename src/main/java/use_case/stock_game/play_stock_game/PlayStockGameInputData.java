@@ -1,23 +1,17 @@
 package use_case.stock_game.play_stock_game;
 
-import entity.Player;
-
 /**
  * input data for START stock game use case
 **/
 
 public class PlayStockGameInputData {
-    private final Player player;
-    private Double startAmount;
+    public final String symbol;
+    public final double startAmount; // initial investing amount
+    public final int days;
 
-    // initialise attributes
-    public PlayStockGameInputData(Double startAmount, Player player) {
+    public PlayStockGameInputData(String symbol, double startAmount, int day) {
+        this.symbol = symbol;
         this.startAmount = startAmount;
-        this.player = player;
+        this.days = day;
     }
-
-    public Double getStartAmount() {
-        return startAmount;
-    }
-    public Player getPlayer() {return player;}
 }

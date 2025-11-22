@@ -1,76 +1,86 @@
 package use_case.stock_game.play_stock_game;
 
+import entity.Portfolio;
 import entity.Stock;
 
+import javax.swing.*;
 import java.util.List;
-
-//TODO: need to seperate into buy and sell stock use cases...?
-// and then during end_stock game use case, maybe
-// call the sell stock if they still have stocks?
-// so that way they always cash out at the end???
+import java.util.Random;
 
 /**
- * The PLAY stock game Interactor.
+ * The PLAY stock game use case interactor.
  */
 
 public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
 
-    private final PlayStockGameDataAccessInterface stockGameDataAccessObject;
-    private final PlayStockGameOutputBoundary stockGamePresenter;
+    private final PlayStockGameDataAccessInterface dataAccess;
+    private final PlayStockGameOutputBoundary presenter;
 
-    public PlayStockGameInteractor(PlayStockGameDataAccessInterface playStockGameDataAccessInterface,
-                                   PlayStockGameOutputBoundary playStockGameOutputBoundary){
-        this.stockGameDataAccessObject = playStockGameDataAccessInterface;
-        this.stockGamePresenter = playStockGameOutputBoundary;
+    // initialise
+    public PlayStockGameInteractor(PlayStockGameDataAccessInterface dataAccess,
+                                   PlayStockGameOutputBoundary presenter) {
+        this.dataAccess = dataAccess;
+        this.presenter = presenter;
     }
 
-    public void execute(){
-        // need input which is the startAmount
-        // TODO: ???? does this^ go into a inputdata object even though its not from the user (should be internal)
+    // TODO: subtract start amount from player balance, and then add total equity once done playing
 
+    /**
+     * play the game! until it ends
+     * @param inputData
+     */
+    @Override
+    public void execute(PlayStockGameInputData inputData) {
 
+        try {   // get the list of prices for that symbol and the corresponding day
+            List<Double> realPrices = dataAccess.getIntradayPrices(inputData.symbol, inputData.days);
+
+            Portfolio portfolio = new Portfolio(); // make new portfolio
+            double startingPrice = realPrices.get(0); // get first stock price
+
+            Stock stock = new Stock(inputData.symbol, startingPrice); // make Stock with that info
+            portfolio.loadStock(stock); // add stock to portfolio
+            portfolio.setCash(inputData.startAmount); // set portfolio cash to starting amount (at the very start)
+
+            double[] lastPrice = {startingPrice};
+            int[] ticks = {0}; // counter to eevntaulyl end game
+
+            Timer timer = new Timer(250, e -> {
+                ticks[0]++;
+
+                // check to make sure it is not game over yet
+                if (ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
+                    ((Timer) e.getSource()).stop();
+
+                    // present game-over view
+                    presenter.presentGameOver(new PlayStockGameOutputData(portfolio.getCash(),portfolio.getShares(stock),
+                                    portfolio.getTotalEquity(),lastPrice[0]));
+                    return;
+                }
+
+                // move to next price in list of stock prices
+                realPrices.add(realPrices.remove(0));
+                double nextRealPrice = realPrices.get(0);
+                double diff = nextRealPrice - lastPrice[0];
+
+                Random random = new Random(); // make random object to use in algorithm for next price
+                double momentum = diff * 0.3;
+                double noise = random.nextGaussian() * 0.01 * nextRealPrice;
+
+                double price = nextRealPrice + diff * 0.04 + momentum + noise;
+
+                lastPrice[0] = price;
+                // update view with new price
+                presenter.presentPriceUpdate(new PlayStockGameOutputData(portfolio.getCash(),portfolio.getShares(stock),
+                                portfolio.getTotalEquity(),price));
+            });
+
+            // present start game view
+            presenter.presentGameStart(portfolio, stock, timer);
+
+            // if error, present error message
+        } catch (Exception ex) {
+            presenter.presentError(ex.getMessage());
+        }
     }
-
-
-
-
-    // TODO: these methods below need to go somewhere else but i dont know where so thats a later problem
-    /**
-     * Returns the list of stock prices given the stock, date, gameday.
-     * @param stock which stock you want data on
-     * @param date (String?) for the date of the data
-     * @param gameday integer from 1-5 for which day of the game thy're on
-     * @return stockPastPrices which are that stock's prices for that day
-     */
-    //List<Double> getStockPastPrices(Stock stock, String date, int gameday);
-
-
-    //TODO
-    /**
-     * Returns the number of stock shares bought given the stock price and cash amount.
-     * @param //
-     * @return //
-     */
-
-    //TODO
-    /**
-     * Returns the total equity given the current stock shares, stock prices AND cash.
-     * @param //
-     * @return //
-     */
-
-    //TODO
-    /**
-     * Adjusts player cash and stock share numbers so that player "buys" shares
-     * @param //
-     */
-
-    //TODO
-    /**
-     * Adjusts player cash and stock share numbers so that player "sells" shares
-     * @param //
-     */
-
-
-
 }

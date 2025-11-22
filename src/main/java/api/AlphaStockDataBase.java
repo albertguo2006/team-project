@@ -127,7 +127,7 @@ public class AlphaStockDataBase implements StockDataBase {
         return prices; // return the list of stock prices for that day (in the correct order)
     }
 
-
+/**
     public static void main(String[] args) throws Exception {
         AlphaStockDataBase db = new AlphaStockDataBase("YOUR_API_KEY");
 
@@ -148,4 +148,5 @@ public class AlphaStockDataBase implements StockDataBase {
         System.out.println("MOST recent prices for VOO: " + fifthMostRecent);
 
     }
+ **/
 }

@@ -2,7 +2,6 @@ package api;
 
 import org.json.JSONException;
 
-import java.util.List;
 
 /**
  * StockDB is an interface that defines the methods that the stockDB class must implement.
