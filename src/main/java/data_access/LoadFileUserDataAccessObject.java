@@ -33,7 +33,7 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
         JSONArray data = JSONFileReader(SAVE_FILE);
         List<Event> events = eventDataAccessObject.createEventList();
         HashMap<String, Item> items = itemDataAccessObject.getItemMap();
-        HashMap<String, NPC> npcMap = npcDataAccessObject.getNPCMap();
+        HashMap<String, NPC> npcMap = (HashMap<String, NPC>) npcDataAccessObject.getAllNpcs();
 
         Player player = loadPlayer(data);
         loadInventory(data, player, items);
