@@ -4,7 +4,7 @@ import api.AlphaStockDataBase;
 import entity.Portfolio;
 import entity.Stock;
 
-
+import javax.swing.Timer;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.Math;
@@ -62,7 +62,6 @@ public class StockGameSwing {
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.add(buyButton);
-        //buttonPanel.add(sellButton);
 
         frame.setLayout(new BorderLayout());
         frame.add(priceLabel, BorderLayout.NORTH);
@@ -95,24 +94,40 @@ public class StockGameSwing {
             frame.repaint();
         });
 
-        // update each second (1000ms)
-        new Timer(1000, e -> {
+        // update each second (__ ms)
+        final int[] ticks = {0};
+        Timer timer = new Timer(250, e -> {
+            ticks[0] += 1;
+
+            if (ticks[0] >= realPrices.size() || portfolio.getTotalEquity()<=0) { // stop when done the list of prices (around 193)
+                ((Timer)e.getSource()).stop();
+                JOptionPane.showMessageDialog(frame, "Game Over! You finished your work for today.");
+                if (portfolio.getTotalEquity() > 0){
+                    // TODO: need to be able to get input stock data (start amount)
+                    JOptionPane.showMessageDialog(frame, "Congrats! You earned: " +
+                            portfolio.getTotalEquity() +  "dollars!");
+                }
+                else{
+                    JOptionPane.showMessageDialog(frame, "Unfortunately, You lost: " +
+                            portfolio.getTotalEquity() +  "dollars... better luck next time!");
+                }
+
+                JOptionPane.showMessageDialog(frame, "Game Over! You finished your work for today.");
+                return;
+            }
+
 
             // shift to next price
-            /*
-            realPrices.add(realPrices.remove(0));
-            double price = realPrices.get(0);
-            stock.stockPrice = price;
-             */
-            // shift to next price
             realPrices.add(realPrices.remove(0));   // removed already used price from the list of prices
-            double diff =  realPrices.get(0) - lastPrice;
+            double nextRealPrice = realPrices.get(0);
+            double diff =  nextRealPrice - lastPrice;
             // make random object
             Random random = new Random();
-            //double newPrice = lastPrice + 0.01*diff*(lastPrice/(random.nextDouble(1.0, 3.0)));
-            //double newPrice = lastPrice + Math.random()*diff*(lastPrice);
-            double price = lastPrice + diff*(lastPrice/10);
             // use random algorithm to calculate new price based on previous and next price
+            double momentum = (nextRealPrice - lastPrice) * 0.3;
+            double noise = random.nextGaussian() * 0.01 * nextRealPrice;
+            double price = nextRealPrice + diff * 0.04 + momentum + noise;
+
 
             priceLabel.setText(String.format("Price: %.2f", price));
 
@@ -132,7 +147,8 @@ public class StockGameSwing {
             // update details shown on screen, shares, cash, equity etc
             refreshPortfolioUI(portfolio, stock);
 
-        }).start();
+        });
+        timer.start();
     }
 
     private void refreshPortfolioUI(Portfolio portfolio, Stock stock) {
@@ -148,7 +164,7 @@ public class StockGameSwing {
 
         List<Double> opens = AlphaStockDataBase.getIntradayOpensForGameDay("VOO", 5);
 
-        List<Double> finalOpens = opens;
-        SwingUtilities.invokeLater(() -> new StockGameSwing(finalOpens, "VOO", 10000.0));
+        System.out.println("opens: " + opens.size());
+        SwingUtilities.invokeLater(() -> new StockGameSwing(opens, "VOO", 10000.0));
     }
 }
