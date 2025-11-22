@@ -139,7 +139,7 @@ public class Player {
 
     public void addNPC(NPC npc) {
         if (!relationships.containsKey(npc)) {
-            relationships.put(npc, npc.getDefaultscore());
+            relationships.put(npc, npc.getDefaultScore());
         }
     }
 

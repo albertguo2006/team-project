@@ -19,6 +19,7 @@ import static data_access.LoadFileUserDataAccessObject.JSONFileReader;
 
 
 public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterface {
+    private static final String NPC_FILE = "src/main/resources/npc.json";
     private Map<String, NPC> allNpcs;
 
     public NPCDataAccessObject() {

@@ -11,11 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
-    public static final String SAVE_FILE = "saveFile.json";
     EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
 
     @Override
-    public void save(Player player, String currentZone) {
+    public void save(Player player, String currentZone, String SAVE_FILE) {
         try{
             FileWriter file = new FileWriter(SAVE_FILE, false);
             file.write(JSONFileWriter(player, eventDataAccessObject.createEventList(), currentZone).toString());

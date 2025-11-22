@@ -1,0 +1,36 @@
+[
+  {
+    "name": "Anya",
+    "balance": 308.06,
+    "xLocation": 37.2,
+    "yLocation": 56.1,
+    "stats": {"Hunger":  30, "Energy":  70, "Mood": 80}
+  },
+  {
+    "Bob": 5
+  },
+  {
+    "Test Event A": 1,
+    "Car Accident": 0
+  },
+  {
+    "1": "Coffee",
+    "3": "Energy Drink"
+  },
+  {
+    "totalEquity": 803.21,
+    "investments": {
+      "3.57": {
+        "ticketSymbol": "MCD",
+        "companyName": "McDonalds",
+        "stockPrice": 426.14
+      },
+      "6.32": {
+        "ticketSymbol": "NVDA",
+        "companyName": "NVIDIA Corp",
+        "stockPrice": 253.72
+      }
+    }
+  },
+  "Subway Station 1"
+]

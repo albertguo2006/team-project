@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static data_access.SaveFileUserDataObject.SAVE_FILE;
 
 public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInterface {
     EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
@@ -30,7 +29,7 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
     }
 
     @Override
-    public Player load(GameMap gameMap) throws IOException {
+    public Player load(GameMap gameMap, String SAVE_FILE) throws IOException {
         JSONArray data = JSONFileReader(SAVE_FILE);
         List<Event> events = eventDataAccessObject.createEventList();
         HashMap<String, Item> items = itemDataAccessObject.getItemMap();
@@ -101,7 +100,7 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
             Stock stock = new Stock(stockData.getString("ticketSymbol"),
                     stockData.getString("companyName"),
                     stockData.getDouble("stockPrice"));
-            investments.put(stock, investmentData.getDouble(shares));
+            investments.put(stock, Double.parseDouble(shares));
         }
         Portfolio portfolio = new Portfolio(equity, investments);
         player.setPortfolio(portfolio);
