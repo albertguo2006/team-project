@@ -3,7 +3,6 @@ package Paybill;
 import data_access.Paybill.InMemoryPaybillDataAccessObject;
 import entity.Bill;
 import entity.Player;
-import io.opencensus.internal.DefaultVisibilityForTesting;
 import use_case.paybills.*;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -32,7 +31,7 @@ class PaybillInteractorTest {
             @Override
             public void prepareSuccessView(PaybillOutputData paybillOutputData) {
                 assertTrue(paybillOutputData.isSuccess());
-                assertEquals("Paid: Rent", paybillOutputData.getMessage());
+                assertEquals("Paid: " + bill1.getName(), paybillOutputData.getMessage());
                 assertEquals(500.0, paybillOutputData.getAmount(), 0.01); // Total amount paid
             }
 
@@ -41,6 +40,7 @@ class PaybillInteractorTest {
                 fail("Should not reach failure case");
             }
         };
+
         PaybillInputBoundary interactor = new PaybillInteractor(paybillRepository, successPresenter, player);
         interactor.paySingleBill("001");
 
