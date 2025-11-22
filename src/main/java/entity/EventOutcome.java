@@ -15,11 +15,9 @@ public class EventOutcome {
         this.outcomeChance = outcomeChance;
         this.outcomeResult = outcomeResult;
     }
+    public String getOutcomeName() {return outcomeName;}
     public int  getOutcomeID() {
         return outcomeID;
-    }
-    public String getOutcomeName() {
-        return outcomeName;
     }
     public String getOutcomeDescription() {
         return outcomeDescription;

@@ -18,13 +18,13 @@ public class PlayerMovementUseCase {
     
     private final Player player;
     
-    // World bounds for collision detection
-    private static final double WORLD_WIDTH = 800.0;
-    private static final double WORLD_HEIGHT = 600.0;
+    // World bounds for collision detection (virtual resolution 1920x1200)
+    private static final double WORLD_WIDTH = 1920.0;
+    private static final double WORLD_HEIGHT = 1200.0;
     
     // Player sprite dimensions (for more accurate collision detection)
-    private static final double PLAYER_WIDTH = 32.0;
-    private static final double PLAYER_HEIGHT = 32.0;
+    private static final double PLAYER_WIDTH = 64.0;
+    private static final double PLAYER_HEIGHT = 64.0;
     
     // Movement state flags: which directions are currently active
     private boolean movingUp = false;
@@ -99,13 +99,11 @@ public class PlayerMovementUseCase {
         double newX = player.getX() + (velocityX * deltaTime);
         double newY = player.getY() + (velocityY * deltaTime);
         
-        // Allow position to go slightly beyond boundaries for zone transitions
-        // The GamePanel will handle zone transitions when position exceeds bounds
-        // Only prevent huge out-of-bounds jumps
-        if (newX < -50) newX = -50;
-        if (newX > WORLD_WIDTH + 50) newX = WORLD_WIDTH + 50;
-        if (newY < -50) newY = -50;
-        if (newY > WORLD_HEIGHT + 50) newY = WORLD_HEIGHT + 50;
+        // Clamp position to stay within visible screen bounds
+        // This keeps the player sprite completely visible and prevents jagged motion
+        // GamePanel will trigger zone transitions when player reaches these edges
+        newX = clampPosition(newX, PLAYER_WIDTH, WORLD_WIDTH);
+        newY = clampPosition(newY, PLAYER_HEIGHT, WORLD_HEIGHT);
         
         // Update player position
         player.setX(newX);

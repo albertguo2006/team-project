@@ -13,6 +13,11 @@ public interface EndStockGameDataAccessInterface {
      * @return the total equity of the player
      */
     Double getTotalEquity();
+     * Returns the player with the given username.
+     * @param username the username to look up
+     * @return the player with the given username
+     */
+    Player get(String username);
 
     /**
      * Updates the player balance to include the earnings

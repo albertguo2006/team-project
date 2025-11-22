@@ -57,4 +57,12 @@ public class Stock {
     public String toString() {
         return ticketSymbol + "@ $" + stockPrice;
     }
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public Double getStockPrice() {
+        return stockPrice;
+    }
+
 }

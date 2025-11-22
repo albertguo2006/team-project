@@ -2,15 +2,40 @@
   {"id": 00, "name": "Car Accident", "description": "a",
     "outcomes": {
       0: {
+        "name": "A",
         "description": "A",
         "chance": 0.8,
         "result": -2000
       },
       1: {
+        "name": "B",
         "description": "B",
         "chance": 0.2,
         "result": 0
 
+      }
+    }
+  },
+  {"id": 01, "name": "Test Event A", "description": "Test Description A",
+    "outcomes": {
+      0: {
+        "name": "Test Outcome A",
+        "description": "Test Outcome A",
+        "chance": 0.3,
+        "result": 100
+      },
+      1: {
+        "name": "Test Outcome B",
+        "description": "Test Outcome B",
+        "chance": 0.3,
+        "result": -100
+
+      },
+      2: {
+        "name": "Test Outcome C",
+        "description": "Test Outcome C",
+        "chance": 0.4,
+        "result": 0
       }
     }
   }

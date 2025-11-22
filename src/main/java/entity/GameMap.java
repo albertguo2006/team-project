@@ -1,8 +1,8 @@
 package entity;
 
 import java.awt.Color;
-import java.util.HashMap;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -18,12 +18,11 @@ public class GameMap {
     public GameMap() {
         // Initialize all zones and their connections
         createZones();
-        createSpecialTransitions();
         currentZoneName = "Home";
     }
 
     private void createZones() {
-        // Zone colors for visual distinction
+        // Zone colors for visual distinction (fallback if images don't load)
         Color homeColor = new Color(220, 220, 255);
         Color subwayColor = new Color(200, 255, 255);
         Color streetColor = new Color(200, 255, 200);
@@ -31,53 +30,55 @@ public class GameMap {
         Color officeColor = new Color(255, 220, 200);
         Color lobbyColor = new Color(255, 240, 220);
 
-        // Create zones
-        Zone home = new Zone("Home", homeColor);
-        Zone subway1 = new Zone("Subway Station 1", subwayColor);
-        Zone street1 = new Zone("Street 1", streetColor);
-        Zone street2 = new Zone("Street 2", streetColor);
-        Zone grocery = new Zone("Grocery Store", groceryColor);
-        Zone subway2 = new Zone("Subway Station 2", subwayColor);
-        Zone office = new Zone("Office (Your Cubicle)", officeColor);
-        Zone street3 = new Zone("Street 3", streetColor);
-        Zone lobby = new Zone("Office Lobby", lobbyColor);
+        // Music paths (WAV format for Java AudioSystem compatibility)
+        String lofiMusic = "/audio/lofi-lofi-song-2-434695.wav";
+        String elevatorMusic = "/audio/local-forecast-elevator.wav";
+
+        // Create zones with background images and music
+        Zone home = new Zone("Home", homeColor, "/backgrounds/home.png", lofiMusic);
+        Zone subway1 = new Zone("Subway Station 1", subwayColor, "/backgrounds/subway_1.png", lofiMusic);
+        Zone street1 = new Zone("Street 1", streetColor, "/backgrounds/street_1.png", lofiMusic);
+        Zone street2 = new Zone("Street 2", streetColor, "/backgrounds/street_2.png", lofiMusic);
+        Zone grocery = new Zone("Grocery Store", groceryColor, "/backgrounds/store.png", lofiMusic);
+        Zone subway2 = new Zone("Subway Station 2", subwayColor, "/backgrounds/subway_2.png", lofiMusic);
+        Zone office = new Zone("Office (Your Cubicle)", officeColor, "/backgrounds/office.png", elevatorMusic);
+        Zone street3 = new Zone("Street 3", streetColor, "/backgrounds/street_3.png", lofiMusic);
+        Zone lobby = new Zone("Office Lobby", lobbyColor, "/backgrounds/office_lobby.png", elevatorMusic);
 
         // Set neighbors (edges) - Based on the map layout
-        // Home (top-left) - connects DOWN to Street 1, RIGHT is blocked (x)
+        // Each connection must be bidirectional for proper zone transitions
+        
+        // Home <-> Street 1
         home.setNeighbor(Zone.Edge.DOWN, "Street 1");
-
-        // Subway Station 1 (top-right) - connects DOWN to Street 2, LEFT is blocked (x)
-        // UP will be handled by special transition to Subway Station 2
-        subway1.setNeighbor(Zone.Edge.DOWN, "Street 2");
-
-        // Street 1 - connects UP to Home, RIGHT to Street 2
         street1.setNeighbor(Zone.Edge.UP, "Home");
+
+        // Street 1 <-> Street 2
         street1.setNeighbor(Zone.Edge.RIGHT, "Street 2");
-
-        // Street 2 - connects UP to Subway Station 1, LEFT to Street 1, RIGHT to Grocery Store
-        street2.setNeighbor(Zone.Edge.UP, "Subway Station 1");
         street2.setNeighbor(Zone.Edge.LEFT, "Street 1");
-        street2.setNeighbor(Zone.Edge.RIGHT, "Grocery Store");
+        
+        // Street 1 <-> Subway Station 1
+        street1.setNeighbor(Zone.Edge.DOWN, "Subway Station 1");
+        subway1.setNeighbor(Zone.Edge.UP, "Street 1");
 
-        // Grocery Store - connects LEFT to Street 2 only
+        // Subway Station 1 <-> Subway Station 2
+        // NOTE: These use special zone-based transitions, not edge-based
+        // Handled specially in GamePanel with 300-pixel trigger zones
+
+        // Street 2 <-> Grocery Store
+        street2.setNeighbor(Zone.Edge.RIGHT, "Grocery Store");
         grocery.setNeighbor(Zone.Edge.LEFT, "Street 2");
 
-        // Subway Station 2 - connects UP to Street 1, DOWN to Street 3, RIGHT is blocked (x)
-        // DOWN will be handled by special transition to Subway Station 1
-        subway2.setNeighbor(Zone.Edge.DOWN, "Subway Station 1");
-        subway2.setNeighbor(Zone.Edge.UP, "Street 3");
+        // Subway Station 2 <-> Street 3
+        subway2.setNeighbor(Zone.Edge.DOWN, "Street 3");
+        street3.setNeighbor(Zone.Edge.UP, "Subway Station 2");
 
-        // Office (Your Cubicle) - ONLY connects DOWN to Office Lobby
-        // UP, LEFT, RIGHT are all blocked
-        office.setNeighbor(Zone.Edge.DOWN, "Office Lobby");
-
-        // Street 3 - connects UP to Subway Station 2, RIGHT to Office Lobby
-        street3.setNeighbor(Zone.Edge.DOWN, "Subway Station 2");
+        // Street 3 <-> Office Lobby
         street3.setNeighbor(Zone.Edge.RIGHT, "Office Lobby");
-
-        // Office Lobby - connects UP to Office, LEFT to Street 3
-        lobby.setNeighbor(Zone.Edge.UP, "Office (Your Cubicle)");
         lobby.setNeighbor(Zone.Edge.LEFT, "Street 3");
+        
+        // Office Lobby <-> Office (Your Cubicle)
+        lobby.setNeighbor(Zone.Edge.RIGHT, "Office (Your Cubicle)");
+        office.setNeighbor(Zone.Edge.LEFT, "Office Lobby");
 
         // Add zones to map
         zones.put(home.getName(), home);
@@ -91,25 +92,6 @@ public class GameMap {
         zones.put(lobby.getName(), lobby);
     }
 
-    /**
-     * Creates special transitions like subway tunnels that connect non-adjacent zones.
-     */
-    private void createSpecialTransitions() {
-        // Subway tunnel connecting Subway Station 1 (top) and Subway Station 2 (bottom)
-        // From Subway Station 1, going UP enters the tunnel to Subway Station 2
-        specialTransitions.add(new Transition(
-            "Subway Station 1", Zone.Edge.UP,
-            "Subway Station 2", Zone.Edge.DOWN,
-            "Subway Tunnel"
-        ));
-
-        // Bidirectional: From Subway Station 2, going DOWN enters the tunnel to Subway Station 1
-        specialTransitions.add(new Transition(
-            "Subway Station 2", Zone.Edge.DOWN,
-            "Subway Station 1", Zone.Edge.UP,
-            "Subway Tunnel"
-        ));
-    }
 
     public Zone getCurrentZone() {
         return zones.get(currentZoneName);

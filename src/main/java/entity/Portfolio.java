@@ -13,6 +13,13 @@ public class Portfolio {
     // to the number of shares they have of that stock (open for extension)
 
 
+    public Portfolio() {}
+
+    public Portfolio(Double totalEquity, HashMap<Stock, Double> investments) {
+        this.totalEquity = totalEquity;
+        this.investments = investments;
+    }
+
     /**
      * GET the total equity (total money).
      */
@@ -67,5 +74,7 @@ public class Portfolio {
     public void  setInvestments(Map<Stock, Double> investments) {
         this.investments = (HashMap<Stock, Double>) investments;
     }
+    public HashMap<Stock, Double> getInvestments() { return investments; }
+
 }
 

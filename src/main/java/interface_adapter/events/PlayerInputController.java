@@ -1,29 +1,54 @@
 package interface_adapter.events;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+import javax.swing.JFrame;
+
 import use_case.Direction;
 import use_case.PlayerMovementUseCase;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import javax.swing.JFrame;
-
 /**
  * PlayerInputController translates raw keyboard input into movement commands.
- * 
+ *
  * Responsibilities:
  * - Listens for key press/release events (implements KeyListener)
  * - Translates keyboard events (WASD) into domain concepts (Direction enum)
  * - Updates the PlayerMovementUseCase movement state
- * - Handles special keys (ESC to exit)
+ * - Handles special keys (ESC to pause/show menu)
  * - Acts as a bridge between Swing input events and the application layer
- * 
+ *
  * This controller follows Clean Architecture by keeping presentation concerns
  * (KeyListener) separate from business logic (PlayerMovementUseCase).
  */
 public class PlayerInputController implements KeyListener {
     
+    /**
+     * Callback interface for pause menu events.
+     */
+    public interface PauseMenuListener {
+        void onPauseRequested();
+    }
+    
+    /**
+     * Callback interface for sleep zone checks.
+     */
+    public interface SleepZoneChecker {
+        boolean isInSleepZone();
+    }
+    
+    /**
+     * Callback interface for sleep actions.
+     */
+    public interface SleepActionListener {
+        void onSleepRequested();
+    }
+    
     private final PlayerMovementUseCase playerMovementUseCase;
-    private JFrame parentFrame;  // Optional: for exit handling
+    private JFrame parentFrame;  // Optional: for frame reference
+    private PauseMenuListener pauseMenuListener;
+    private SleepZoneChecker sleepZoneChecker;
+    private SleepActionListener sleepActionListener;
     
     /**
      * Constructs a PlayerInputController with the given use case.
@@ -35,12 +60,39 @@ public class PlayerInputController implements KeyListener {
     }
     
     /**
-     * Sets the parent frame for exit handling.
-     * 
+     * Sets the parent frame reference.
+     *
      * @param frame the parent JFrame
      */
     public void setParentFrame(JFrame frame) {
         this.parentFrame = frame;
+    }
+    
+    /**
+     * Sets the pause menu listener for ESC key handling.
+     *
+     * @param listener the pause menu listener
+     */
+    public void setPauseMenuListener(PauseMenuListener listener) {
+        this.pauseMenuListener = listener;
+    }
+    
+    /**
+     * Sets the sleep zone checker callback.
+     *
+     * @param checker the sleep zone checker
+     */
+    public void setSleepZoneChecker(SleepZoneChecker checker) {
+        this.sleepZoneChecker = checker;
+    }
+    
+    /**
+     * Sets the sleep action listener callback.
+     *
+     * @param listener the sleep action listener
+     */
+    public void setSleepActionListener(SleepActionListener listener) {
+        this.sleepActionListener = listener;
     }
     
     /**
@@ -53,9 +105,12 @@ public class PlayerInputController implements KeyListener {
     public void keyPressed(KeyEvent e) {
         int keyCode = e.getKeyCode();
         
-        // Handle ESC to exit
+        // Handle ESC to show pause menu (or exit if no listener)
         if (keyCode == KeyEvent.VK_ESCAPE) {
-            if (parentFrame != null) {
+            if (pauseMenuListener != null) {
+                pauseMenuListener.onPauseRequested();
+            } else if (parentFrame != null) {
+                // Fallback: exit if no pause listener set
                 parentFrame.dispose();
                 System.exit(0);
             }
@@ -74,6 +129,13 @@ public class PlayerInputController implements KeyListener {
                 break;
             case KeyEvent.VK_D:
                 playerMovementUseCase.setMovementState(Direction.RIGHT, true);
+                break;
+            case KeyEvent.VK_E:
+                // Handle sleep action if in sleep zone
+                if (sleepZoneChecker != null && sleepZoneChecker.isInSleepZone() &&
+                    sleepActionListener != null) {
+                    sleepActionListener.onSleepRequested();
+                }
                 break;
         }
     }
