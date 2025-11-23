@@ -1,63 +1,85 @@
-# Project Readme: California Prop. 65
 
-**Team:** TUT0401-14
-**Domain:** Stock Market and IRL Simulator Game
+# California Prop. 65 - Game Documentation
 
------
+**Team:** TUT0401-14 (CSC207 LEC0201 Group 14)  
+**Domain:** Stock Market and Life Simulator Game  
+**Architecture:** Clean Architecture with Java Swing
 
-## 1\. Project Description
+---
 
-California Prop. 65 is a 2D simulation game that provides a satirical commentary on the financial pressures of modern life. The player must navigate an exaggerated capitalistic world, managing a 9-5 job, paying bills, and handling unexpected life events. The core gameplay loop involves surviving, managing virtual money, and attempting to build wealth through a simulated stock market.
+## Table of Contents
 
-This project will be developed as a standalone **Java application** using the **Java Swing GUI toolkit**. It will strictly adhere to **Clean Architecture** principles to ensure a maintainable, testable, and scalable codebase.
+1. [Project Overview](#project-overview)
+2. [Quick Start](#quick-start)
+3. [Architecture](#architecture)
+4. [Implemented Features](#implemented-features)
+5. [Game Systems](#game-systems)
+6. [Package Structure](#package-structure)
+7. [How to Play](#how-to-play)
+8. [Testing](#testing)
+9. [Future Features](#future-features)
+10. [Team Members](#team-members)
 
-## Quick Start: How to Run the Program
+---
+
+## Project Overview
+
+California Prop. 65 is a 2D simulation game that provides satirical commentary on the financial pressures of modern life. Players navigate an exaggerated capitalistic world, managing a 9-5 job, paying bills, and handling unexpected life events. The core gameplay loop involves surviving a work week (Monday-Friday), managing money, and attempting to build wealth through a simulated stock market.
+
+### Key Features
+
+- **2D Environment Navigation**: Move through multiple interconnected zones (home, streets, subway, office)
+- **Day-Based Progression**: Experience a full work week from Monday to Friday
+- **Stock Trading Minigame**: Earn money by playing the stock market
+- **Random Events**: Encounter unpredictable life challenges
+- **NPC Interactions**: Talk to characters with AI-generated dialogue
+- **Bill Payment System**: Manage recurring expenses
+- **Save/Load System**: Persist game progress
+- **Resizable Window**: 16:10 aspect ratio with automatic scaling (1920x1200 virtual resolution)
+
+### Technology Stack
+
+- **Language**: Java 11+
+- **GUI Framework**: Java Swing
+- **Build Tool**: Maven
+- **APIs**: Alpha Vantage (stock data), Google Gemini (NPC dialogue)
+- **Data Format**: JSON (for saves, events, items, NPC prompts)
+- **Audio**: Java AudioSystem (WAV format)
+
+---
+
+## Quick Start
 
 ### Prerequisites
-- Java 11 or higher installed on your system
-- `javac` compiler available in your PATH
 
-### Option 1: Using Maven (Recommended)
+- Java 11 or higher
+- Maven (recommended) or `javac`
+
+### Running the Game
+
+#### Option 1: Using Maven (Recommended)
+
 ```bash
 cd /path/to/team-project
 mvn clean compile exec:java -Dexec.mainClass="app.Main"
 ```
 
-### Option 2: Manual Compilation & Execution
+#### Option 2: Using IntelliJ IDEA
+
+1. Open project in IntelliJ IDEA
+2. Build → Build Project (Ctrl+F9 / Cmd+F9)
+3. Right-click on [`Main.java`](src/main/java/app/Main.java) → Run 'Main.main()'
+
+#### Option 3: Manual Compilation
+
 ```bash
-# 1. Navigate to the source directory
 cd src/main/java
-
-# 2. Compile all Java files
-javac -d ../../../target/classes \
-  app/Main.java \
-  entity/Player.java \
-  entity/NPC.java \
-  entity/Event.java \
-  entity/Stock.java \
-  use_case/Direction.java \
-  use_case/PlayerMovementUseCase.java \
-  interface_adapter/events/PlayerInputController.java \
-  view/GamePanel.java \
-  view/MainGameWindow.java
-
-# 3. Run the application
+javac -d ../../../target/classes app/Main.java
 cd ../../../target/classes
 java app.Main
 ```
 
-### Option 3: Quick Test (One-Line Compile & Run)
-```bash
-cd src/main/java && \
-javac -d /tmp/prop65 \
-  app/Main.java entity/Player.java entity/NPC.java entity/Event.java \
-  entity/Stock.java use_case/Direction.java use_case/PlayerMovementUseCase.java \
-  interface_adapter/events/PlayerInputController.java view/GamePanel.java view/MainGameWindow.java && \
-cd /tmp/prop65 && java app.Main
-```
-
-### Controls (Use Case 1: Character Movement)
-Once the game window opens, use these controls:
+### Controls
 
 | Key | Action |
 |-----|--------|
@@ -65,257 +87,1072 @@ Once the game window opens, use these controls:
 | **A** | Move character left |
 | **S** | Move character down |
 | **D** | Move character right |
-| **W + D** (or any combination) | Move diagonally |
-| **ESC** | Exit the application |
-
-### What You'll See
-- A green game window (800x600 pixels)
-- A blue character sprite in the center that you can control
-- A yellow arrow indicating movement direction
-- HUD display showing:
-  - Current position (X, Y coordinates)
-  - Cash balance
-  - Movement status ("MOVING" indicator)
-  - Control instructions
+| **E** | Interact / Sleep (when in sleep zone) |
+| **ESC** | Pause menu / Exit |
+| **ENTER** | Confirm / Continue |
 
 ### Troubleshooting
 
 **"Command not found: java"**
-- Ensure Java is installed: `java -version`
-- If not installed, download from [java.com](https://www.java.com) or use your package manager
-
-**"javac: command not found"**
-- You need the Java Development Kit (JDK), not just JRE
-- Download JDK from [oracle.com](https://www.oracle.com/java/technologies/downloads/) or use:
-  ```bash
-  sudo apt-get install default-jdk  # Ubuntu/Debian
-  brew install openjdk              # macOS
-  ```
+- Install JDK 11+: `sudo apt-get install default-jdk` (Ubuntu) or download from [oracle.com](https://www.oracle.com/java/technologies/downloads/)
 
 **Game window doesn't appear**
-- Ensure you're running on a display (not headless)
-- On Linux, you may need: `DISPLAY=:0 java app.Main`
+- Ensure running on a display (not headless)
+- Linux: Try `DISPLAY=:0 java app.Main`
 
-**Character doesn't respond to WASD input**
-- Click on the game window to ensure it has focus
-- Ensure caps lock is off (the program uses lowercase WASD)
+**Character doesn't respond to input**
+- Click on game window to give it focus
+- Ensure caps lock is off
 
-### Core MVP Features
+---
 
-The Minimum Viable Product (MVP) will focus on delivering the core "survive the day" loop. This includes:
+## Architecture
 
-1.  **2D Environment Interaction:** The player can move a 2D character sprite around a basic environment (e.g., apartment, office).
-2.  **Go to Work / Stock Minigame:** The player's job is represented by a stock trading minigame, which is the primary method of earning money.
-3.  **Core Systems:** The game will support saving/loading progress, a daily cycle (go to sleep), random events, and basic NPC interaction.
+This project strictly follows **Clean Architecture** principles with four distinct layers:
 
------
+### 1. Domain Layer (Entities)
 
-## 2\. Project Architecture: CLEAN Architecture in Java Swing
+**Location**: [`src/main/java/entity/`](src/main/java/entity/)
 
-To meet the project requirements, we will separate our application into the four distinct layers of Clean Architecture. This ensures that our core game logic (Domain and Application) is completely independent of our GUI (Infrastructure).
+Pure Java objects representing core game concepts. No dependencies on frameworks or I/O.
 
-1.  **1\_Domain (Entities):**
+**Key Entities**:
+- [`Player.java`](src/main/java/entity/Player.java) - Player state (position, balance, stats, day, health)
+- [`Day.java`](src/main/java/entity/Day.java) - Weekday enum (Monday-Friday)
+- [`DaySummary.java`](src/main/java/entity/DaySummary.java) - Daily financial summary
+- [`GameEnding.java`](src/main/java/entity/GameEnding.java) - Week completion endings
+- [`Zone.java`](src/main/java/entity/Zone.java) - Game map zones with neighbors
+- [`GameMap.java`](src/main/java/entity/GameMap.java) - Complete map with all zones
+- [`Event.java`](src/main/java/entity/Event.java) - Random events with outcomes
+- [`NPC.java`](src/main/java/entity/NPC.java) - Non-player characters
+- [`Stock.java`](src/main/java/entity/Stock.java) - Stock market data
+- [`Bill.java`](src/main/java/entity/Bill.java) - Bills to pay
+- [`Item.java`](src/main/java/entity/Item.java) - Inventory items
+- [`Portfolio.java`](src/main/java/entity/Portfolio.java) - Player's stock holdings
 
-      * **Content:** Pure Java Objects (POJOs) that represent the core data and concepts of the game.
-      * **Rules:** Contains no logic related to *how* the game is played or displayed. Knows nothing about Swing, databases, or APIs.
-      * **Examples:** `Player.java`, `Stock.java`, `NPC.java`, `Event.java`, `GameState.java`.
+### 2. Application Layer (Use Cases)
 
-2.  **2\_Application (Use Cases):**
+**Location**: [`src/main/java/use_case/`](src/main/java/use_case/)
 
-      * **Content:** The business logic and rules of the game. This layer orchestrates the Entities.
-      * **Rules:** Contains all game logic (e.g., "how to calculate profit from a stock trade," "what happens when a player selects an event option"). It depends *only* on the Domain layer. It defines *interfaces* for any outside data or services it needs (e.g., `IStockDataService`, `IGameSaveRepository`).
-      * **Examples:** `StockMarketUseCase.java`, `PlayerMovementUseCase.java`, `GameSaveUseCase.java`, `NPCInteractionUseCase.java`.
+Business logic and game rules. Depends only on entities and defines interfaces for external services.
 
-3.  **3\_Presentation (Controllers & Presenters):**
+**Key Use Cases**:
+- [`PlayerMovementUseCase.java`](src/main/java/use_case/PlayerMovementUseCase.java) - Character movement logic
+- [`sleep/SleepInteractor.java`](src/main/java/use_case/sleep/SleepInteractor.java) - Day advancement and health restoration
+- [`paybills/PaybillInteractor.java`](src/main/java/use_case/paybills/PaybillInteractor.java) - Bill payment logic
+- [`events/StartRandomEvent/`](src/main/java/use_case/events/StartRandomEvent/) - Random event triggering
+- [`events/ActivateRandomOutcome/`](src/main/java/use_case/events/ActivateRandomOutcome/) - Event outcome processing
+- [`npc_interactions/NpcInteractionsInteractor.java`](src/main/java/use_case/npc_interactions/NpcInteractionsInteractor.java) - NPC dialogue
+- [`stock_game/`](src/main/java/use_case/stock_game/) - Stock trading minigame logic
+- [`save_progress/SaveProgressInteractor.java`](src/main/java/use_case/save_progress/SaveProgressInteractor.java) - Game saving
+- [`load_progress/LoadProgressInteractor.java`](src/main/java/use_case/load_progress/LoadProgressInteractor.java) - Game loading
 
-      * **Content:** The bridge between the Application (logic) and Infrastructure (GUI).
-      * **Rules:** This layer adapts data for the view and translates user input into calls to the Use Cases.
-      * **Controllers:** Java **Event Listeners** (`ActionListener`, `KeyListener`, `MouseListener`). They take raw input from Swing components (like a `JButton` click) and call the appropriate `UseCase` method.
-      * **Presenters:** Classes responsible for formatting data from the Use Cases for the View. (e.g., taking a `List<Double>` of stock prices and preparing `(x, y)` coordinates for a `JPanel` to draw).
+### 3. Interface Adapter Layer
 
-4.  **4\_Infrastructure (Frameworks & Drivers):**
+**Location**: [`src/main/java/interface_adapter/`](src/main/java/interface_adapter/)
 
-      * **Content:** The "outside world." This is where Swing, our API clients, and our file system live.
-      * **Rules:** This layer is the "glue" that implements the interfaces defined in the Application layer. It is volatile and can be swapped out.
-      * **GUI (View):** All Java Swing components (`JFrame`, `JPanel`, `JButton`, `JDialog`).
-      * **Services:** `AlphaVantageClient.java` (implements `IStockDataService`), `GeminiApiClient.java` (implements `ILLMService`). These classes contain the `java.net.http.HttpClient` logic.
-      * **Persistence:** `FileSaveRepository.java` (implements `IGameSaveRepository`). This class uses `Gson` or `Jackson` to write a `GameState` object to a JSON file.
+Bridges between use cases and views. Translates data and handles presentation logic.
 
------
+**Components**:
+- **Controllers**: Translate user input into use case calls
+- **Presenters**: Format use case output for views
+- **ViewModels**: Hold state for views with property change support
+- [`ViewManagerModel.java`](src/main/java/interface_adapter/ViewManagerModel.java) - Coordinates view transitions
 
-## 3\. Recommended Package Structure
+### 4. Infrastructure Layer (Frameworks & UI)
 
-This structure enforces the architectural layers.
+**Location**: [`src/main/java/view/`](src/main/java/view/), [`src/main/java/api/`](src/main/java/api/), [`src/main/java/data_access/`](src/main/java/data_access/)
 
-```java
-src/
-└── com/tut0401/prop65/
-    ├── 1_domain/
-    │   ├── entities/
-    │   │   ├── Player.java
-    │   │   ├── Stock.java
-    │   │   ├── Npc.java
-    │   │   ├── Event.java
-    │   │   └── GameState.java
-    │
-    ├── 2_application/
-    │   ├── usecases/
-    │   │   ├── PlayerMovementUseCase.java
-    │   │   ├── StockMarketUseCase.java
-    │   │   ├── NpcInteractionUseCase.java
-    │   │   ├── RandomEventUseCase.java
-    │   │   ├── GameSaveUseCase.java
-    │   │   └── FinancialUseCase.java
-    │   └── interfaces/
-    │       ├── IStockDataService.java  // Implemented by Infrastructure
-    │       ├── ILlmService.java        // Implemented by Infrastructure
-    │       └── IGameSaveRepository.java // Implemented by Infrastructure
-    │
-    ├── 3_presentation/
-    │   ├── controllers/
-    │   │   ├── PlayerInputController.java  // Implements KeyListener
-    │   │   ├── StockMinigameController.java // Contains ActionListeners
-    │   │   └── SettingsMenuController.java  // Contains ActionListeners
-    │   └── presenters/
-    │       └── StockGraphPresenter.java // Logic to prep data for graph
-    │
-    ├── 4_infrastructure/
-    │   ├── gui/
-    │   │   ├── MainGameWindow.java  // The main JFrame
-    │   │   ├── GamePanel.java       // The main 2D game view (extends JPanel)
-    │   │   ├── StockMinigamePanel.java // The stock game UI (extends JPanel)
-    │   │   ├── NpcDialog.java       // (extends JDialog)
-    │   │   ├── EventDialog.java     // (extends JDialog)
-    │   │   └── BillDialog.java      // (extends JDialog)
-    │   ├── services/
-    │   │   ├── AlphaVantageClient.java // Implements IStockDataService
-    │   │   └── GeminiApiClient.java    // Implements ILlmService
-    │   └── persistence/
-    │       └── FileSaveRepository.java // Implements IGameSaveRepository
-    │
-    └── Main.java // Main entry point, creates and shows the MainGameWindow
+External frameworks, APIs, file I/O, and GUI components.
+
+**Views**:
+- [`MainGameWindow.java`](src/main/java/view/MainGameWindow.java) - Main JFrame with CardLayout
+- [`GamePanel.java`](src/main/java/view/GamePanel.java) - Main game view with rendering loop
+- [`MainMenuPanel.java`](src/main/java/view/MainMenuPanel.java) - Main menu
+- [`DaySummaryView.java`](src/main/java/view/DaySummaryView.java) - Daily summary screen
+- [`EndGameView.java`](src/main/java/view/EndGameView.java) - Week ending screen
+- [`PaybillView.java`](src/main/java/view/PaybillView.java) - Bill payment interface
+- [`SettingsPanel.java`](src/main/java/view/SettingsPanel.java) - Game settings
+- [`InGameMenuPanel.java`](src/main/java/view/InGameMenuPanel.java) - Pause menu
+
+**Data Access**:
+- [`SaveFileUserDataObject.java`](src/main/java/data_access/SaveFileUserDataObject.java) - Save file management
+- [`LoadFileUserDataAccessObject.java`](src/main/java/data_access/LoadFileUserDataAccessObject.java) - Load file management
+- [`EventDataAccessObject.java`](src/main/java/data_access/EventDataAccessObject.java) - Event data from JSON
+- [`NPCDataAccessObject.java`](src/main/java/data_access/NPCDataAccessObject.java) - NPC data
+- [`ItemDataAccessObject.java`](src/main/java/data_access/ItemDataAccessObject.java) - Item data
+
+**APIs**:
+- [`AlphaStockDataAccessObject.java`](src/main/java/api/AlphaStockDataAccessObject.java) - Alpha Vantage API client
+- Google Gemini integration (for NPC dialogue)
+
+### Dependency Rule
+
+All dependencies point **inward** toward entities. Outer layers depend on inner layers, never the reverse. Interfaces invert dependencies when outer layers need to provide services to inner layers.
+
+---
+
+## Implemented Features
+
+### ✅ Character Movement System
+
+**Implementation**: Use Case #1  
+**Responsible**: Albert
+
+- 2D character movement with WASD keys
+- Real-time game loop using `javax.swing.Timer` (~60 FPS)
+- Collision detection and boundary checking
+- Virtual 1920x1200 coordinate system with automatic scaling
+- Smooth diagonal movement
+- Position tracking in HUD
+
+**Files**: [`PlayerMovementUseCase.java`](src/main/java/use_case/PlayerMovementUseCase.java), [`GamePanel.java`](src/main/java/view/GamePanel.java), [`PlayerInputController.java`](src/main/java/interface_adapter/events/PlayerInputController.java)
+
+### ✅ Day Progression System
+
+**Implementation**: Use Case #5 (Sleep)  
+**Responsible**: Sherry
+
+- Monday through Friday work week
+- Sleep in designated zone (top-right 400x400px in Home)
+- Press E to sleep when in zone
+- Daily financial tracking (earnings and spending)
+- Health restoration (100) after sleeping
+- One sleep per day restriction
+- Day summary screen with fade transitions
+- Week ending based on final balance
+
+**Files**: [`Day.java`](src/main/java/entity/Day.java), [`DaySummary.java`](src/main/java/entity/DaySummary.java), [`GameEnding.java`](src/main/java/entity/GameEnding.java), [`SleepInteractor.java`](src/main/java/use_case/sleep/SleepInteractor.java), [`DaySummaryView.java`](src/main/java/view/DaySummaryView.java), [`EndGameView.java`](src/main/java/view/EndGameView.java)
+
+**Endings**:
+- **Wealthy** (≥$5000): "The Wealthy Executive"
+- **Comfortable** (≥$2000): "The Comfortable Professional"
+- **Struggling** (≥$1000): "The Struggling Worker"
+- **Broke** (<$1000): "The Defeated"
+
+### ✅ Zone Transition System
+
+**Implementation**: Map Navigation  
+**Responsible**: Albert
+
+- 9 interconnected zones (Home, Streets, Subway, Office, Grocery)
+- Background images for each zone
+- Zone-specific music (lofi and elevator)
+- Edge-based transitions between adjacent zones
+- Special subway tunnel system (Subway 1 ↔ Subway 2)
+- Visual zone name display
+- Color-coded zones (fallback if images fail)
+
+**Files**: [`Zone.java`](src/main/java/entity/Zone.java), [`GameMap.java`](src/main/java/entity/GameMap.java), [`Transition.java`](src/main/java/entity/Transition.java), [`GamePanel.java`](src/main/java/view/GamePanel.java)
+
+### ✅ Bill Payment System
+
+**Implementation**: Use Case #5 (Bills)  
+**Responsible**: Sherry
+
+- Pay bills through in-game menu
+- Track bill types and amounts
+- Deduct from player balance
+- Bill history tracking
+- Integration with daily spending
+
+**Files**: [`Bill.java`](src/main/java/entity/Bill.java), [`PaybillInteractor.java`](src/main/java/use_case/paybills/PaybillInteractor.java), [`PaybillView.java`](src/main/java/view/PaybillView.java)
+
+### ✅ Random Events System
+
+**Implementation**: Use Case #2  
+**Responsible**: Joshua
+
+- Random event triggering with pity system (25% increase per non-trigger)
+- Multiple event outcomes with financial impacts
+- Events loaded from [`events.json`](src/main/resources/events.json)
+- Event outcome selection
+- Player stat modifications
+
+**Files**: [`Event.java`](src/main/java/entity/Event.java), [`EventOutcome.java`](src/main/java/entity/EventOutcome.java), [`StartRandomEventInteractor.java`](src/main/java/use_case/events/StartRandomEvent/StartRandomEventInteractor.java), [`ActivateRandomOutcomeInteractor.java`](src/main/java/use_case/events/ActivateRandomOutcome/ActivateRandomOutcomeInteractor.java)
+
+### ✅ Display Scaling System
+
+**Implementation**: Resolution System
+
+- Virtual 1920x1200 resolution (16:10 aspect ratio)
+- Automatic scaling to any window size
+- Letterbox/pillarbox for non-16:10 windows
+- Resizable window with 640x400 minimum
+- HiDPI/Retina display support
+- Wayland support on Linux (Java 17+)
+- Coordinate translation between screen and virtual space
+
+**Files**: [`GamePanel.java`](src/main/java/view/GamePanel.java), [`MainGameWindow.java`](src/main/java/view/MainGameWindow.java), [`Main.java`](src/main/java/app/Main.java)
+
+### ✅ Menu System
+
+**Implementation**: UI System
+
+- Main menu (New Game, Load Game, Settings, Exit)
+- Loading screen with progress bar
+- In-game pause menu (Resume, Save, Settings, Pay Bills, Exit)
+- Settings panel (resolution, volume, controls)
+- CardLayout view management
+- Keyboard navigation
+
+**Files**: [`MainMenuPanel.java`](src/main/java/view/MainMenuPanel.java), [`InGameMenuPanel.java`](src/main/java/view/InGameMenuPanel.java), [`SettingsPanel.java`](src/main/java/view/SettingsPanel.java), [`LoadingScreenPanel.java`](src/main/java/view/LoadingScreenPanel.java)
+
+### ⚠️ Partial Implementation
+
+#### Stock Trading Minigame
+
+**Implementation**: Use Case #6  
+**Responsible**: Cynthia  
+**Status**: Backend complete, UI integration pending
+
+- Alpha Vantage API integration
+- 30-second trading sessions
+- Buy/sell stock mechanics
+- Price history tracking
+- Portfolio management
+
+**Files**: [`AlphaStockDataAccessObject.java`](src/main/java/api/AlphaStockDataAccessObject.java), [`Stock.java`](src/main/java/entity/Stock.java), [`Portfolio.java`](src/main/java/entity/Portfolio.java), [`use_case/stock_game/`](src/main/java/use_case/stock_game/)
+
+#### NPC Interactions
+
+**Implementation**: Use Case #3  
+**Responsible**: Jayden  
+**Status**: Backend complete, UI integration pending
+
+- Google Gemini API for dynamic dialogue
+- NPC prompts from [`npc_prompts.json`](src/main/resources/npc_prompts.json)
+- Relationship tracking
+- Context-aware responses
+
+**Files**: [`NPC.java`](src/main/java/entity/NPC.java), [`NpcInteractionsInteractor.java`](src/main/java/use_case/npc_interactions/NpcInteractionsInteractor.java), [`NPCDataAccessObject.java`](src/main/java/data_access/NPCDataAccessObject.java)
+
+#### Save/Load System
+
+**Implementation**: Use Case #4  
+**Responsible**: Anjani  
+**Status**: Backend complete, frontend stubbed
+
+- JSON save file format
+- Full game state serialization
+- Autosave on sleep
+- Manual save/load from menu
+
+**Files**: [`SaveFileUserDataObject.java`](src/main/java/data_access/SaveFileUserDataObject.java), [`LoadFileUserDataAccessObject.java`](src/main/java/data_access/LoadFileUserDataAccessObject.java), [`SaveProgressInteractor.java`](src/main/java/use_case/save_progress/SaveProgressInteractor.java)
+
+---
+
+## Game Systems
+
+### Game Loop Architecture
+
+The game runs on a real-time loop using `javax.swing.Timer`:
+
+```
+[Timer fires every 16ms - ~60 FPS]
+         ↓
+1. UPDATE PHASE
+   - PlayerMovementUseCase.updatePosition()
+   - Update player coordinates
+   - Check collisions
+   - Check zone transitions
+         ↓
+2. RENDER PHASE
+   - GamePanel.repaint()
+   - paintComponent() draws:
+     * Background/zone image
+     * Player sprite
+     * HUD (health, balance, day, position)
+     * Sleep prompt (if in zone)
+         ↓
+[Wait 16ms, repeat]
 ```
 
------
+### Virtual Resolution System
 
-## 4\. Core Game Loop (Swing Implementation)
+All game logic operates in 1920x1200 virtual space:
 
-To create a 2D game ("User Story \#1") in Swing, we cannot rely on a simple event-driven model. We must create a real-time **game loop**.
+1. **Calculate viewport** maintaining 16:10 aspect ratio
+2. **Add letterbox/pillarbox** if needed for non-16:10 windows
+3. **Scale Graphics2D transform** to map virtual → screen coordinates
+4. **Render at virtual coordinates** (automatically scaled)
 
-1.  **`MainGameWindow.java` (`JFrame`):** This is the main application window. It will hold the `GamePanel`.
-2.  **`GamePanel.java` (`JPanel`):**
-      * This class will override the `protected void paintComponent(Graphics g)` method.
-      * Inside `paintComponent`, we will draw the entire game state: the level background, the player sprite, and any NPCs, using `Graphics2D` methods (e.g., `g.drawImage()`, `g.fillRect()`).
-      * This panel will be the focus of the application.
-3.  **`PlayerInputController.java` (`KeyListener`):**
-      * This controller will be attached to the `GamePanel`.
-      * It will listen for `keyPressed` and `keyReleased` events (e.g., W, A, S, D).
-      * When a key is pressed, it will call a method in the `PlayerMovementUseCase` (e.g., `useCase.setMoving(Direction.UP, true)`).
-4.  **The Game Loop (`javax.swing.Timer`):**
-      * A `javax.swing.Timer` will be initialized in the `GamePanel` (or a main game manager) to fire approximately 60 times per second (e.g., every 16ms).
-      * This `Timer` is the "heartbeat" of the game.
-      * On each "tick" (its `actionPerformed` method), it will:
-        1.  **Update:** Call a main `update()` method, which in turn calls the `PlayerMovementUseCase.updatePosition()` to calculate the player's new `x, y` coordinates based on current input.
-        2.  **Render:** Call `gamePanel.repaint()`. This tells Swing to schedule a call to `paintComponent`, which will redraw the player at their new coordinates.
+Benefits:
+- Consistent coordinate system across all screen sizes
+- Automatic scaling without code changes
+- Maintains visual quality on HiDPI displays
 
------
+### Zone Transition Logic
 
-## 5\. MVP Module Breakdown & Team Responsibilities
+```
+Player reaches screen edge
+         ↓
+Determine edge direction (UP/DOWN/LEFT/RIGHT)
+         ↓
+Check for special transitions (subway tunnel)
+         ↓
+If none, check zone neighbors
+         ↓
+If valid → Load new zone
+         ↓
+Reposition player at corresponding edge
+         ↓
+Update background and music
+```
 
-### Albert: Use Case \#1 (Environment Interaction)
+### Day Progression Flow
 
-  * **User Story:** As a user, I want to be able to interact with and move around in a virtual environment.
-  * **Architecture:**
-      * **Domain:** Modify `Player.java` to include `double x`, `double y`, `double speed`.
-      * **Application:** Create `PlayerMovementUseCase.java`. This class will manage the player's position and movement state.
-          * Methods: `setMovementState(Direction dir, boolean isMoving)`, `updatePosition(double deltaTime)`. This method calculates the new `x, y` based on speed and time, and handles basic collision detection (checking against a simple map array).
-      * **Presentation:** Create `PlayerInputController.java` (implements `KeyListener`). On `keyPressed("W")`, call `useCase.setMovementState(Direction.UP, true)`.
-      * **Infrastructure:**
-          * Create `GamePanel.java` (extends `JPanel`). This is the core view.
-          * Implement the `javax.swing.Timer` game loop here. The loop's `actionPerformed` will call `playerMovementUseCase.updatePosition()` and then `this.repaint()`.
-          * Implement `paintComponent(Graphics g)`. This method will read `player.getX()` and `player.getY()` (from the entity) and draw a `g.fillRect(player.getX(), ...)` or `g.drawImage(...)`.
-          * Implement the interaction trigger (e.g., if player `x, y` is near an object and "E" is pressed).
+```
+Player enters sleep zone (top-right 400x400px in Home)
+         ↓
+Press E key
+         ↓
+SleepInteractor validates (not already slept today)
+         ↓
+Restore health to 100
+         ↓
+Create DaySummary (earnings, spending, net)
+         ↓
+    Is Friday?
+    /        \
+  YES        NO
+   ↓          ↓
+Determine   Advance day
+ending tier  Reset flags
+   ↓          ↓
+EndGameView  DaySummaryView
+   ↓          ↓
+Main Menu   Continue game (next day)
+```
 
-### Cynthia: Use Case \#6 (Stock Investing)
+---
 
-  * **User Story:** As a user, I want to work a 9-5 and invest in a simulated stock market.
-  * **Architecture:**
-      * **Domain:** Create `Stock.java` (with `priceHistory`). Modify `Player.java` (with `cashBalance`).
-      * **Application:**
-          * Create `IStockDataService.java` interface (e.g., `List<Double> getStockHistory(String ticker)`).
-          * Create `StockMarketUseCase.java`. This is the *logic core*.
-          * Methods: `startMinigame(Player p)`. This fetches data via `IStockDataService`, sets up the 30-second game timer (e.g., `java.util.Timer`), and generates the price walk.
-          * Methods: `buy(Player p)`, `sell(Player p)`, `endMinigame(Player p)`. These methods modify the `Player`'s `cashBalance` and stock holdings.
-      * **Infrastructure (Services):** Create `AlphaVantageClient.java` (implements `IStockDataService`). This class uses `java.net.http.HttpClient` to call the Alpha Vantage API and parse the JSON response (using `Gson` or `Jackson`).
-      * **Infrastructure (GUI):** Create `StockMinigamePanel.java` (extends `JPanel`). This panel will be shown in the `MainGameWindow` (e.g., using a `CardLayout`) when the game starts. It will contain "Buy" and "Sell" `JButton`s and a `JPanel` for the graph.
-      * **Presentation:** Create `StockMinigameController.java`. This adds `ActionListener`s to the buttons. The "Buy" listener calls `stockMarketUseCase.buy()`. This layer also needs a way to get data *from* the use case (e.g., via the Observer pattern) to update the graph, which will be drawn in the `StockMinigamePanel`'s `paintComponent`.
+## Package Structure
 
-### Joshua: Use Case \#2 (Random Events)
+```
+src/main/java/
+├── app/
+│   └── Main.java                          # Entry point
+├── entity/                                # Domain layer
+│   ├── Player.java                        # Player entity
+│   ├── Day.java                          # Day enum
+│   ├── DaySummary.java                   # Daily summary
+│   ├── GameEnding.java                   # Week endings
+│   ├── Zone.java                         # Map zone
+│   ├── GameMap.java                      # Complete map
+│   ├── Transition.java                   # Special transitions
+│   ├── Event.java                        # Random events
+│   ├── EventOutcome.java                 # Event results
+│   ├── NPC.java                          # NPCs
+│   ├── Stock.java                        # Stock data
+│   ├── Bill.java                         # Bills
+│   └── Item.java                         # Items
+├── use_case/                             # Application layer
+│   ├── PlayerMovementUseCase.java        # Movement logic
+│   ├── Direction.java                    # Direction enum
+│   ├── sleep/                            # Sleep system
+│   ├── paybills/                         # Bill payment
+│   ├── events/                           # Random events
+│   ├── npc_interactions/                 # NPC dialogue
+│   ├── stock_game/                       # Stock trading
+│   ├── save_progress/                    # Saving
+│   └── load_progress/                    # Loading
+├── interface_adapter/                    # Adapter layer
+│   ├── ViewManagerModel.java             # View coordination
+│   ├── ViewModel.java                    # Base view model
+│   ├── events/                           # Event adapters
+│   │   └── PlayerInputController.java    # Input handling
+│   ├── sleep/                            # Sleep adapters
+│   └── paybills/                         # Bill adapters
+├── view/                                 # UI layer
+│   ├── MainGameWindow.java               # Main JFrame
+│   ├── GamePanel.java                    # Game view
+│   ├── MainMenuPanel.java                # Main menu
+│   ├── DaySummaryView.java               # Day summary
+│   ├── EndGameView.java                  # Ending screen
+│   ├── PaybillView.java                  # Bill payment UI
+│   ├── SettingsPanel.java                # Settings
+│   ├── InGameMenuPanel.java              # Pause menu
+│   └── LoadingScreenPanel.java           # Loading screen
+├── data_access/                          # Data persistence
+│   ├── SaveFileUserDataObject.java       # Save files
+│   ├── LoadFileUserDataAccessObject.java # Load files
+│   ├── EventDataAccessObject.java        # Event data
+│   ├── NPCDataAccessObject.java          # NPC data
+│   └── ItemDataAccessObject.java         # Item data
+└── api/                                  # External APIs
+    ├── AlphaStockDataAccessObject.java   # Alpha Vantage
+    └── StockDataBase.java                # API interface
 
-  * **User Story:** As a user, experience random events/challenges.
-  * **Architecture:**
-      * **Domain:** Create `Event.java` and `EventOption.java` (with `eventDescription`, `optionText`, `moneyEffect`).
-      * **Application:** Create `RandomEventUseCase.java`.
-          * Methods: `triggerRandomEvent()`. This method randomly selects an `Event` from a predefined list (e.g., loaded from a config file) and returns it.
-          * Methods: `selectEventOption(Player p, EventOption option)`. This method applies the `moneyEffect` to the `p.cashBalance`.
-      * **Infrastructure (GUI):** Create `EventDialog.java` (extends `JDialog`). This is a modal pop-up window.
-          * Its constructor will take an `Event` object.
-          * It will dynamically create a `JLabel` for the `eventDescription` and a `JButton` for each `EventOption`.
-      * **Presentation (Controller):** The `ActionListener` for each option `JButton` (created in the `EventDialog`) will call `randomEventUseCase.selectEventOption()` with the corresponding option, and then `dispose()` the dialog.
-      * **Integration:** Sherry's `TimeUseCase` will call `randomEventUseCase.triggerRandomEvent()` and show this dialog.
+src/main/resources/
+├── events.json                           # Event definitions
+├── items.json                            # Item definitions
+├── npc_prompts.json                      # NPC dialogue prompts
+├── saveFile.json                         # Player save data
+├── audio/                                # Music and SFX
+│   ├── lofi-lofi-song-2-434695.wav
+│   ├── local-forecast-elevator.wav
+│   └── siren_cropped.wav
+└── backgrounds/                          # Zone images
+    ├── home.png
+    ├── street_1.png, street_2.png, street_3.png
+    ├── subway_1.png, subway_2.png
+    ├── office.png, office_lobby.png
+    └── store.png
 
-### Jayden: Use Case \#3 (NPC Interactions)
+src/test/java/                            # Unit tests
+├── AlphaStockDataBaseTest.java
+├── StartStockGameUsecaseTest.java
+├── Events/
+├── Paybill/
+├── Sleep/
+└── use_case/
+```
 
-  * **User Story:** As a user, I want to be able to interact/talk to other characters or npcs.
-  * **Architecture:**
-      * **Domain:** Create `Npc.java` (with `name`, `dialoguePrompt`, `x`, `y`). Modify `Player.java` to hold `relationships`.
-      * **Application:**
-          * Create `ILlmService.java` interface (e.g., `String getDynamicResponse(String prompt)`).
-          * Create `NpcInteractionUseCase.java`.
-          * Methods: `interact(Player p, Npc npc, String playerInput)`. This method builds the full prompt, calls `iLlmService.getDynamicResponse()`, and returns the NPC's response string.
-      * **Infrastructure (Services):** Create `GeminiApiClient.java` (implements `ILlmService`). This uses `HttpClient` to call the Google Gemini API.
-      * **Infrastructure (GUI):** Create `NpcDialog.java` (extends `JDialog`). This modal pop-up contains a `JTextArea` (for chat history), a `JTextField` (for user input), and a "Send" `JButton`.
-      * **Presentation (Controller):** The "Send" button's `ActionListener` gets text from the `JTextField`, calls `npcInteractionUseCase.interact()`, and appends both the player's input and the NPC's response to the `JTextArea`.
-      * **Integration:** Albert's `PlayerMovementUseCase` (or `PlayerInputController`) will detect an interaction (e.g., "E" key near an NPC) and trigger this dialog.
+---
 
-### Anjani: Use Case \#4 (Saving/Loading)
+## How to Play
 
-  * **User Story:** As a user, I want to be able to save/load my progress.
-  * **Architecture:**
-      * **Domain:** Create `GameState.java`. This is a POJO that holds *all* data to be persisted (the `Player` entity, `List<Npc>` states, current in-game day, etc.).
-      * **Application:**
-          * Create `IGameSaveRepository.java` interface (e.g., `void save(GameState state)`, `GameState load()`).
-          * Create `GameSaveUseCase.java`.
-          * Methods: `saveGame()`. This method gathers all current data from the live `Player` entity (and other entities) into a new `GameState` object and passes it to `iGameSaveRepository.save()`.
-          * Methods: `loadGame()`. This method calls `iGameSaveRepository.load()` and receives a `GameState` object. It then *updates* the application's *current* live `Player` entity (and others) with this loaded data.
-      * **Infrastructure (Persistence):** Create `FileSaveRepository.java` (implements `IGameSaveRepository`). This class uses `Gson` or `Jackson` to serialize the `GameState` object to a JSON file (e.g., `save.json`) and deserialize it.
-      * **Infrastructure (GUI):** Add a `JMenuBar` to the `MainGameWindow.java`.
-      * **Presentation (Controller):** Create `SettingsMenuController.java`. This adds `ActionListener`s to "Save" and "Load" `JMenuItem`s, which call `gameSaveUseCase.saveGame()` and `gameSaveUseCase.loadGame()` respectively.
+### Starting the Game
 
-### Sherry: Use Case \#5 (Everyday Tasks: Bills + Sleep)
+1. Launch the game (see [Quick Start](#quick-start))
+2. Loading screen appears with progress bar
+3. Main menu appears
 
-  * **User Story:** As a user, I want to be able to... go through everyday tasks (pay bills, ... go to bed).
-  * **Architecture:**
-      * **Domain:** Modify `Player.java` for `cashBalance`.
-      * **Application:**
-          * Create `FinancialUseCase.java`. Methods: `payBills(Player p, double amount)`. This checks if the player has enough `cashBalance` and subtracts the amount.
-          * Create `TimeUseCase.java`. This orchestrates the end-of-day sequence.
-          * Methods: `goToSleep(Player p)`. This is a critical method that calls other use cases in order:
-            1.  Calls `Joshua_RandomEventUseCase.triggerRandomEvent()` (and shows the dialog).
-            2.  Generates bills and shows the `BillDialog`.
-            3.  Calls `Anjani_GameSaveUseCase.saveGame()` (this is the auto-save).
-            4.  Advances the in-game day counter.
-      * **Infrastructure (GUI):**
-          * Create `BillDialog.java` (extends `JDialog`). Shows the user their bills and a "Pay" button.
-          * The "Go to Sleep" trigger will be in Albert's `GamePanel` (e.g., player walks to a bed and presses "E").
-      * **Presentation (Controller):** The "Pay" button's `ActionListener` in `BillDialog` will call `financialUseCase.payBills()`. The "Sleep" interaction will call `timeUseCase.goToSleep()`.
+### Main Menu Options
 
------
+- **New Game**: Start a new game (Monday, $1000 balance)
+- **Load Game**: Load saved progress (when implemented)
+- **Settings**: Adjust resolution, volume, controls
+- **Exit**: Quit the game
 
-## 6\. API and Data Persistence Plan
+### Gameplay Loop
 
-  * **API Usage:**
-    1.  **Alpha Vantage:** (Cynthia) Used via `AlphaVantageClient.java` to get historical stock data for the trading minigame.
-    2.  **Google Gemini:** (Jayden) Used via `GeminiApiClient.java` to generate dynamic dialogue for NPCs.
-  * **Data Persistence:**
-    1.  **File System:** (Anjani) The `FileSaveRepository.java` will implement the `IGameSaveRepository` interface. It will use the `Gson` library to serialize the `GameState` domain object into a `save.json` file. This fulfills the data persistence requirement.
+1. **Navigate the World**
+   - Use WASD to move your character
+   - Walk to zone edges to transition between areas
+   - Explore Home, Streets, Subway, Office, Grocery Store
+
+2. **Manage Your Day**
+   - Current day displayed in HUD (Monday - Day 1/5)
+   - Health bar shows 0-100 health
+   - Balance shows current money
+
+3. **Earn Money**
+   - Go to Office to work (stock trading minigame)
+   - Daily earnings tracked automatically
+
+4. **Pay Bills**
+   - Press ESC for pause menu
+   - Select "Pay Bills"
+   - Pay pending bills to avoid penalties
+
+5. **Sleep to Progress**
+   - Return to Home zone
+   - Go to top-right corner (sleep zone)
+   - Press E when prompted
+   - View daily summary (earnings, spending, net change)
+   - Press ENTER to advance to next day
+
+6. **Complete the Week**
+   - Survive Monday through Friday
+   - Maximize your balance
+   - Sleep on Friday to see ending
+
+### Endings
+
+Your final balance determines your ending:
+
+| Balance | Ending | Description |
+|---------|--------|-------------|
+| ≥ $5000 | Wealthy Executive | "You've mastered the art of financial success!" |
+| ≥ $2000 | Comfortable Professional | "You made it through with money to spare." |
+| ≥ $1000 | Struggling Worker | "You survived, but barely." |
+| < $1000 | The Defeated | "The city has defeated you... for now." |
+
+### Tips
+
+- Sleep only once per day (you'll be blocked if you try again)
+- Sleeping restores health to 100
+- Track your daily earnings/spending in the day summary
+- Use the pause menu (ESC) to access bills and settings
+- Explore all zones to discover features
+- The subway connects distant parts of the city
+
+---
+
+## Testing
+
+### Running Tests
+
+```bash
+mvn test
+```
+
+### Test Coverage
+
+#### Unit Tests
+
+- **Entity Layer**: Day enum, Player state, GameEnding logic
+- **Use Case Layer**: Sleep validation, Event triggering, Bill payment
+- **API Layer**: Alpha Vantage integration
+- **Data Access**: Event/NPC/Item loading from JSON
+
+#### Integration Tests
+
+- Full sleep cycle: E key → summary → ENTER → new day
+- Zone transitions with edge cases
+- Week completion flow
+- Financial tracking accuracy
+
+#### Manual Testing Checklist
+
+- [ ] Character movement in all directions
+- [ ] Zone transitions work correctly
+- [ ] Background images and music load
+- [ ] Sleep zone detection and visual indicator
+- [ ] Day advancement and summary screen
+- [ ] Health restoration after sleep
+- [ ] Can't sleep twice in same day
+- [ ] Week ending shows correct tier
+- [ ] Bill payment deducts from balance
+- [ ] Window resizing maintains aspect ratio
+- [ ] HUD displays correct information
+
+### Test Files
+
+Located in [`src/test/java/`](src/test/java/):
+- [`AlphaStockDataBaseTest.java`](src/test/java/AlphaStockDataBaseTest.java)
+- [`Events/StartRandomEventInteractorTest.java`](src/test/java/Events/StartRandomEventInteractorTest.java)
+- [`Events/ActivateRandomOutcomeInteractorTest.java`](src/test/java/Events/ActivateRandomOutcomeInteractorTest.java)
+- [`Paybill/PaybillInteractorTest.java`](src/test/java/Paybill/PaybillInteractorTest.java)
+- [`Sleep/SleepInteractorTest.java`](src/test/java/Sleep/SleepInteractorTest.java)
+- [`use_case/npc_interactions/NPCDAOTest.java`](src/test/java/use_case/npc_interactions/NPCDAOTest.java)
+
+---
+
+## Future Features
+
+This section describes how planned features will be implemented using Clean Architecture.
+
+### 🔮 Stock Trading UI Integration
+
+**Current Status**: Backend complete, UI pending  
+**Implementation Plan**:
+
+1. **View Layer**: Create `StockGamePanel.java` extending `JPanel`
+   - Display stock price chart using `Graphics2D`
+   - Buy/sell buttons with ActionListeners
+   - Timer display for 30-second sessions
+   - Portfolio display showing holdings
+
+2. **Controller**: `StockGameController.java`
+   - Connect button clicks to `BuyStockGameInteractor`
+   - Update chart in real-time from use case outputs
+   - Handle session start/end
+
+3. **Integration**: Add to `MainGameWindow` CardLayout
+   - Trigger when player enters Office zone
+   - Press E to start trading session
+   - Display in overlay or separate panel
+
+**Files to Create**:
+- `view/StockGamePanel.java`
+- `interface_adapter/stock_game/StockGameController.java`
+- Update `GamePanel.java` for Office interaction
+
+### 🔮 NPC Dialogue System
+
+**Current Status**: Backend complete, dialogue generation works  
+**Implementation Plan**:
+
+1. **View Layer**: Create `NpcDialogView.java` extending `JDialog`
+   - Modal dialogue window
+   - JTextArea for conversation history
+   - JTextField for player input
+   - Send button
+
+2. **Controller**: Already exists (`NpcInteractionsController.java`)
+   - Connect to view's send button
+   - Pass player input to `NpcInteractionsInteractor`
+   - Display AI-generated response
+
+3. **Integration**:
+   - Place NPC sprites in zones (render in `GamePanel`)
+   - Detect proximity to NPC
+   - Press E to open dialogue window
+   - Use Google Gemini API for responses
+
+**Files to Create**:
+- `view/NpcDialogView.java`
+- NPC sprite rendering in `GamePanel.java`
+- NPC placement data in `GameMap.java`
+
+### 🔮 Save/Load UI Integration
+
+**Current Status**: Backend complete, frontend stubbed  
+**Implementation Plan**:
+
+1. **Save System**:
+   - Already autosaves on sleep (implemented)
+   - Manual save from pause menu calls `SaveProgressInteractor`
+   - Serialize `Player`, `GameMap` state, current day to JSON
+   - Store in `saveFile.json`
+
+2. **Load System**:
+   - Load button reads `saveFile.json`
+   - Deserialize into entities
+   - Restore player position, balance, day, inventory
+   - Restore zone state
+   - Resume game at saved position
+
+3. **UI Updates**:
+   - Replace placeholder dialogs with actual save/load
+   - Show save slots (multiple saves)
+   - Display save metadata (day, balance, timestamp)
+
+**Files to Update**:
+- `MainGameWindow.java` - Remove stub dialogs
+- `MainMenuPanel.java` - Enable load button
+- `SaveFileUserDataObject.java` - Multiple save slots
+
+### 🔮 Inventory System UI
+
+**Current Status**: Backend exists, no UI  
+**Implementation Plan**:
+
+1. **View Layer**: Create `InventoryPanel.java`
+   - 5-slot grid display
+   - Item icons and names
+   - Use/Drop buttons
+   - Item descriptions on hover
+
+2. **Controller**: `InventoryController.java`
+   - Handle item use (calls `Player.itemUsed()`)
+   - Handle item drop (calls `Player.removeInventory()`)
+   - Update view when inventory changes
+
+3. **Item Pickups**:
+   - Render items in zones (sprite on ground)
+   - Collision detection with player
+   - Press E to pick up
+   - Add to inventory via `Player.addInventory()`
+
+4. **Integration**:
+   - Access from pause menu or I key
+   - Show in overlay on game screen
+   - Items from `items.json` loaded by `ItemDataAccessObject`
+
+**Files to Create**:
+- `view/InventoryPanel.java`
+- `interface_adapter/inventory/InventoryController.java`
+- Update `GamePanel.java` for item rendering
+
+### 🔮 Enhanced Random Events
+
+**Current Status**: Event triggering works, needs richer UI
+**Implementation Plan**:
+
+1. **Event Dialog Enhancement**:
+   - Create `EventDialog.java` with better visuals
+   - Show event description with formatting
+   - Display multiple choice buttons for outcomes
+   - Show financial impact preview
+
+2. **Event Types**:
+   - **Positive Events**: Unexpected income, bonuses
+   - **Negative Events**: Fines, accidents, repairs
+   - **Choice Events**: Risk/reward scenarios
+   - **Story Events**: Character development
+
+3. **Integration**:
+   - Trigger from `StartRandomEventInteractor` (already implemented)
+   - Display modal dialog with choices
+   - Apply outcome via `ActivateRandomOutcomeInteractor`
+   - Update player stats and balance
+
+**Files to Create**:
+- `view/EventDialog.java`
+- Expand `events.json` with more events
+
+### 🔮 Weekend Days
+
+**Current Status**: Game ends after Friday
+**Implementation Plan**:
+
+1. **Entity Updates**:
+   - Extend `Day` enum: Add SATURDAY, SUNDAY
+   - Modify week length from 5 to 7 days
+   - Different endings for 1-week, 2-week, 1-month modes
+
+2. **Weekend Activities**:
+   - No work requirement
+   - Optional activities (shopping, socializing)
+   - Different random events
+   - Rest and recovery bonuses
+
+3. **Use Case Changes**:
+   - `SleepInteractor` checks for Sunday (week end)
+   - Weekend-specific event pool
+   - Relationship building with NPCs
+
+**Files to Modify**:
+- `entity/Day.java` - Add weekend days
+- `use_case/sleep/SleepInteractor.java` - Week ending logic
+- `data_access/EventDataAccessObject.java` - Weekend events
+
+### 🔮 Stats and Mood System
+
+**Current Status**: Player has stats (Hunger, Energy, Mood) but not actively used
+**Implementation Plan**:
+
+1. **Stat Decay**:
+   - Hunger decreases over time
+   - Energy decreases with activity
+   - Mood affected by events and choices
+
+2. **Stat Effects**:
+   - Low hunger: Reduced movement speed
+   - Low energy: Can't work effectively
+   - Low mood: More negative events
+
+3. **Stat Management**:
+   - Eat at Grocery Store (restores hunger)
+   - Sleep restores energy
+   - NPC interactions improve mood
+   - Items can boost stats
+
+4. **UI Display**:
+   - Stat bars in HUD
+   - Color-coded (green/yellow/red)
+   - Warning messages when critical
+
+**Files to Modify**:
+- `entity/Player.java` - Stat decay methods
+- `GamePanel.java` - Draw stat bars
+- `use_case/PlayerMovementUseCase.java` - Speed reduction
+- `view/StockGameView.java` - Effectiveness modifiers
+
+### 🔮 Achievements System
+
+**Current Status**: Not implemented
+**Implementation Plan**:
+
+1. **Achievement Types**:
+   - **Financial**: Earn $X, Save $Y
+   - **Social**: Meet all NPCs, Max relationship
+   - **Exploration**: Visit all zones
+   - **Survival**: Complete week without sleeping
+   - **Trading**: Make profitable trades
+
+2. **Achievement Tracking**:
+   - Create `Achievement` entity
+   - Track progress in `Player`
+   - Save with game state
+   - Display notification on unlock
+
+3. **Rewards**:
+   - Unlock special items
+   - Starting bonus for new games
+   - Cosmetic player sprites
+   - Secret endings
+
+**Files to Create**:
+- `entity/Achievement.java`
+- `use_case/achievements/AchievementTracker.java`
+- `view/AchievementsPanel.java`
+- Update `Player.java` with achievement list
+
+### 🔮 Difficulty Modes
+
+**Current Status**: Single difficulty
+**Implementation Plan**:
+
+1. **Mode Selection** (on New Game):
+   - **Easy**: Higher starting balance ($2000), lower bills
+   - **Normal**: Current settings ($1000, standard bills)
+   - **Hard**: Lower balance ($500), higher bills, more negative events
+   - **Impossible**: Extreme challenge mode
+
+2. **Difficulty Modifiers**:
+   - Bill amounts scaled by difficulty
+   - Event outcome severity
+   - Stock market volatility
+   - NPC relationship thresholds
+
+3. **Implementation**:
+   - Add difficulty to `GameSettings`
+   - Modifier multipliers in use cases
+   - Show difficulty in save file
+   - Separate leaderboards per difficulty
+
+**Files to Modify**:
+- `entity/GameSettings.java` - Add difficulty enum
+- `MainMenuPanel.java` - Difficulty selection
+- All use cases - Apply multipliers
+- `SaveFileUserDataObject.java` - Store difficulty
+
+### 🔮 Leaderboard and Statistics
+
+**Current Status**: Not implemented
+**Implementation Plan**:
+
+1. **Statistics Tracking**:
+   - Total games played
+   - Best ending achieved
+   - Total money earned
+   - Days survived
+   - Most profitable trade
+   - Bills paid on time
+
+2. **Leaderboard**:
+   - Local leaderboard (top 10 runs)
+   - Sort by final balance, days survived
+   - Show difficulty mode
+   - Timestamp of completion
+
+3. **Stats View**:
+   - Accessible from main menu
+   - Lifetime statistics
+   - Per-game statistics
+   - Charts and graphs
+
+**Files to Create**:
+- `entity/GameStatistics.java`
+- `data_access/StatisticsDataAccessObject.java`
+- `view/LeaderboardPanel.java`
+- `view/StatisticsPanel.java`
+
+### 🔮 Audio System Enhancements
+
+**Current Status**: Basic music per zone
+**Implementation Plan**:
+
+1. **Audio Features**:
+   - Sound effects (walking, interaction, cash)
+   - Ambient sounds per zone (traffic, office chatter)
+   - Music crossfade between zones
+   - Volume controls per category
+
+2. **Audio Manager**:
+   - `AudioManager` singleton
+   - Background music queue
+   - SFX mixing
+   - Persistent volume settings
+
+3. **Implementation**:
+   - Java AudioSystem (javax.sound)
+   - WAV format for compatibility
+   - Streaming for music, loaded for SFX
+   - Settings panel sliders
+
+**Files to Create**:
+- `audio/AudioManager.java`
+- `audio/SoundEffect.java`
+- Add more audio files to `resources/audio/`
+- Update `SettingsPanel.java` with volume controls
+
+### 🔮 Tutorial System
+
+**Current Status**: No tutorial
+**Implementation Plan**:
+
+1. **First-Time Experience**:
+   - Welcome screen explaining premise
+   - Interactive tutorial on first play
+   - Highlight controls and features
+   - Practice movement and interactions
+
+2. **Contextual Hints**:
+   - Show hints when entering new zones
+   - Tooltips for UI elements
+   - Help button in pause menu
+   - Keyboard shortcut reference
+
+3. **Implementation**:
+   - Check `GameSettings.hasCompletedTutorial`
+   - Tutorial mode with scripted events
+   - Overlay instructions
+   - Skip button for experienced players
+
+**Files to Create**:
+- `view/TutorialOverlay.java`
+- `use_case/tutorial/TutorialManager.java`
+- Update `GameSettings.java` with tutorial flag
+
+---
+
+## Technical Specifications
+
+### System Requirements
+
+**Minimum**:
+- Java 11+
+- 2 GB RAM
+- 500 MB disk space
+- Integrated graphics
+- 640x400 display
+
+**Recommended**:
+- Java 17+ (for better Wayland support)
+- 4 GB RAM
+- 1 GB disk space
+- Dedicated graphics
+- 1920x1200 or higher display
+
+### Compatibility
+
+- **OS**: Windows 7+, macOS 10.12+, Linux (X11 and Wayland)
+- **Display**: Supports any aspect ratio (16:10 optimal)
+- **Input**: Keyboard required
+- **Network**: Required for stock data and NPC dialogue (offline mode planned)
+
+### Performance
+
+- **Target Frame Rate**: 60 FPS
+- **Memory Usage**: ~200 MB runtime
+- **Startup Time**: 2-3 seconds
+- **Save File Size**: <1 MB
+
+---
+
+## Team Members
+
+**CSC207 LEC0201 Group 14 - TUT0401-14**
+
+| Member | GitHub | Responsibilities |
+|--------|--------|-----------------|
+| **Albert Guo** | - | Environment interaction, movement system, map transitions, scaling implementation |
+| **Cynthia Rong** | - | Stock market minigame, Alpha Vantage API integration |
+| **Joshua Iaboni** | - | Random events system, event outcomes |
+| **Jayden Luo** | - | NPC interactions, Google Gemini integration |
+| **Anjani Sjariffudin** | - | Save/load system, data persistence |
+| **Sherry Yuehua Wang** | - | Day progression, sleep system, bill payment |
+
+---
+
+## Team Contract
+
+As outlined in our [`TeamContract.md`](TeamContract.md), we commit to:
+
+- **Communication**: Respond within 24 hours on Discord
+- **Accountability**: Meet agreed deadlines or notify team promptly
+- **Collaboration**: Equal participation and respect for all members
+- **Quality**: Maintain Clean Architecture principles
+- **Decision Making**: Democratic voting (simple majority)
+- **Conflict Resolution**: Professional and constructive approach
+
+---
+
+## Project Timeline
+
+### Phase 1: Core Systems (Completed)
+- ✅ Project setup and architecture design
+- ✅ Character movement and rendering
+- ✅ Zone system with transitions
+- ✅ Day progression with sleep
+- ✅ Menu system and UI framework
+
+### Phase 2: Game Features (In Progress)
+- ✅ Bill payment system
+- ✅ Random events backend
+- ⚠️ Stock trading (backend complete, UI pending)
+- ⚠️ NPC dialogue (backend complete, UI pending)
+- ⚠️ Save/load (backend complete, frontend stubbed)
+
+### Phase 3: Polish and Integration (Planned)
+- 🔮 Complete all feature UIs
+- 🔮 Comprehensive testing
+- 🔮 Audio enhancements
+- 🔮 Tutorial system
+- 🔮 Performance optimization
+
+### Phase 4: Future Enhancements (Post-Release)
+- 🔮 Weekend days
+- 🔮 Achievements
+- 🔮 Difficulty modes
+- 🔮 Leaderboards
+- 🔮 Additional zones and NPCs
+
+---
+
+## Contributing
+
+This is a course project for CSC207 at University of Toronto. Contributions are limited to team members.
+
+### Development Guidelines
+
+1. **Follow Clean Architecture**: Maintain layer boundaries
+2. **Write Tests**: Unit tests for use cases, integration tests for workflows
+3. **Document Code**: JavaDoc for public methods
+4. **Code Style**: Follow Java conventions
+5. **Git Workflow**: Feature branches, pull requests, code review
+
+### Code Review Checklist
+
+- [ ] Follows Clean Architecture principles
+- [ ] No inner layer depends on outer layers
+- [ ] All public methods documented
+- [ ] Unit tests included
+- [ ] Integration tests pass
+- [ ] No hardcoded values (use constants)
+- [ ] Error handling implemented
+- [ ] Performance acceptable
+
+---
+
+## Known Issues
+
+1. **Stock Game UI**: Backend complete but not integrated with main game
+2. **NPC Dialogue**: AI responses work but no dialogue window yet
+3. **Save/Load**: Frontend shows placeholder messages
+4. **Special Transitions**: Subway tunnel infrastructure exists but not activated
+5. **Event UI**: Events trigger but need better visual presentation
+
+---
+
+## Credits
+
+### APIs and Libraries
+
+- **Alpha Vantage**: Stock market data ([alphavantage.co](https://www.alphavantage.co/))
+- **Google Gemini**: AI-generated NPC dialogue ([ai.google.dev](https://ai.google.dev/))
+- **Java Swing**: GUI framework (built into Java)
+- **Maven**: Build automation ([maven.apache.org](https://maven.apache.org/))
+- **Gson**: JSON parsing (used for data files)
+
+### Assets
+
+- **Music**:
+  - "Lofi Lofi Song 2" by Lofi-Lofi
+  - "Local Forecast - Elevator" by Kevin MacLeod
+- **Background Art**: Custom created for this project
+- **Sound Effects**: Various open-source SFX
+
+### Inspiration
+
+This game draws inspiration from:
+- Life simulation games (The Sims, Animal Crossing)
+- Economic management games (Papers Please, Cart Life)
+- Social commentary in games (Undertale, Night in the Woods)
+
+---
+
+## License
+
+This project is created for educational purposes as part of CSC207 at University of Toronto.
+
+**Course**: CSC207 - Software Design
+**Term**: Fall 2024
+**Instructor**: TBD
+**Institution**: University of Toronto
+
+---
+
+## Contact
+
+For questions about this project, contact team members through the course Discord or GitHub.
+
+**Last Updated**: November 23, 2024
+**Version**: 1.0.0
+**Status**: In Development
