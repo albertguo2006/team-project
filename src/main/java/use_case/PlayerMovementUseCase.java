@@ -50,18 +50,10 @@ public class PlayerMovementUseCase {
      */
     public void setMovementState(Direction direction, boolean isMoving) {
         switch (direction) {
-            case UP:
-                movingUp = isMoving;
-                break;
-            case DOWN:
-                movingDown = isMoving;
-                break;
-            case LEFT:
-                movingLeft = isMoving;
-                break;
-            case RIGHT:
-                movingRight = isMoving;
-                break;
+            case UP -> movingUp = isMoving;
+            case DOWN -> movingDown = isMoving;
+            case LEFT -> movingLeft = isMoving;
+            case RIGHT -> movingRight = isMoving;
         }
     }
     
