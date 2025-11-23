@@ -44,11 +44,27 @@ public class PlayerInputController implements KeyListener {
         void onSleepRequested();
     }
     
+    /**
+     * Callback interface for stock trading zone checks.
+     */
+    public interface StockTradingZoneChecker {
+        boolean isInStockTradingZone();
+    }
+    
+    /**
+     * Callback interface for stock trading actions.
+     */
+    public interface StockTradingActionListener {
+        void onStockTradingRequested();
+    }
+    
     private final PlayerMovementUseCase playerMovementUseCase;
     private JFrame parentFrame;  // Optional: for frame reference
     private PauseMenuListener pauseMenuListener;
     private SleepZoneChecker sleepZoneChecker;
     private SleepActionListener sleepActionListener;
+    private StockTradingZoneChecker stockTradingZoneChecker;
+    private StockTradingActionListener stockTradingActionListener;
     
     /**
      * Constructs a PlayerInputController with the given use case.
@@ -96,6 +112,24 @@ public class PlayerInputController implements KeyListener {
     }
     
     /**
+     * Sets the stock trading zone checker callback.
+     *
+     * @param checker the stock trading zone checker
+     */
+    public void setStockTradingZoneChecker(StockTradingZoneChecker checker) {
+        this.stockTradingZoneChecker = checker;
+    }
+    
+    /**
+     * Sets the stock trading action listener callback.
+     *
+     * @param listener the stock trading action listener
+     */
+    public void setStockTradingActionListener(StockTradingActionListener listener) {
+        this.stockTradingActionListener = listener;
+    }
+    
+    /**
      * Called when a key is pressed.
      * Translates WASD keys to Direction commands and notifies the use case.
      * 
@@ -135,6 +169,11 @@ public class PlayerInputController implements KeyListener {
                 if (sleepZoneChecker != null && sleepZoneChecker.isInSleepZone() &&
                     sleepActionListener != null) {
                     sleepActionListener.onSleepRequested();
+                }
+                // Handle stock trading action if in stock trading zone
+                else if (stockTradingZoneChecker != null && stockTradingZoneChecker.isInStockTradingZone() &&
+                         stockTradingActionListener != null) {
+                    stockTradingActionListener.onStockTradingRequested();
                 }
                 break;
         }
