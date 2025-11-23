@@ -18,6 +18,8 @@ public interface StartStockGameDataAccessInterface {
      * @return true if the user is able to begin the stock game
      */
     boolean validBeginGame(Double startAmount);
+
+    /**
      * Returns the player with the given username.
      * @param username the username to look up
      * @return the player with the given username
