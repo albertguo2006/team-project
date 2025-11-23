@@ -2,9 +2,11 @@ package view;
 
 import data_access.Paybill.PaybillDataAccessObject;
 import entity.Bill;
-import interface_adapter.events.paybills.PaybillController;
-import interface_adapter.events.paybills.PaybillState;
-import interface_adapter.events.paybills.PaybillViewModel;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.paybills.PaybillController;
+import interface_adapter.paybills.PaybillState;
+import interface_adapter.paybills.PaybillViewModel;
+import io.opencensus.stats.ViewManager;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -24,6 +26,7 @@ import java.util.List;
 public class PaybillView extends JPanel implements ActionListener, PropertyChangeListener {
     private final PaybillViewModel paybillViewModel;
     private final PaybillController paybillController;
+    private final ViewManagerModel viewManagerModel;
     private final String viewName = "bills";
     private final PaybillDataAccessObject paybillDataAccessObject = new PaybillDataAccessObject();
 
@@ -43,31 +46,46 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final JPanel actionButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
     public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController,
-                       DefaultTableModel tableModel, DefaultTableModel tableModel1){
+                       ViewManagerModel viewManagerModel){
         this.paybillViewModel = paybillViewModel;
         this.paybillController = paybillController;
-        this.tableModel = tableModel1;
+        this.viewManagerModel = viewManagerModel;
         this.paybillViewModel.addPropertyChangeListener(this);
 
         // Initialize table model
         String[] columnNames = {"Name", "Due Date", "Amount", "Status"};
-        tableModel = new DefaultTableModel(columnNames, 0){
+        this.tableModel = new DefaultTableModel(columnNames, 0){
             @Override
             public boolean isCellEditable(int row, int column) {
                 return false;
             }
         };
 
-        billsTable = new JTable(tableModel);
+        billsTable = new JTable(this.tableModel);
         setupUI();
         setupListeners();
 
         loadInitialBills(); // Load initial bills
+
+        // Add keyboard support for returning to game
+        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"),
+                "goBack");
+        this.getActionMap().put("goBack", new AbstractAction() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Switch back to game view
+                viewManagerModel.setState("game");
+                viewManagerModel.firePropertyChange();
+            }
+        });
     }
 
-    private void loadInitialBills(){
+    void loadInitialBills(){
+        System.out.println("PaybillView.loadInitialBills() called");
         List<Bill> initialBills = paybillDataAccessObject.getAllBills();
         loadBills(initialBills);
+        System.out.println("Retrieved " + initialBills.size() + " bills from data access");
     }
 
     private void setupUI() {
@@ -90,35 +108,45 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         billsTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
 
         // Action buttons panel
+        actionButtonsPanel.setLayout(new BoxLayout(actionButtonsPanel, BoxLayout.Y_AXIS));
         actionButtonsPanel.setBorder(BorderFactory.createTitledBorder("Actions"));
+        actionButtonsPanel.setPreferredSize(new Dimension(180, 0));
 
-        // Bottom panel with total and pay all button
+        // Combined bottom panel with total, pay all, and status
         JPanel bottomPanel = new JPanel(new BorderLayout());
+
+        // Left: Total
         JPanel totalPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        totalLabel.setFont(new Font("Segoe UI", Font.BOLD, 20));
         totalPanel.add(totalLabel);
 
+        // Right: Pay all button
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        payAllButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        payAllButton.setFont(new Font("Segoe UI", Font.BOLD, 20));
         payAllButton.setBackground(new Color(76, 175, 80)); // Green
         payAllButton.setForeground(Color.WHITE);
+        payAllButton.setPreferredSize(new Dimension(172, 40));
         buttonPanel.add(payAllButton);
-
-        bottomPanel.add(totalPanel, BorderLayout.WEST);
-        bottomPanel.add(buttonPanel, BorderLayout.EAST);
 
         // Status message panel
         JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         statusMessage.setForeground(Color.RED);
-        statusMessage.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        statusMessage.setFont(new Font("Segoe UI", Font.PLAIN, 20));
         statusPanel.add(statusMessage);
+
+        bottomPanel.add(totalPanel, BorderLayout.WEST);
+        bottomPanel.add(statusPanel, BorderLayout.CENTER);
+        bottomPanel.add(buttonPanel, BorderLayout.EAST);
+
+        // Create main content panel with table and actions side by side
+        JPanel contentPanel = new JPanel(new BorderLayout(10,10));
+        contentPanel.add(tableScrollPane, BorderLayout.CENTER);
+        contentPanel.add(actionButtonsPanel, BorderLayout.EAST);
 
         // Add all panels to main panel
         add(headerPanel, BorderLayout.NORTH);
-        add(tableScrollPane, BorderLayout.CENTER);
-        add(actionButtonsPanel, BorderLayout.EAST);
+        add(contentPanel, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
-        add(statusPanel, BorderLayout.SOUTH);
 
     }
 
@@ -189,10 +217,12 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     }
 
     public void loadBills(List<Bill> bills){
+        System.out.println("PaybillView.loadBills() called with " + bills.size() + " bills");
         this.currentBills = bills;
 
         // Clear existing data
-        tableModel.setRowCount(0);
+        this.tableModel.setRowCount(0);
+        System.out.println("Table model cleared, row count: " + this.tableModel.getRowCount());
         actionButtonsPanel.removeAll();
 
         // Add bills to table and create action buttons
@@ -201,13 +231,16 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
             String dueDate = formatDueDate(bill.getDueDate());
             String amount = String.format("$%.2f", bill.getAmount());
 
+            System.out.println("Adding bill to table: " + bill.getName() + " - " + amount + " - " + status);
+
             // Add to table
-            tableModel.addRow(new Object[]{bill.getName(), dueDate, amount, status});
+            this.tableModel.addRow(new Object[]{bill.getName(), dueDate, amount, status});
 
             // Create individual button for unpaid bills
             if (!bill.getPaid()){
                 JButton payButton = createBillButton(bill);
                 actionButtonsPanel.add(payButton);
+                System.out.println("Created pay button for: " + bill.getName());
             }
 
         }
@@ -217,6 +250,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         // Refresh the panels
         actionButtonsPanel.revalidate();
         actionButtonsPanel.repaint();
+        System.out.println("Table model row count after loading: " + tableModel.getRowCount());
     }
 
     private void updateTotal(){

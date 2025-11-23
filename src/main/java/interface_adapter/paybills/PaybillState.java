@@ -1,4 +1,4 @@
-package interface_adapter.events.paybills;
+package interface_adapter.paybills;
 
 /**
  * The state for the Paybill feature.
