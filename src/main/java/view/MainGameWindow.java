@@ -8,18 +8,20 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
+import api.AlphaStockDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.SleepDataAccessObject;
 import entity.GameSettings;
 import entity.Player;
-import interface_adapter.events.PlayerInputController;
 import interface_adapter.ViewManagerModel;
+import interface_adapter.events.PlayerInputController;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
 import interface_adapter.sleep.SleepController;
 import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
+import interface_adapter.stock_trading.StockTradingController;
 import use_case.PlayerMovementUseCase;
 import use_case.paybills.PaybillDataAccessInterface;
 import use_case.paybills.PaybillInputBoundary;
@@ -28,6 +30,9 @@ import use_case.paybills.PaybillOutputBoundary;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
 import use_case.sleep.SleepInteractor;
+import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
+import use_case.stock_game.play_stock_game.PlayStockGameInputBoundary;
+import use_case.stock_game.play_stock_game.PlayStockGameInteractor;
 
 /**
  * MainGameWindow is the top-level JFrame for the application.
@@ -67,6 +72,10 @@ public class MainGameWindow extends JFrame {
     private PaybillView paybillView;
     private PaybillViewModel paybillViewModel;
     PaybillController paybillController;
+    
+    // Stock trading system components
+    private StockTradingController stockTradingController;
+    private StockGameView stockGameView;
     
     // Card names for CardLayout
     private static final String LOADING_CARD = "loading";
@@ -244,6 +253,9 @@ public class MainGameWindow extends JFrame {
         // 5. Controller
         this.sleepController = new SleepController(sleepInteractor);
         
+        // Initialize Stock Trading system
+        initializeStockTradingSystem();
+        
         // Create use case
         PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(player);
         
@@ -260,6 +272,13 @@ public class MainGameWindow extends JFrame {
         // Set up sleep system callbacks
         playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
         playerInputController.setSleepActionListener(() -> sleepController.sleep(player));
+        
+        // Set up stock trading system callbacks
+        playerInputController.setStockTradingZoneChecker(() -> gamePanel.isInStockTradingZone());
+        playerInputController.setStockTradingActionListener(() -> {
+            gamePanel.pauseGame();  // Pause main game while trading
+            stockTradingController.startStockTrading(player);
+        });
         
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
@@ -327,6 +346,31 @@ public class MainGameWindow extends JFrame {
 
         // Add to card panel
         cardPanel.add(paybillView, PAYBILL_CARD);
+    }
+    
+    /**
+     * Initializes the stock trading game system.
+     */
+    private void initializeStockTradingSystem() {
+        System.out.println("=== INITIALIZE STOCK TRADING SYSTEM STARTED ===");
+        
+        // Create Stock Game Data Access
+        PlayStockGameDataAccessInterface stockDataAccess = new AlphaStockDataAccessObject();
+        
+        // Create Stock Game View (Presenter)
+        this.stockGameView = new StockGameView();
+        stockGameView.setPlayer(player);  // Set player reference for balance updates
+        
+        // Create Stock Game Interactor
+        PlayStockGameInputBoundary stockGameInteractor = new PlayStockGameInteractor(
+            stockDataAccess,
+            stockGameView
+        );
+        
+        // Create Stock Trading Controller
+        this.stockTradingController = new StockTradingController(stockGameInteractor);
+        
+        System.out.println("=== INITIALIZE STOCK TRADING SYSTEM COMPLETED ===");
     }
     
     /**

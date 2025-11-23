@@ -34,12 +34,23 @@ public class StockGameView implements PlayStockGameOutputBoundary {
 
     private Portfolio portfolio;
     private Stock stock;
+    private entity.Player player;  // Reference to player for crediting balance
+    private double initialInvestment;  // Track initial investment for profit/loss calculation
 
+    /**
+     * Sets the player reference for crediting balance on game end.
+     * @param player the player
+     */
+    public void setPlayer(entity.Player player) {
+        this.player = player;
+    }
+    
     // view at the start of the game
     @Override
     public void presentGameStart(Portfolio portfolio, Stock stock, Timer timer) {
         this.portfolio = portfolio;
         this.stock = stock;
+        this.initialInvestment = portfolio.getCash();  // Store initial investment
 
         viewModel.lastPrice = stock.stockPrice;  // set initial price
 
@@ -77,7 +88,31 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     // end of game view
     @Override
     public void presentGameOver(PlayStockGameOutputData data) {
-        JOptionPane.showMessageDialog(frame, "Game Over!\nFinal Equity: " + data.totalEquity);
+        double finalEquity = data.totalEquity;
+        
+        // Credit player balance with final equity
+        if (player != null) {
+            player.setBalance(player.getBalance() + finalEquity);
+            
+            // Calculate profit/loss
+            double profitLoss = finalEquity - initialInvestment;
+            String profitLossText = profitLoss >= 0 ?
+                "Profit: $" + String.format("%.2f", profitLoss) :
+                "Loss: $" + String.format("%.2f", Math.abs(profitLoss));
+            
+            JOptionPane.showMessageDialog(frame,
+                "Game Over!\n" +
+                "Final Equity: $" + String.format("%.2f", finalEquity) + "\n" +
+                profitLossText + "\n" +
+                "New Balance: $" + String.format("%.2f", player.getBalance()));
+        } else {
+            JOptionPane.showMessageDialog(frame, "Game Over!\nFinal Equity: $" + String.format("%.2f", finalEquity));
+        }
+        
+        // Close the stock game window
+        if (frame != null) {
+            frame.dispose();
+        }
     }
 
     // if there is an error...
