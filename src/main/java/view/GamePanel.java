@@ -57,6 +57,13 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int SLEEP_ZONE_HEIGHT = 400;
     private boolean inSleepZone = false;
     
+    // Stock trading zone (in Office cubicle)
+    private static final int STOCK_TRADING_ZONE_X = 1188;
+    private static final int STOCK_TRADING_ZONE_Y = 244;
+    private static final int STOCK_TRADING_ZONE_WIDTH = 239;  // 1427 - 1188
+    private static final int STOCK_TRADING_ZONE_HEIGHT = 226; // 470 - 244
+    private boolean inStockTradingZone = false;
+    
     // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
     private int viewportWidth;
     private int viewportHeight;
@@ -167,6 +174,7 @@ public class GamePanel extends JPanel implements ActionListener {
         playerMovementUseCase.updatePosition(deltaTime);
         checkZoneTransition();
         checkSleepZone();
+        checkStockTradingZone();
 
         // === RENDER PHASE ===
         this.repaint();
@@ -449,6 +457,11 @@ public class GamePanel extends JPanel implements ActionListener {
             drawSleepZone(g);
         }
         
+        // Draw stock trading zone indicator if in Office and player is in zone
+        if (currentZone != null && "Office (Your Cubicle)".equals(currentZone.getName()) && inStockTradingZone) {
+            drawStockTradingZone(g);
+        }
+        
         drawUI(g);
     }
     
@@ -571,6 +584,62 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public boolean isInSleepZone() {
         return inSleepZone;
+    }
+    
+    /**
+     * Checks if the player is in the stock trading zone (specific area in Office cubicle).
+     */
+    private void checkStockTradingZone() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        
+        // Only check if in Office zone
+        if (!"Office (Your Cubicle)".equals(currentZone.getName())) {
+            inStockTradingZone = false;
+            return;
+        }
+        
+        double playerX = player.getX();
+        double playerY = player.getY();
+        
+        // Check if player is within stock trading zone bounds
+        inStockTradingZone = playerX >= STOCK_TRADING_ZONE_X &&
+                             playerX <= STOCK_TRADING_ZONE_X + STOCK_TRADING_ZONE_WIDTH &&
+                             playerY >= STOCK_TRADING_ZONE_Y &&
+                             playerY <= STOCK_TRADING_ZONE_Y + STOCK_TRADING_ZONE_HEIGHT;
+    }
+    
+    /**
+     * Draws the stock trading zone indicator and prompt.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawStockTradingZone(Graphics2D g) {
+        // Draw semi-transparent overlay
+        g.setColor(new Color(50, 255, 50, 77));  // Light green with 30% opacity
+        g.fillRect(STOCK_TRADING_ZONE_X, STOCK_TRADING_ZONE_Y, STOCK_TRADING_ZONE_WIDTH, STOCK_TRADING_ZONE_HEIGHT);
+        
+        // Draw border
+        g.setColor(new Color(50, 255, 50, 200));
+        g.setStroke(new BasicStroke(4));
+        g.drawRect(STOCK_TRADING_ZONE_X, STOCK_TRADING_ZONE_Y, STOCK_TRADING_ZONE_WIDTH, STOCK_TRADING_ZONE_HEIGHT);
+        
+        // Draw prompt text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 32));
+        String prompt = "Press E to Trade Stocks";
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int promptX = STOCK_TRADING_ZONE_X + (STOCK_TRADING_ZONE_WIDTH - promptWidth) / 2;
+        int promptY = STOCK_TRADING_ZONE_Y + STOCK_TRADING_ZONE_HEIGHT / 2;
+        g.drawString(prompt, promptX, promptY);
+    }
+    
+    /**
+     * Checks if the player is currently in the stock trading zone.
+     * @return true if in stock trading zone, false otherwise
+     */
+    public boolean isInStockTradingZone() {
+        return inStockTradingZone;
     }
     
     /**
