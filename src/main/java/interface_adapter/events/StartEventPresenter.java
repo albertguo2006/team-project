@@ -1,6 +1,6 @@
 package interface_adapter.events;
 
-import interface_adapter.events.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import use_case.events.StartRandomEvent.StartRandomEventOutputBoundary;
 import use_case.events.StartRandomEvent.StartRandomEventOutputData;
 

@@ -8,6 +8,7 @@ import java.util.Map;
 public class Portfolio {
 
     public double cash;   // starting cash
+    public double totalEquity;  // total equity field
     public HashMap<Stock, Double> investments = new HashMap<>();
     // investments is a hashmap from the stock (which includes symbol and price)
     // to the number of shares they have of that stock (open for extension)
@@ -74,7 +75,6 @@ public class Portfolio {
     public void  setInvestments(Map<Stock, Double> investments) {
         this.investments = (HashMap<Stock, Double>) investments;
     }
-    public HashMap<Stock, Double> getInvestments() { return investments; }
 
 }
 

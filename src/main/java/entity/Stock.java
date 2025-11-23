@@ -6,12 +6,19 @@ import java.util.Objects;
 // and CURRENT (in-game) price histories
 public class Stock {
     public String ticketSymbol;
+    public String companyName;
     public Double stockPrice;
     // stock price gets constantly reupdated to the next values in the priceHistory
 
     public Stock(String ticketSymbol, Double stockPrice) {
         // need to call another method to load the data? load data from Stock history
         this.ticketSymbol = ticketSymbol;
+        this.stockPrice = stockPrice;
+    }
+
+    public Stock(String ticketSymbol, String companyName, Double stockPrice) {
+        this.ticketSymbol = ticketSymbol;
+        this.companyName = companyName;
         this.stockPrice = stockPrice;
     }
 
@@ -61,8 +68,8 @@ public class Stock {
         return companyName;
     }
 
-    public Double getStockPrice() {
-        return stockPrice;
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
     }
 
 }

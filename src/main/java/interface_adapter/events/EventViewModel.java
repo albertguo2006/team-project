@@ -1,6 +1,6 @@
 package interface_adapter.events;
 
-import interface_adapter.events.ViewModel;
+import interface_adapter.ViewModel;
 
 public class EventViewModel extends ViewModel<EventState> {
 

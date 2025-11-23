@@ -1,21 +1,27 @@
 package view;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
-import data_access.EventDataAccessObject;
-import entity.Player;
-import interface_adapter.events.ViewManagerModel;
-import interface_adapter.events.*;
-import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInteractor;
-import use_case.events.StartRandomEvent.StartRandomEventInputBoundary;
-import use_case.events.StartRandomEvent.StartRandomEventInteractor;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+
+import interface_adapter.events.EventOutcomeController;
+import interface_adapter.events.EventState;
+import interface_adapter.events.EventViewModel;
 
 public class EventView extends JPanel implements ActionListener, PropertyChangeListener {
     private final String viewName = "Event";
