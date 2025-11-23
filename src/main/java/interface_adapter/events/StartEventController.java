@@ -1,6 +1,5 @@
 package interface_adapter.events;
 
-import entity.Player;
 import use_case.events.StartRandomEvent.StartRandomEventInputBoundary;
 
 public class StartEventController {

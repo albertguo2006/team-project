@@ -20,4 +20,7 @@ public class StartRandomEventOutputData {
     public int getOutcomeCount(){
         return event.getOutcomes().size();
     }
+    public Event getEvent() {
+        return event;
+    }
 }
