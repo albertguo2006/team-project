@@ -99,7 +99,11 @@ public class GameMap {
     
     public void setCurrentZone(String zoneName) {
         if (zones.containsKey(zoneName)) {
+            System.out.println("GameMap: Transitioning to zone: " + zoneName);
             currentZoneName = zoneName;
+        } else {
+            System.err.println("ERROR: Attempted to transition to non-existent zone: '" + zoneName + "'");
+            System.err.println("Available zones: " + zones.keySet());
         }
     }
     

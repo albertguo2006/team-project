@@ -11,9 +11,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -21,6 +19,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import entity.GameMap;
@@ -36,8 +35,10 @@ public class GamePanel extends JPanel implements ActionListener {
     private final Timer gameTimer;
     private final GameMap gameMap;
     
-    // Background image cache
-    private final Map<String, BufferedImage> backgroundImageCache = new HashMap<>();
+    // Background image cache (thread-safe)
+    private final Map<String, BufferedImage> backgroundImageCache = new java.util.concurrent.ConcurrentHashMap<>();
+    // Track which images are currently being loaded to avoid duplicate loads
+    private final java.util.Set<String> imagesBeingLoaded = java.util.concurrent.ConcurrentHashMap.newKeySet();
     
     // Background music
     private volatile Clip backgroundMusicClip;
@@ -303,8 +304,13 @@ public class GamePanel extends JPanel implements ActionListener {
         // Update background color and music if zone changed
         if (transitioned) {
             Zone newZone = gameMap.getCurrentZone();
-            setBackground(newZone.getBackgroundColor());
-            playBackgroundMusic(newZone.getBackgroundMusicPath());
+            if (newZone != null) {
+                System.out.println("Successfully transitioned to zone: " + newZone.getName());
+                setBackground(newZone.getBackgroundColor());
+                playBackgroundMusic(newZone.getBackgroundMusicPath());
+            } else {
+                System.err.println("ERROR: Transition resulted in null zone!");
+            }
         }
     }
 
@@ -379,15 +385,21 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Draw the game viewport background (image or color fallback)
         Zone currentZone = gameMap.getCurrentZone();
-        BufferedImage backgroundImage = loadBackgroundImage(currentZone.getBackgroundImagePath());
-        
-        if (backgroundImage != null) {
-            // Draw the background image scaled to viewport
-            g2d.drawImage(backgroundImage, viewportX, viewportY, viewportWidth, viewportHeight, null);
-        } else {
-            // Fallback to solid color if image not available
-            g2d.setColor(currentZone.getBackgroundColor());
+        if (currentZone == null) {
+            System.err.println("ERROR: currentZone is null in paintComponent!");
+            g2d.setColor(Color.GRAY);
             g2d.fillRect(viewportX, viewportY, viewportWidth, viewportHeight);
+        } else {
+            BufferedImage backgroundImage = loadBackgroundImage(currentZone.getBackgroundImagePath());
+            
+            if (backgroundImage != null) {
+                // Draw the background image scaled to viewport
+                g2d.drawImage(backgroundImage, viewportX, viewportY, viewportWidth, viewportHeight, null);
+            } else {
+                // Fallback to solid color if image not available
+                g2d.setColor(currentZone.getBackgroundColor());
+                g2d.fillRect(viewportX, viewportY, viewportWidth, viewportHeight);
+            }
         }
         
         // Create clipped viewport for game content
@@ -420,17 +432,20 @@ public class GamePanel extends JPanel implements ActionListener {
     private void drawGame(Graphics2D g) {
         // Draw zone name at top center
         Zone zone = gameMap.getCurrentZone();
-        g.setColor(Color.DARK_GRAY);
-        g.setFont(new Font("Arial", Font.BOLD, 48));  // Scaled up for 1920x1200
-        String zoneName = zone.getName();
-        int zoneNameWidth = g.getFontMetrics().stringWidth(zoneName);
-        g.drawString(zoneName, (VIRTUAL_WIDTH - zoneNameWidth) / 2, 80);
+        if (zone != null) {
+            g.setColor(Color.DARK_GRAY);
+            g.setFont(new Font("Arial", Font.BOLD, 48));  // Scaled up for 1920x1200
+            String zoneName = zone.getName();
+            int zoneNameWidth = g.getFontMetrics().stringWidth(zoneName);
+            g.drawString(zoneName, (VIRTUAL_WIDTH - zoneNameWidth) / 2, 80);
+        }
 
         // Draw player
         drawPlayer(g);
         
         // Draw sleep zone indicator if in Home and player is in zone
-        if (gameMap.getCurrentZone().getName().equals("Home") && inSleepZone) {
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone != null && "Home".equals(currentZone.getName()) && inSleepZone) {
             drawSleepZone(g);
         }
         
@@ -637,124 +652,213 @@ public class GamePanel extends JPanel implements ActionListener {
     
     /**
      * Loads a background image from resources with caching.
-     * Returns null if the image cannot be loaded.
+     * Async loading to prevent EDT freezing.
+     * Returns cached image immediately, or null if not yet loaded.
      *
      * @param imagePath the path to the image resource
-     * @return the loaded BufferedImage, or null if loading fails
+     * @return the loaded BufferedImage, or null if not yet loaded or failed
      */
     private BufferedImage loadBackgroundImage(String imagePath) {
         if (imagePath == null || imagePath.isEmpty()) {
             return null;
         }
         
-        // Check cache first
+        // Check cache first (fast path)
         if (backgroundImageCache.containsKey(imagePath)) {
             return backgroundImageCache.get(imagePath);
         }
         
-        // Try to load the image
-        try {
-            BufferedImage image = ImageIO.read(getClass().getResourceAsStream(imagePath));
-            if (image != null) {
-                backgroundImageCache.put(imagePath, image);
-                System.out.println("Loaded background image: " + imagePath);
-            }
-            return image;
-        } catch (IOException | IllegalArgumentException e) {
-            System.err.println("Failed to load background image: " + imagePath);
-            System.err.println("Error: " + e.getMessage());
-            // Cache null to avoid repeated load attempts
-            backgroundImageCache.put(imagePath, null);
-            return null;
+        // If not in cache and not currently being loaded, start async load
+        if (imagesBeingLoaded.add(imagePath)) {
+            // Successfully added to loading set, start load in background
+            new Thread(() -> {
+                try {
+                    System.out.println("Async loading background image: " + imagePath);
+                    InputStream imageStream = getClass().getResourceAsStream(imagePath);
+                    
+                    if (imageStream == null) {
+                        System.err.println("Image stream is null for: " + imagePath);
+                        backgroundImageCache.put(imagePath, null);
+                        imagesBeingLoaded.remove(imagePath);
+                        return;
+                    }
+                    
+                    BufferedImage image = ImageIO.read(imageStream);
+                    imageStream.close();
+                    
+                    if (image != null) {
+                        backgroundImageCache.put(imagePath, image);
+                        System.out.println("Successfully loaded background image: " + imagePath +
+                                         " (size: " + image.getWidth() + "x" + image.getHeight() + ")");
+                        // Trigger a repaint to show the newly loaded image
+                        SwingUtilities.invokeLater(() -> repaint());
+                    } else {
+                        System.err.println("ImageIO.read returned null for: " + imagePath);
+                        backgroundImageCache.put(imagePath, null);
+                    }
+                } catch (Exception e) {
+                    System.err.println("Failed to load background image: " + imagePath);
+                    System.err.println("Error: " + e.getClass().getName() + ": " + e.getMessage());
+                    e.printStackTrace();
+                    backgroundImageCache.put(imagePath, null);
+                } finally {
+                    imagesBeingLoaded.remove(imagePath);
+                }
+            }, "ImageLoader-" + imagePath.hashCode()).start();
         }
+        
+        // Return null for now - image will appear when loaded
+        return null;
     }
     
     /**
      * Plays background music for the current zone.
+     * Completely non-blocking and fault-tolerant for Linux audio issues.
+     * Includes format conversion for compatibility.
      * If music is already playing and matches the requested path, does nothing.
      * Otherwise, stops current music and starts the new track.
      *
      * @param musicPath the path to the music file (WAV format)
      */
     private void playBackgroundMusic(String musicPath) {
-        if (musicPath == null || musicPath.isEmpty()) {
-            stopBackgroundMusic();
-            return;
-        }
-        
-        synchronized (musicLock) {
-            // If the same music is already playing, don't restart it
-            if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
-                return;
-            }
-            
-            // Stop current music if any
-            stopBackgroundMusic();
-            
-            // Store the path immediately to prevent race conditions
-            final String pathToLoad = musicPath;
-            
-            // Load and play new music in a separate thread
-            new Thread(() -> {
-                try {
-                    InputStream musicStream = getClass().getResourceAsStream(pathToLoad);
-                    
-                    if (musicStream != null) {
-                        BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
-                        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
-                        
-                        synchronized (musicLock) {
-                            // Check if we should still load this music
-                            if (!pathToLoad.equals(currentMusicPath) && currentMusicPath != null) {
-                                audioInputStream.close();
-                                return;
-                            }
-                            
-                            if (AudioSystem.getMixer(null) != null) {
-                                Clip newClip = AudioSystem.getClip();
-                                newClip.open(audioInputStream);
-                                
-                                // Set the clip and path atomically
-                                backgroundMusicClip = newClip;
-                                currentMusicPath = pathToLoad;
-                                
-                                // Loop the music continuously
-                                backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
-                                backgroundMusicClip.start();
-                                
-                                System.out.println("Background music started: " + pathToLoad);
-                            } else {
-                                System.err.println("Warning: Audio mixer not available");
-                            }
-                        }
-                    } else {
-                        System.err.println("Warning: Music file not found: " + pathToLoad);
+        // Everything happens in background - never block game thread
+        new Thread(() -> {
+            try {
+                if (musicPath == null || musicPath.isEmpty()) {
+                    System.out.println("No music path provided, stopping background music");
+                    synchronized (musicLock) {
+                        stopBackgroundMusic();
                     }
-                } catch (Exception e) {
-                    System.err.println("Note: Background music unavailable: " + e.getMessage());
-                    e.printStackTrace();
+                    return;
                 }
-            }, "MusicLoader").start();
-        }
+                
+                // Check if same music is already playing
+                synchronized (musicLock) {
+                    if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
+                        System.out.println("Music already playing: " + musicPath);
+                        return;
+                    }
+                }
+                
+                System.out.println("Initiating music change to: " + musicPath);
+                
+                // Stop old music
+                synchronized (musicLock) {
+                    stopBackgroundMusic();
+                    currentMusicPath = musicPath;
+                }
+                
+                // Small delay to let audio system stabilize
+                Thread.sleep(200);
+                
+                // Load new music
+                System.out.println("Loading new music: " + musicPath);
+                InputStream musicStream = getClass().getResourceAsStream(musicPath);
+                
+                if (musicStream == null) {
+                    System.err.println("Warning: Music file not found: " + musicPath);
+                    return;
+                }
+                
+                BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
+                AudioInputStream originalStream = AudioSystem.getAudioInputStream(bufferedStream);
+                
+                synchronized (musicLock) {
+                    // Check if music path changed during load
+                    if (!musicPath.equals(currentMusicPath)) {
+                        System.out.println("Music path changed during load, aborting: " + musicPath);
+                        originalStream.close();
+                        return;
+                    }
+                    
+                    try {
+                        // Convert to a format that's more likely to be supported on Linux
+                        javax.sound.sampled.AudioFormat originalFormat = originalStream.getFormat();
+                        System.out.println("Original format: " + originalFormat);
+                        
+                        // Try to get a compatible format for the system
+                        javax.sound.sampled.AudioFormat.Encoding encoding = javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED;
+                        javax.sound.sampled.AudioFormat targetFormat = new javax.sound.sampled.AudioFormat(
+                            encoding,
+                            originalFormat.getSampleRate(),
+                            16, // 16-bit
+                            originalFormat.getChannels(),
+                            originalFormat.getChannels() * 2, // frame size
+                            originalFormat.getSampleRate(),
+                            false // little-endian
+                        );
+                        
+                        AudioInputStream convertedStream = originalStream;
+                        if (!AudioSystem.isConversionSupported(targetFormat, originalFormat)) {
+                            System.out.println("Direct conversion not supported, trying AudioSystem conversion");
+                            // If direct conversion isn't supported, try to convert
+                            convertedStream = AudioSystem.getAudioInputStream(targetFormat, originalStream);
+                        } else {
+                            convertedStream = AudioSystem.getAudioInputStream(targetFormat, originalStream);
+                        }
+                        
+                        System.out.println("Target format: " + targetFormat);
+                        
+                        // Get a line that supports this format
+                        javax.sound.sampled.DataLine.Info info = new javax.sound.sampled.DataLine.Info(Clip.class, convertedStream.getFormat());
+                        
+                        if (!AudioSystem.isLineSupported(info)) {
+                            System.err.println("Line not supported for format: " + convertedStream.getFormat());
+                            System.err.println("Audio playback disabled (game continues silently)");
+                            convertedStream.close();
+                            return;
+                        }
+                        
+                        Clip newClip = (Clip) AudioSystem.getLine(info);
+                        newClip.open(convertedStream);
+                        
+                        backgroundMusicClip = newClip;
+                        backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
+                        backgroundMusicClip.start();
+                        
+                        System.out.println("Background music started successfully: " + musicPath);
+                    } catch (Exception e) {
+                        System.err.println("Failed to start music (game continues silently): " + e.getMessage());
+                        System.err.println("Your audio system may not support the required format.");
+                        System.err.println("Game will continue without background music.");
+                    }
+                }
+            } catch (Exception e) {
+                System.err.println("Music system error (non-fatal, game continues silently): " + e.getMessage());
+            }
+        }, "MusicManager").start();
     }
     
     /**
      * Stops the currently playing background music.
+     * Must be called from within synchronized(musicLock) block.
+     * Non-blocking with daemon thread for cleanup.
      */
     private void stopBackgroundMusic() {
-        synchronized (musicLock) {
-            if (backgroundMusicClip != null) {
-                try {
-                    if (backgroundMusicClip.isRunning()) {
-                        backgroundMusicClip.stop();
+        if (backgroundMusicClip != null) {
+            try {
+                System.out.println("Stopping background music...");
+                final Clip clipToStop = backgroundMusicClip;
+                backgroundMusicClip = null; // Clear immediately
+                
+                // Stop in daemon thread to avoid blocking
+                Thread stopThread = new Thread(() -> {
+                    try {
+                        if (clipToStop.isRunning()) {
+                            clipToStop.stop();
+                        }
+                        clipToStop.close();
+                        System.out.println("Background music stopped successfully");
+                    } catch (Exception e) {
+                        System.err.println("Error stopping music (non-fatal): " + e.getMessage());
                     }
-                    backgroundMusicClip.close();
-                } catch (Exception e) {
-                    System.err.println("Error stopping music: " + e.getMessage());
-                }
-                backgroundMusicClip = null;
+                }, "MusicStopper");
+                stopThread.setDaemon(true);
+                stopThread.start();
+            } catch (Exception e) {
+                System.err.println("Error initiating music stop (non-fatal): " + e.getMessage());
             }
-            currentMusicPath = null;
         }
+        currentMusicPath = null;
     }
 }
