@@ -38,24 +38,5 @@
         "result": 0
       }
     }
-  },
-  {
-    "id": 02,
-    "name": "Test Event B",
-    "description": "<html><p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.<html><p>",
-    "outcomes": {
-      0: {
-        "name": "Earn $100: +$100 | 99%",
-        "description": "<html><p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.<html><p>",
-        "chance": 0.99,
-        "result": 100
-      },
-      1: {
-        "name": "Lose $100: -$100 | 1%",
-        "description": "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium",
-        "chance": 0.01,
-        "result": -100
-      }
-    }
   }
-]
+  ]
