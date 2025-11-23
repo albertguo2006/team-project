@@ -69,11 +69,12 @@ public class AlphaStockDataBase implements StockDataBase {
     @Override
     // save fetched api data to a file with the stock symbol name as the file name
     public void saveToFile(String json, String symbol) {
-        try (FileWriter writer = new FileWriter(symbol)) {
+        String filePath = "src/main/resources/stock_data/" + symbol;
+        try (FileWriter writer = new FileWriter(filePath)) {
             writer.write(json);
         }
         catch (IOException e) { // if there is an issue writing to the file
-            System.out.println("Error writing to file: " + symbol);
+            System.out.println("Error writing to file: " + filePath);
             e.printStackTrace();
         }
     }
@@ -93,7 +94,8 @@ public class AlphaStockDataBase implements StockDataBase {
         // use mapper to parse json file
         ObjectMapper mapper = new ObjectMapper();
         // open file and extract time series data
-        JsonNode timeSeries = mapper.readTree(new File(symbol)).get("Time Series (5min)");
+        String filePath = "src/main/resources/stock_data/" + symbol;
+        JsonNode timeSeries = mapper.readTree(new File(filePath)).get("Time Series (5min)");
 
         if (timeSeries == null) { // if time series data not found
             throw new RuntimeException("No 'Time Series (5min)' found.");

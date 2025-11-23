@@ -33,7 +33,7 @@ public class AlphaStockDataBaseTest {
         }
         """;
 
-        try (FileWriter writer = new FileWriter("time_series_test.json")) {
+        try (FileWriter writer = new FileWriter("src/main/resources/stock_data/time_series_test.json")) {
             writer.write(json);
         }
 
