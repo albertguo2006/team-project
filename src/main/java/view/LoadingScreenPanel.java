@@ -32,7 +32,7 @@ public class LoadingScreenPanel extends JPanel {
     private static final Color BACKGROUND_COLOR = new Color(20, 20, 30);
     private static final Color TEXT_COLOR = new Color(255, 255, 255);
     private static final Color HIGHLIGHT_COLOR = new Color(255, 50, 50);  // Red for warning
-    private static final int DISPLAY_DURATION_MS = 3000;  // 3 seconds
+    private static final int DISPLAY_DURATION_MS = 5000;  // 3 seconds
     
     private Clip audioClip;
     private Runnable onComplete;
@@ -51,6 +51,8 @@ public class LoadingScreenPanel extends JPanel {
      */
     public void setOnComplete(Runnable onComplete) {
         this.onComplete = onComplete;
+        System.out.println("LoadingScreenPanel.setOnComplete() called, callback is: " +
+                          (onComplete != null ? "NOT NULL" : "NULL"));
     }
     
     /**
@@ -119,15 +121,19 @@ public class LoadingScreenPanel extends JPanel {
             long endTime = System.currentTimeMillis();
             long actualDuration = endTime - startTime;
             System.out.println("Timer fired at: " + endTime + " (actual duration: " + actualDuration + "ms)");
+            System.out.println("onComplete is: " + (onComplete != null ? "NOT NULL" : "NULL"));
             
             stopAudio();
             if (onComplete != null) {
                 System.out.println("Calling onComplete callback");
-                onComplete.run();
+                SwingUtilities.invokeLater(() -> {
+                    onComplete.run();
+                });
+            } else {
+                System.err.println("ERROR: onComplete callback is null! Cannot transition from loading screen.");
             }
         });
         transitionTimer.setRepeats(false);
-        transitionTimer.setInitialDelay(DISPLAY_DURATION_MS);
         transitionTimer.start();
     }
     
