@@ -1,12 +1,22 @@
 package view;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridLayout;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.Timer;
+
 import entity.Portfolio;
 import entity.Stock;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
-
-import javax.swing.*;
-import java.awt.*;
 
 /**
  * view for the stock game
@@ -74,6 +84,18 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     @Override
     public void presentError(String message) {
         JOptionPane.showMessageDialog(frame, "Error: " + message);
+    }
+
+    @Override
+    public void prepareSuccessView(PlayStockGameOutputData outputData) {
+        // Present success view for valid investment
+        presentPriceUpdate(outputData);
+    }
+
+    @Override
+    public void prepareFailView(String errorMessage) {
+        // Present failure view for invalid investment
+        presentError(errorMessage);
     }
 
     // details for making the panels, buttons etc.
