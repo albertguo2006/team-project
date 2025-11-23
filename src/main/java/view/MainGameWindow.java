@@ -6,16 +6,25 @@ import java.awt.Dimension;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.table.DefaultTableModel;
 
+import data_access.Paybill.PaybillDataAccessObject;
 import data_access.SleepDataAccessObject;
 import entity.GameSettings;
 import entity.Player;
 import interface_adapter.events.PlayerInputController;
-import interface_adapter.events.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.paybills.PaybillController;
+import interface_adapter.paybills.PaybillPresenter;
+import interface_adapter.paybills.PaybillViewModel;
 import interface_adapter.sleep.SleepController;
 import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
 import use_case.PlayerMovementUseCase;
+import use_case.paybills.PaybillDataAccessInterface;
+import use_case.paybills.PaybillInputBoundary;
+import use_case.paybills.PaybillInteractor;
+import use_case.paybills.PaybillOutputBoundary;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
 import use_case.sleep.SleepInteractor;
@@ -55,6 +64,9 @@ public class MainGameWindow extends JFrame {
     private DaySummaryView daySummaryView;
     private EndGameView endGameView;
     private Player player;
+    private PaybillView paybillView;
+    private PaybillViewModel paybillViewModel;
+    PaybillController paybillController;
     
     // Card names for CardLayout
     private static final String LOADING_CARD = "loading";
@@ -64,6 +76,7 @@ public class MainGameWindow extends JFrame {
     private static final String IN_GAME_MENU_CARD = "inGameMenu";
     private static final String DAY_SUMMARY_CARD = "daySummary";
     private static final String END_GAME_CARD = "endGame";
+    private static final String PAYBILL_CARD = "paybill";
     
     /**
      * Constructs the MainGameWindow.
@@ -151,6 +164,9 @@ public class MainGameWindow extends JFrame {
             inGameMenuPanel.addSaveListener(e -> saveGame());
             inGameMenuPanel.addSettingsListener(e -> showSettingsFromGame());
             inGameMenuPanel.addSaveAndExitListener(e -> saveAndExit());
+            inGameMenuPanel.addPayBillsListener(e -> {
+                showPaybillView();
+            });
         }
     }
     
@@ -204,10 +220,14 @@ public class MainGameWindow extends JFrame {
     private void initializeGamePanel() {
         // Create player entity
         this.player = new Player("Player");
-        
+
+
         // Create view manager model
         this.viewManagerModel = new ViewManagerModel();
-        
+
+        // Initialize Paybill system
+        initializePaybillSystem();
+
         // Create sleep system components (following Clean Architecture)
         // 1. View Model
         this.sleepViewModel = new SleepViewModel();
@@ -254,6 +274,59 @@ public class MainGameWindow extends JFrame {
         cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
         cardPanel.add(daySummaryView, DAY_SUMMARY_CARD);
         cardPanel.add(endGameView, END_GAME_CARD);
+        cardPanel.add(paybillView, PAYBILL_CARD);
+
+        // Connect ViewManagerModel to CardLayout
+        viewManagerModel.addPropertyChangeListener(evt -> {
+            if ("state".equals(evt.getPropertyName())) {
+                String viewName = (String) evt.getNewValue();
+                System.out.println("ViewManager: Switching to view: " + viewName);
+                cardLayout.show(cardPanel, viewName);
+
+                // Request focus for the new view
+                switch (viewName) {
+                    case GAME_CARD:
+                        gamePanel.requestFocusInWindow();
+                        break;
+                    case DAY_SUMMARY_CARD:
+                        daySummaryView.requestFocusInWindow();
+                        break;
+                    case END_GAME_CARD:
+                        endGameView.requestFocusInWindow();
+                        break;
+                    case PAYBILL_CARD:
+                        paybillView.requestFocusInWindow();
+                        paybillView.loadInitialBills();
+                        break;
+                }
+            }
+        });
+    }
+
+    private void initializePaybillSystem() {
+        System.out.println("=== INITIALIZE PAYBILL SYSTEM STARTED ===");
+        // Create Paybill ViewModel
+        this.paybillViewModel = new PaybillViewModel();
+
+        // Create Paybill Data Access
+        PaybillDataAccessInterface paybillDataAccess = new PaybillDataAccessObject();
+
+        // Create Paybill Presenter
+        PaybillOutputBoundary paybillPresenter = new PaybillPresenter(paybillViewModel, viewManagerModel);
+
+        // Create Paybill Interactor
+        PaybillInputBoundary paybillInteractor = new PaybillInteractor(paybillDataAccess, paybillPresenter, player);
+
+        // Create Paybill Controller
+        this.paybillController = new PaybillController(paybillInteractor);
+
+        // Create Paybill View
+        DefaultTableModel tableModel = new DefaultTableModel();
+        DefaultTableModel tableModel2 = new DefaultTableModel();
+        this.paybillView = new PaybillView(paybillViewModel, paybillController, viewManagerModel);
+
+        // Add to card panel
+        cardPanel.add(paybillView, PAYBILL_CARD);
     }
     
     /**
@@ -319,7 +392,20 @@ public class MainGameWindow extends JFrame {
             showMainMenu();
         }
     }
-    
+
+    /**
+     * Shows the pay bills view.
+     */
+    public void showPaybillView(){
+        if (paybillView != null) {
+            cardLayout.show(cardPanel, PAYBILL_CARD);
+            paybillView.requestFocusInWindow();
+
+            // Refresh bills data
+            paybillView.loadInitialBills();
+        }
+    }
+
     /**
      * Loads a saved game (frontend stub - backend to be implemented).
      */

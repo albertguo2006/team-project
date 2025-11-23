@@ -1,7 +1,7 @@
 package interface_adapter.sleep;
 
 import entity.GameEnding;
-import interface_adapter.events.ViewManagerModel;
+import interface_adapter.ViewManagerModel;
 import use_case.sleep.SleepOutputBoundary;
 import use_case.sleep.SleepOutputData;
 
@@ -37,7 +37,7 @@ public class SleepPresenter implements SleepOutputBoundary {
         sleepViewModel.setNewDay(outputData.getNewDay());
         sleepViewModel.setWeekComplete(outputData.isWeekComplete());
         sleepViewModel.setErrorMessage(null);
-        
+
         // Switch to day summary view
         viewManagerModel.setState("daySummary");
         viewManagerModel.firePropertyChange();

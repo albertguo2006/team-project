@@ -1,4 +1,4 @@
-package interface_adapter.events.paybills;
+package interface_adapter.paybills;
 
 import use_case.paybills.PaybillInputBoundary;
 

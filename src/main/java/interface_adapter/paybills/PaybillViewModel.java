@@ -1,12 +1,12 @@
-package interface_adapter.events.paybills;
+package interface_adapter.paybills;
 
-import interface_adapter.events.ViewModel;
+import interface_adapter.ViewModel;
 
 /**
  * The View Model for the Paybill View
  */
 
-public class PaybillViewModel extends ViewModel {
+public class PaybillViewModel extends ViewModel<PaybillState> {
     private PaybillState state = new PaybillState();
 
     public PaybillViewModel() {

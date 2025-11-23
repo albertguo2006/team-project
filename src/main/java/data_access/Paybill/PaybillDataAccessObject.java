@@ -51,10 +51,7 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
     ));
 
     public PaybillDataAccessObject() {
-        loadBillsFromFile();
-        if (bills.isEmpty()) {
-            generateWeeklyBills(); // Only generate if no saved bills
-        }
+        generateWeeklyBills(); // Don't load from file for new games - always generate fresh bills
     }
 
     @Override

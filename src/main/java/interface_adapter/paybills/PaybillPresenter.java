@@ -1,8 +1,6 @@
-package interface_adapter.events.paybills;
+package interface_adapter.paybills;
 
-import interface_adapter.events.ViewManagerModel;
-import io.opencensus.stats.ViewManager;
-import use_case.paybills.PaybillInputBoundary;
+import interface_adapter.ViewManagerModel;
 import use_case.paybills.PaybillOutputBoundary;
 import use_case.paybills.PaybillOutputData;
 

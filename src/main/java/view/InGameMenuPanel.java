@@ -38,6 +38,7 @@ public class InGameMenuPanel extends JPanel {
     private final JButton saveButton;
     private final JButton settingsButton;
     private final JButton saveAndExitButton;
+    private final JButton payBillsButton; // New bills button
     
     /**
      * Constructs the in-game menu panel with all menu buttons.
@@ -61,6 +62,7 @@ public class InGameMenuPanel extends JPanel {
         saveButton = createMenuButton("Save Game");
         settingsButton = createMenuButton("Settings");
         saveAndExitButton = createMenuButton("Save & Exit");
+        payBillsButton = createMenuButton("Pay Bills");
         
         add(resumeButton);
         add(Box.createRigidArea(new Dimension(0, 20)));
@@ -69,6 +71,8 @@ public class InGameMenuPanel extends JPanel {
         add(settingsButton);
         add(Box.createRigidArea(new Dimension(0, 20)));
         add(saveAndExitButton);
+        add(Box.createRigidArea(new Dimension(0, 20)));
+        add(payBillsButton);
         
         // Add vertical glue at bottom
         add(Box.createVerticalGlue());
@@ -155,6 +159,14 @@ public class InGameMenuPanel extends JPanel {
      */
     public void addSaveAndExitListener(ActionListener listener) {
         saveAndExitButton.addActionListener(listener);
+    }
+
+    /**
+     * Adds an action listener to the Pay Bills button
+     * @param listener the action listener to add
+     */
+    public void addPayBillsListener(ActionListener listener) {
+        payBillsButton.addActionListener(listener);
     }
     
     @Override
