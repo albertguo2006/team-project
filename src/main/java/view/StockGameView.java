@@ -101,6 +101,16 @@ public class StockGameView implements PlayStockGameOutputBoundary {
             xData.add(i);
         }
 
+        // Calculate min and max prices for dynamic y-axis
+        double minPrice = prices.stream().min(Double::compare).orElse(0.0);
+        double maxPrice = prices.stream().max(Double::compare).orElse(100.0);
+
+        // Add 5% padding to top and bottom for better visualization
+        double range = maxPrice - minPrice;
+        double padding = range * 0.05;
+        chart.getStyler().setYAxisMin(minPrice - padding);
+        chart.getStyler().setYAxisMax(maxPrice + padding);
+
         // Update chart series
         chart.updateCategorySeries("Price", xData, prices, null);
         chartPanel.repaint();
@@ -179,7 +189,6 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         // Style the chart to look like candlesticks
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
         chart.getStyler().setLabelsVisible(false); // Remove x-axis labels
-        chart.getStyler().setYAxisMin(null); // Let y-axis be dynamic (don't force 0)
         chart.getStyler().setAvailableSpaceFill(0.9); // Make bars wider (90% of space)
         chart.getStyler().setOverlapped(true); // Allow bars to be close together
 
