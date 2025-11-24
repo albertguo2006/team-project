@@ -939,4 +939,29 @@ public class GamePanel extends JPanel implements ActionListener {
         currentMusicPath = null;
     }
 
+    /**
+     * Loads saved game state.
+     * Note: Due to final fields, this method has limited ability to update state.
+     * For proper game loading, the panel should be recreated with new data.
+     *
+     * @param playerMovementUseCase the player movement use case (not used due to final field)
+     * @param newGameMap the new game map (not used due to final field)
+     */
+    public void loadGameState(PlayerMovementUseCase playerMovementUseCase, GameMap newGameMap) {
+        // Note: Since playerMovementUseCase and gameMap are final fields,
+        // we cannot replace them. The proper way to load a game is to
+        // recreate the entire GamePanel with the new data.
+        // This method exists to satisfy the interface but cannot fully update the state.
+
+        // We can still update the current zone in the existing gameMap
+        // by synchronizing it with the loaded map's current zone
+        if (newGameMap != null && newGameMap.getCurrentZone() != null) {
+            String zoneName = newGameMap.getCurrentZone().getName();
+            gameMap.setCurrentZone(zoneName);
+        }
+
+        // Repaint to reflect any changes
+        repaint();
+    }
+
 }

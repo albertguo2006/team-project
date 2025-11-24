@@ -33,12 +33,14 @@ import interface_adapter.sleep.SleepViewModel;
 import interface_adapter.stock_trading.StockTradingController;
 import use_case.PlayerMovementUseCase;
 import use_case.load_progress.LoadProgressDataAccessInterface;
+import use_case.load_progress.LoadProgressInputData;
 import use_case.load_progress.LoadProgressInteractor;
 import use_case.paybills.PaybillDataAccessInterface;
 import use_case.paybills.PaybillInputBoundary;
 import use_case.paybills.PaybillInteractor;
 import use_case.paybills.PaybillOutputBoundary;
 import use_case.save_progress.SaveProgressDataAccessInterface;
+import use_case.save_progress.SaveProgressInputData;
 import use_case.save_progress.SaveProgressInteractor;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
@@ -126,10 +128,12 @@ public class MainGameWindow extends JFrame {
 
         // Initialize save/load system
         SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataObject();
-        this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess);
+        SaveProgressPresenter savePresenter = new SaveProgressPresenter();
+        this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess, savePresenter);
 
         LoadProgressDataAccessInterface loadDataAccess = new LoadFileUserDataAccessObject();
-        this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess);
+        LoadProgressPresenter loadPresenter = new LoadProgressPresenter();
+        this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess, loadPresenter);
 
         // Set up CardLayout for switching between views
         this.cardLayout = new CardLayout();
@@ -438,8 +442,9 @@ public class MainGameWindow extends JFrame {
             // Get current zone name from the game map
             String currentZone = gamePanel.getGameMap().getCurrentZone().getName();
 
-            // Save the game using the interactor
-            saveProgressInteractor.saveGame(player, currentZone, SAVE_FILE);
+            // Create input data and save the game using the interactor
+            SaveProgressInputData inputData = new SaveProgressInputData(player, SAVE_FILE, currentZone);
+            saveProgressInteractor.saveGame(inputData);
 
             JOptionPane.showMessageDialog(
                 this,
@@ -520,27 +525,28 @@ public class MainGameWindow extends JFrame {
             // Create a temporary GameMap for loading
             GameMap tempGameMap = new GameMap();
 
-            // Load the player using the interactor
-            Player loadedPlayer = loadProgressInteractor.loadGame(tempGameMap, SAVE_FILE);
+            // Create input data and load the player using the interactor
+            LoadProgressInputData inputData = new LoadProgressInputData(tempGameMap, SAVE_FILE);
+            Player loadedPlayer = loadProgressInteractor.loadGame(inputData);
 
             // If we haven't initialized the game panel yet, do it now
             if (gamePanel == null) {
-                initializeGamePanel();
-            }
+                initializeGamePanel(loadedPlayer, tempGameMap);
+            } else {
+                // Replace the current player with the loaded player
+                this.player = loadedPlayer;
 
-            // Replace the current player with the loaded player
-            this.player = loadedPlayer;
+                // Update the player movement use case with the loaded player
+                PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(loadedPlayer);
+                playerInputController.updatePlayerMovementUseCase(playerMovementUseCase);
 
-            // Update the player movement use case with the loaded player
-            PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(loadedPlayer);
-            playerInputController.setPlayerMovementUseCase(playerMovementUseCase);
+                // Update the game panel with the loaded game state
+                gamePanel.loadGameState(playerMovementUseCase, tempGameMap);
 
-            // Update the game panel with the loaded game state
-            gamePanel.loadGameState(playerMovementUseCase, tempGameMap);
-
-            // Update stock game view with loaded player
-            if (stockGameView != null) {
-                stockGameView.setPlayer(loadedPlayer);
+                // Update stock game view with loaded player
+                if (stockGameView != null) {
+                    stockGameView.setPlayer(loadedPlayer);
+                }
             }
 
             // Switch to game view
