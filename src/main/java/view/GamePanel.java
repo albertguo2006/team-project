@@ -67,6 +67,10 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int STOCK_TRADING_ZONE_WIDTH = 239;  // 1427 - 1188
     private static final int STOCK_TRADING_ZONE_HEIGHT = 226; // 470 - 244
     private boolean inStockTradingZone = false;
+
+    // NPC interaction
+    private static final double NPC_INTERACTION_RADIUS = 100.0;
+    private NPC nearbyNPC = null;
     
     // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
     private int viewportWidth;
@@ -186,6 +190,7 @@ public class GamePanel extends JPanel implements ActionListener {
         checkZoneTransition();
         checkSleepZone();
         checkStockTradingZone();
+        checkNPCProximity();
 
         // === RENDER PHASE ===
         this.repaint();
@@ -543,7 +548,116 @@ public class GamePanel extends JPanel implements ActionListener {
                 break;
         }
     }
-    
+
+    /**
+     * Draws all NPCs in the current zone with personality-based visual styles.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawNPCs(Graphics2D g) {
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone == null) return;
+
+        List<NPC> npcsInZone = npcDataAccess.getNPCsInZone(currentZone.getName());
+
+        for (NPC npc : npcsInZone) {
+            int npcX = (int) npc.getX();
+            int npcY = (int) npc.getY();
+            int npcSize = 64;  // Same size as player
+
+            // Draw NPC shape based on personality
+            drawNPCShape(g, npc, npcX, npcY, npcSize);
+
+            // Draw name label above NPC
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            String name = npc.getName();
+            int nameWidth = g.getFontMetrics().stringWidth(name);
+            g.drawString(name, npcX + (npcSize - nameWidth) / 2, npcY - 10);
+        }
+    }
+
+    /**
+     * Draws a specific NPC shape based on their personality.
+     *
+     * @param g the Graphics2D context
+     * @param npc the NPC to draw
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param size the size of the shape
+     */
+    private void drawNPCShape(Graphics2D g, NPC npc, int x, int y, int size) {
+        String name = npc.getName();
+
+        // Different shapes and colors for different NPC personalities
+        switch (name) {
+            case "Bob":
+                // Bureaucrat - Gray square (rigid, formal)
+                g.setColor(new Color(128, 128, 128));
+                g.fillRect(x, y, size, size);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawRect(x, y, size, size);
+                break;
+
+            case "Danny":
+                // CS TA - Green circle (friendly, approachable)
+                g.setColor(new Color(34, 139, 34));  // Forest green
+                g.fillOval(x, y, size, size);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawOval(x, y, size, size);
+                break;
+
+            case "Sebestian":
+                // Eccentric - Purple diamond (quirky, unique)
+                g.setColor(new Color(138, 43, 226));  // Blue violet
+                int[] xPoints = {x + size/2, x + size, x + size/2, x};
+                int[] yPoints = {y, y + size/2, y + size, y + size/2};
+                g.fillPolygon(xPoints, yPoints, 4);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawPolygon(xPoints, yPoints, 4);
+                break;
+
+            case "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon":
+                // Aristocrat - Gold hexagon (distinguished, complex)
+                g.setColor(new Color(218, 165, 32));  // Goldenrod
+                int[] hexX = new int[6];
+                int[] hexY = new int[6];
+                for (int i = 0; i < 6; i++) {
+                    double angle = Math.PI / 3 * i;
+                    hexX[i] = (int) (x + size/2 + size/2 * Math.cos(angle));
+                    hexY[i] = (int) (y + size/2 + size/2 * Math.sin(angle));
+                }
+                g.fillPolygon(hexX, hexY, 6);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawPolygon(hexX, hexY, 6);
+                break;
+
+            case "Sophia":
+                // Curious learner - Pink triangle (dynamic, growing)
+                g.setColor(new Color(255, 182, 193));  // Light pink
+                int[] triX = {x + size/2, x + size, x};
+                int[] triY = {y, y + size, y + size};
+                g.fillPolygon(triX, triY, 3);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawPolygon(triX, triY, 3);
+                break;
+
+            default:
+                // Default - Orange rectangle
+                g.setColor(new Color(255, 140, 0));  // Dark orange
+                g.fillRect(x, y, size, size);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(2));
+                g.drawRect(x, y, size, size);
+                break;
+        }
+    }
+
     /**
      * Checks if the player is in the sleep zone (top-right 400x400px in Home).
      */
@@ -654,6 +768,42 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public boolean isInStockTradingZone() {
         return inStockTradingZone;
+    }
+
+    /**
+     * Checks if the player is near any NPC in the current zone.
+     */
+    private void checkNPCProximity() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+
+        if (currentZone == null) {
+            nearbyNPC = null;
+            return;
+        }
+
+        List<NPC> npcsInZone = npcDataAccess.getNPCsInZone(currentZone.getName());
+        nearbyNPC = null;
+
+        for (NPC npc : npcsInZone) {
+            double distance = Math.sqrt(
+                Math.pow(player.getX() - npc.getX(), 2) +
+                Math.pow(player.getY() - npc.getY(), 2)
+            );
+
+            if (distance < NPC_INTERACTION_RADIUS) {
+                nearbyNPC = npc;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Gets the NPC that is currently near the player, if any.
+     * @return the nearby NPC, or null if no NPC is nearby
+     */
+    public NPC getNearbyNPC() {
+        return nearbyNPC;
     }
 
     /**
