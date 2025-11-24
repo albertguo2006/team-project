@@ -3,18 +3,25 @@ package view;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
 import data_access.LoadFileUserDataAccessObject;
+import data_access.NPCDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.SaveFileUserDataObject;
 import data_access.SleepDataAccessObject;
 import entity.GameMap;
 import entity.GameSettings;
+import entity.NPC;
 import entity.Player;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.PlayerInputController;
@@ -308,10 +315,13 @@ public class MainGameWindow extends JFrame {
         
         // Set up pause menu listener
         playerInputController.setPauseMenuListener(() -> showInGameMenu());
-        
+
+        // Create NPC data access
+        NPCDataAccessObject npcDataAccess = new NPCDataAccessObject();
+
         // Create game panel
-        this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController, gameMap);
-        
+        this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController, gameMap, npcDataAccess);
+
         // Set up sleep system callbacks
         playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
         playerInputController.setSleepActionListener(() -> sleepController.sleep(player));
@@ -322,7 +332,14 @@ public class MainGameWindow extends JFrame {
             gamePanel.pauseGame();  // Pause main game while trading
             stockTradingController.startStockTrading(player);
         });
-        
+
+        // Set up NPC interaction callbacks
+        playerInputController.setNPCInteractionChecker(() -> gamePanel.getNearbyNPC());
+        playerInputController.setNPCInteractionListener((NPC npc) -> {
+            gamePanel.pauseGame();
+            showNPCDialog(npc, npcDataAccess);
+        });
+
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
         this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
@@ -491,7 +508,103 @@ public class MainGameWindow extends JFrame {
         cardLayout.show(cardPanel, SETTINGS_CARD);
         settingsPanel.requestFocusInWindow();
     }
-    
+
+    /**
+     * Shows the NPC interaction dialog for a specific NPC.
+     *
+     * @param npc The NPC to interact with
+     * @param npcDataAccess The NPC data access object
+     */
+    private void showNPCDialog(NPC npc, NPCDataAccessObject npcDataAccess) {
+        // Create ViewModel
+        interface_adapter.events.npc_interactions.NpcInteractionsViewModel viewModel =
+                new interface_adapter.events.npc_interactions.NpcInteractionsViewModel();
+
+        // Create Presenter
+        interface_adapter.events.npc_interactions.NpcInteractionsPresenter presenter =
+                new interface_adapter.events.npc_interactions.NpcInteractionsPresenter(viewModel);
+
+        // Create Interactor
+        use_case.npc_interactions.NpcInteractionsInteractor interactor =
+                new use_case.npc_interactions.NpcInteractionsInteractor(npcDataAccess, presenter);
+
+        // Create Controller
+        interface_adapter.events.npc_interactions.NpcInteractionsController controller =
+                new interface_adapter.events.npc_interactions.NpcInteractionsController(interactor);
+
+        // Create dialog
+        JFrame frame = new JFrame("Chat with " + npc.getName());
+        frame.setSize(400, 500);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        JTextArea chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(chatArea);
+
+        JTextField inputField = new JTextField(25);
+        JButton sendBtn = new JButton("Send");
+
+        JPanel panel = new JPanel();
+        panel.setLayout(new java.awt.BorderLayout());
+        panel.add(inputField, java.awt.BorderLayout.CENTER);
+        panel.add(sendBtn, java.awt.BorderLayout.EAST);
+
+        frame.getContentPane().setLayout(new java.awt.BorderLayout());
+        frame.getContentPane().add(scrollPane, java.awt.BorderLayout.CENTER);
+        frame.getContentPane().add(panel, java.awt.BorderLayout.SOUTH);
+
+        // Set up viewModel listener for updating chat area
+        viewModel.setListener(() -> {
+            simulateTyping(chatArea, viewModel.getNpcName(), viewModel.getAiResponse());
+        });
+
+        // Set up send button action
+        sendBtn.addActionListener(e -> {
+            String message = inputField.getText();
+            if (!message.trim().isEmpty()) {
+                chatArea.append("You: " + message + "\n");
+                inputField.setText("");
+                controller.handleUserMessage(npc.getName(), message);
+            }
+        });
+
+        // Handle window closing to resume game
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                gamePanel.resumeGame();
+                frame.dispose();
+            }
+        });
+
+        frame.setVisible(true);
+    }
+
+    /**
+     * Simulates typing effect for NPC responses.
+     *
+     * @param chatArea The text area to display the message
+     * @param speaker The name of the speaker
+     * @param message The message to display
+     */
+    private void simulateTyping(JTextArea chatArea, String speaker, String message) {
+        final String fullMessage = speaker + ": " + message + "\n";
+        Timer timer = new Timer(30, null);
+        final int[] index = {0};
+
+        timer.addActionListener(e -> {
+            if (index[0] < fullMessage.length()) {
+                chatArea.append(String.valueOf(fullMessage.charAt(index[0])));
+                chatArea.setCaretPosition(chatArea.getDocument().getLength());
+                index[0]++;
+            } else {
+                ((Timer) e.getSource()).stop();
+            }
+        });
+
+        timer.start();
+    }
+
     /**
      * Saves and exits to main menu.
      */

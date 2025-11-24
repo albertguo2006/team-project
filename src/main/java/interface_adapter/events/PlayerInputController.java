@@ -145,7 +145,25 @@ public class PlayerInputController implements KeyListener {
     public void setStockTradingActionListener(StockTradingActionListener listener) {
         this.stockTradingActionListener = listener;
     }
-    
+
+    /**
+     * Sets the NPC interaction checker callback.
+     *
+     * @param checker the NPC interaction checker
+     */
+    public void setNPCInteractionChecker(NPCInteractionChecker checker) {
+        this.npcInteractionChecker = checker;
+    }
+
+    /**
+     * Sets the NPC interaction listener callback.
+     *
+     * @param listener the NPC interaction listener
+     */
+    public void setNPCInteractionListener(NPCInteractionListener listener) {
+        this.npcInteractionListener = listener;
+    }
+
     /**
      * Called when a key is pressed.
      * Translates WASD keys to Direction commands and notifies the use case.
@@ -182,6 +200,14 @@ public class PlayerInputController implements KeyListener {
                 playerMovementUseCase.setMovementState(Direction.RIGHT, true);
                 break;
             case KeyEvent.VK_E:
+                // Handle NPC interaction if near an NPC (highest priority)
+                if (npcInteractionChecker != null && npcInteractionListener != null) {
+                    NPC nearbyNPC = npcInteractionChecker.getNearbyNPC();
+                    if (nearbyNPC != null) {
+                        npcInteractionListener.onNPCInteractionRequested(nearbyNPC);
+                        break;
+                    }
+                }
                 // Handle sleep action if in sleep zone
                 if (sleepZoneChecker != null && sleepZoneChecker.isInSleepZone() &&
                     sleepActionListener != null) {
