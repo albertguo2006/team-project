@@ -1,110 +1,95 @@
 package use_case.save_progress;
 
-import entity.Player;
-import org.junit.jupiter.api.BeforeEach;
+import data_access.EventDataAccessObject;
+import data_access.ItemDataAccessObject;
+import data_access.NPCDataAccessObject;
+import data_access.SaveFileUserDataObject;
+import entity.*;
+import interface_adapter.save_progress.SaveProgressPresenter;
 import org.junit.jupiter.api.Test;
+import use_case.inventory.ItemDataAccessInterface;
+import use_case.npc_interactions.NpcInteractionsUserDataAccessInterface;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class SaveProgressInteractorTest {
+public class SaveProgressInteractorTest {
+    SaveProgressDataAccessInterface saveFileUserDAO = new SaveFileUserDataObject();
+    SaveProgressOutputBoundary saveProgressPresenter = new SaveProgressPresenter();
+    SaveProgressInteractor saveProgressInteractor = new SaveProgressInteractor(saveFileUserDAO, saveProgressPresenter);
+    NpcInteractionsUserDataAccessInterface npcDAO = new NPCDataAccessObject();
+    EventDataAccessObject eventDAO = new EventDataAccessObject();
+    ItemDataAccessInterface itemDAO = new ItemDataAccessObject();
 
-    private SaveProgressInteractor saveProgressInteractor;
-    private TestSaveProgressDataAccessObject dataAccessObject;
+    List<Event> events = eventDAO.createEventList();
+    HashMap<String, Item> items = itemDAO.getItemMap();
+    Map<String, NPC> npcs = npcDAO.getAllNpcs();
 
-    @BeforeEach
-    void setUp() {
-        dataAccessObject = new TestSaveProgressDataAccessObject();
-        saveProgressInteractor = new SaveProgressInteractor(dataAccessObject);
+
+    @Test
+    void successSaveProgress() throws IOException {
+        GameMap gameMap = new GameMap();
+        HashMap<String, Integer> stats = new HashMap<>();
+        stats.put("Hunger", 30);
+        stats.put("Energy", 70);
+        stats.put("Mood", 80);
+        Player testPlayer = new Player("Anya", 308.06, 37.2, 56.1, stats);
+        testPlayer.addNPCScore(npcs.get("Bob"), 5);
+
+        testPlayer.addEvent(events.get(0));
+        testPlayer.addEvent(events.get(1));
+
+        testPlayer.addInventory(1, items.get("Coffee"));
+        testPlayer.addInventory(3, items.get("Energy Drink"));
+
+        HashMap<Stock, Double> investments = new HashMap<>();
+        Stock stock1 = new Stock("MCD", "McDonalds", 426.14);
+        Stock stock2 = new Stock("NVDA", "NVIDIA Corp", 253.72);
+        investments.put(stock1, 3.57);
+        investments.put(stock2, 6.32);
+
+        testPlayer.setPortfolio(new Portfolio(803.21, investments));
+        testPlayer.setCurrentDay(Day.WEDNESDAY);
+
+        SaveProgressInputData inputData = new SaveProgressInputData(testPlayer,
+                "src/main/resources/testSuccessSaveFile.json", gameMap.getCurrentZone().getName());
+        saveProgressInteractor.saveGame(inputData);
+
+        // TODO: write assertions for this,,  a bit unsure on how to do so when comparing JSON files
     }
 
     @Test
-    void successSaveGameTest() throws IOException {
-        Player player = new Player("TestPlayer");
-        player.setBalance(1500.0);
-        player.setX(100.0);
-        player.setY(200.0);
-        String currentZone = "home";
-        String saveFile = "test_save.json";
+    void successSaveProgress_FileMismatch() throws IOException {
+        Player player = new Player("Armand");
+        GameMap gameMap = new GameMap();
 
-        saveProgressInteractor.saveGame(player, currentZone, saveFile);
+        SaveProgressInputData inputData = new SaveProgressInputData(player,
+                "src/main/resources/testSuccessSaveFile.json", gameMap.getCurrentZone().getName());
 
-        assertTrue(dataAccessObject.wasSaveCalled());
-        assertEquals(player, dataAccessObject.getSavedPlayer());
-        assertEquals(currentZone, dataAccessObject.getSavedZone());
-        assertEquals(saveFile, dataAccessObject.getSavedFile());
+        saveProgressInteractor.saveGame(inputData);
+
+
+        // TODO: write assertions for this,,  a bit unsure on how to do so when comparing JSON files
     }
 
     @Test
-    void saveGameWithDifferentPlayerStatesTest() throws IOException {
-        Player player1 = new Player("Player1");
-        player1.setBalance(5000.0);
+    void failSaveProgress_ThrowsException() {
+        Player player = new Player("Cynthia");
+        GameMap gameMap = new GameMap();
 
-        Player player2 = new Player("Player2");
-        player2.setBalance(100.0);
+        SaveProgressInputData inputData = new SaveProgressInputData(player,
+                "invalid/file/path/.json", gameMap.getCurrentZone().getName());
 
-        saveProgressInteractor.saveGame(player1, "office", "save1.json");
-        assertEquals(player1, dataAccessObject.getSavedPlayer());
-        assertEquals("office", dataAccessObject.getSavedZone());
-
-        saveProgressInteractor.saveGame(player2, "subway", "save2.json");
-        assertEquals(player2, dataAccessObject.getSavedPlayer());
-        assertEquals("subway", dataAccessObject.getSavedZone());
+        Exception exception = assertThrows(FileNotFoundException.class, () -> {
+            saveProgressInteractor.saveGame(inputData);
+        });
+        assert(exception.getMessage().equals("Invalid Filepath! Unable to save!"));
+        // Considering making custom exceptions.... but IDK what custom exceptions are actually for....
     }
 
-    @Test
-    void saveGameThrowsIOExceptionTest() {
-        Player player = new Player("TestPlayer");
-        String currentZone = "home";
-        String saveFile = "test_save.json";
-
-        dataAccessObject.setShouldThrowException(true);
-
-        assertThrows(IOException.class, () ->
-            saveProgressInteractor.saveGame(player, currentZone, saveFile)
-        );
-    }
-
-    /**
-     * Test implementation of SaveProgressDataAccessInterface
-     */
-    private static class TestSaveProgressDataAccessObject implements SaveProgressDataAccessInterface {
-        private boolean saveCalled = false;
-        private Player savedPlayer;
-        private String savedZone;
-        private String savedFile;
-        private boolean shouldThrowException = false;
-
-        @Override
-        public void save(Player player, String currentZone, String saveFile) throws IOException {
-            if (shouldThrowException) {
-                throw new IOException("Test exception");
-            }
-            this.saveCalled = true;
-            this.savedPlayer = player;
-            this.savedZone = currentZone;
-            this.savedFile = saveFile;
-        }
-
-        public boolean wasSaveCalled() {
-            return saveCalled;
-        }
-
-        public Player getSavedPlayer() {
-            return savedPlayer;
-        }
-
-        public String getSavedZone() {
-            return savedZone;
-        }
-
-        public String getSavedFile() {
-            return savedFile;
-        }
-
-        public void setShouldThrowException(boolean shouldThrowException) {
-            this.shouldThrowException = shouldThrowException;
-        }
-    }
 }

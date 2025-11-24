@@ -1,19 +1,31 @@
 package use_case.load_progress;
 
-import entity.GameMap;
 import entity.Player;
 
 import java.io.IOException;
 
-public class LoadProgressInteractor {
+public class LoadProgressInteractor implements LoadProgressInputBoundary{
     LoadProgressDataAccessInterface loadProgressDataAccessObject;
+    LoadProgressOutputBoundary loadProgressPresenter;
 
-    public LoadProgressInteractor(LoadProgressDataAccessInterface loadProgressDataAccessObject) {
+    public LoadProgressInteractor(LoadProgressDataAccessInterface loadProgressDataAccessObject,
+                                  LoadProgressOutputBoundary loadProgressPresenter) {
         this.loadProgressDataAccessObject = loadProgressDataAccessObject;
+        this.loadProgressPresenter = loadProgressPresenter;
     }
 
-    public Player loadGame(GameMap gameMap, String SAVE_FILE) throws IOException {
-        return loadProgressDataAccessObject.load(gameMap, SAVE_FILE);
+    @Override
+    public Player loadGame(LoadProgressInputData loadProgressInputData) {
+        try{
+            Player player = loadProgressDataAccessObject.load(loadProgressInputData.getGameMap(),
+                    loadProgressInputData.getFileName());
+//          loadProgressPresenter.prepareSuccessView();
+            return player;
+        }
+        catch (IOException e){
+            loadProgressPresenter.prepareFailView();
+            return null;
+        }
     }
 
 }

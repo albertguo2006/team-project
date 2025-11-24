@@ -29,8 +29,23 @@ public class Item {
         return type;
     }
 
-    public int getScore(){
-        return score;
+    public int getScore(){ return score; }
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj){
+            return true;
+        }
+        if (!(obj instanceof Item)){
+            return false;
+        }
+        Item item = (Item) obj;
+        return name.equals(item.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 
     @Override

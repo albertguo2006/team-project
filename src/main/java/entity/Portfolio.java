@@ -79,17 +79,29 @@ public class Portfolio {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Portfolio)) return false;
+        if (this == obj){
+            return true;
+        }
+        if (!(obj instanceof Portfolio)){
+            return false;
+        }
         Portfolio portfolio = (Portfolio) obj;
-        return Double.compare(portfolio.cash, cash) == 0 &&
-               Double.compare(portfolio.totalEquity, totalEquity) == 0 &&
-               Objects.equals(investments, portfolio.investments);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(cash, totalEquity, investments);
+        if (totalEquity != portfolio.totalEquity) {
+            return false;
+        }
+        if (investments.size() != portfolio.investments.size()) {
+            return false;
+        }
+        Map <Stock, Double> other_investments = portfolio.getInvestments();
+        for (Stock stock: investments.keySet()) {
+            if (!other_investments.containsKey(stock)) {
+                return false;
+            }
+            if (!investments.get(stock).equals(other_investments.get(stock))) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

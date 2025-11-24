@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import use_case.save_progress.SaveProgressDataAccessInterface;
 
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
@@ -14,14 +15,14 @@ public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
     EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
 
     @Override
-    public void save(Player player, String currentZone, String SAVE_FILE) {
+    public void save(Player player, String currentZone, String SAVE_FILE) throws IOException {
         try{
             FileWriter file = new FileWriter(SAVE_FILE, false);
-            file.write(JSONFileWriter(player, eventDataAccessObject.createEventList(), currentZone).toString());
+            file.write(JSONFileWriter(player, eventDataAccessObject.createEventList(), currentZone).toString(4));
             file.close();
         }
         catch(IOException e){
-            throw new RuntimeException();
+            throw new FileNotFoundException("Invalid Filepath! Unable to save!");
         }
     }
 
@@ -39,6 +40,7 @@ public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
         playerData.put("balance", player.getBalance());
         playerData.put("xLocation", player.getX());
         playerData.put("yLocation", player.getY());
+        playerData.put("currentDay", player.getCurrentDay());
 
         JSONObject stats = new JSONObject();
         for (String stat: player.getStats().keySet()) {
