@@ -54,19 +54,18 @@ public class NPC {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof NPC)) {
-            return false;
-        }
+        if (this == obj) return true;
+        if (!(obj instanceof NPC)) return false;
         NPC npc = (NPC) obj;
-        return name.equals(npc.name);
+        return Double.compare(npc.cashBalance, cashBalance) == 0 &&
+               defaultScore == npc.defaultScore &&
+               Objects.equals(name, npc.name) &&
+               Objects.equals(dialoguePrompt, npc.dialoguePrompt) &&
+               Objects.equals(location, npc.location);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return Objects.hash(name, dialoguePrompt, location, cashBalance, defaultScore);
     }
-
 }

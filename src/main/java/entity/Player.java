@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Player {
     private String name;
@@ -298,19 +299,32 @@ public class Player {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (this == obj){
-            return true;
-        }
-        if (!(obj instanceof Player)){
-            return false;
-        }
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Player)) return false;
         Player player = (Player) obj;
+        return Double.compare(player.balance, balance) == 0 &&
+               Double.compare(player.x, x) == 0 &&
+               Double.compare(player.y, y) == 0 &&
+               Double.compare(player.speed, speed) == 0 &&
+               hasSleptToday == player.hasSleptToday &&
+               health == player.health &&
+               Double.compare(player.dailyEarnings, dailyEarnings) == 0 &&
+               Double.compare(player.dailySpending, dailySpending) == 0 &&
+               Objects.equals(name, player.name) &&
+               Objects.equals(stats, player.stats) &&
+               Objects.equals(relationships, player.relationships) &&
+               Objects.equals(events, player.events) &&
+               Objects.equals(portfolio, player.portfolio) &&
+               Objects.equals(inventory, player.inventory) &&
+               currentDay == player.currentDay;
+    }
 
-        return name.equals(player.name) && x == player.x && y == player.y && stats.equals(player.stats) &&
-                inventory.equals(player.inventory) && relationships.equals(player.relationships) &&
-                events.equals(player.events) && portfolio.equals(player.portfolio) &&
-                currentDay.equals(player.currentDay);
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, balance, stats, relationships, events, portfolio,
+                           inventory, x, y, speed, currentDay, hasSleptToday,
+                           health, dailyEarnings, dailySpending);
     }
 
 }

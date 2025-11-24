@@ -44,8 +44,8 @@ public class LoadProgressInteractorTest {
         testPlayer.addNPCScore(npcs.get("Bob"), 5);
         testPlayer.setCurrentDay(Day.TUESDAY);
 
-        testPlayer.addEvent(events.get(0));
-        testPlayer.addEvent(events.get(1));
+        testPlayer.addEvent(events.get(0));  // Car Accident (loaded first due to JSON key order)
+        testPlayer.addEvent(events.get(1));  // Test Event A (loaded second)
 
         testPlayer.addInventory(1, items.get("Coffee"));
         testPlayer.addInventory(3, items.get("Energy Drink"));

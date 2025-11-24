@@ -30,19 +30,19 @@ public class Event {
     }
 
     @Override
-    public boolean equals(Object obj){
-        if (this == obj){
-            return true;
-        }
-        if (!(obj instanceof Event)){
-            return false;
-        }
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Event)) return false;
         Event event = (Event) obj;
-        return this.eventID == event.getEventID(); }
+        return eventID == event.eventID &&
+               Objects.equals(eventName, event.eventName) &&
+               Objects.equals(eventDescription, event.eventDescription) &&
+               Objects.equals(outcomes, event.outcomes);
+    }
 
     @Override
     public int hashCode() {
-        return Objects.hash(eventID);
+        return Objects.hash(eventID, eventName, eventDescription, outcomes);
     }
 
 }

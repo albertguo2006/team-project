@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,6 +17,10 @@ import javax.swing.Timer;
 
 import entity.Portfolio;
 import entity.Stock;
+import org.knowm.xchart.CategoryChart;
+import org.knowm.xchart.CategoryChartBuilder;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.style.Styler;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
 
@@ -30,7 +36,9 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     private JLabel cashLabel;
     private JLabel sharesLabel;
     private JLabel equityLabel;
-    private JLabel arrowLabel;
+
+    private CategoryChart chart;
+    private XChartPanel<CategoryChart> chartPanel;
 
     private Portfolio portfolio;
     private Stock stock;
@@ -64,25 +72,48 @@ public class StockGameView implements PlayStockGameOutputBoundary {
 
         // change viewmodel
         viewModel.update(data);
+        viewModel.addPriceToHistory(data.price);
+
         // set text
         priceLabel.setText("Price: " + String.format("%.2f", viewModel.price));
         cashLabel.setText("Cash: " + String.format("%.2f", viewModel.cash));
         sharesLabel.setText("Shares: " + String.format("%.2f", viewModel.shares));
         equityLabel.setText("Total Equity: " + String.format("%.2f", viewModel.equity));
 
-        // change arrow (compare new price to last price)
-        if (viewModel.price > viewModel.lastPrice) {
-            arrowLabel.setText("▲");
-            arrowLabel.setForeground(Color.GREEN);
-        } else if (viewModel.price < viewModel.lastPrice) {
-            arrowLabel.setText("▼");
-            arrowLabel.setForeground(Color.RED);
-        } else {
-            arrowLabel.setText("—");
-            arrowLabel.setForeground(Color.BLACK);
-        }
+        // update chart with price history
+        updateChartData();
 
         viewModel.lastPrice = viewModel.price; // store new price as last price
+    }
+
+    private void updateChartData() {
+        // Convert queue to list for chart
+        List<Double> prices = new ArrayList<>(viewModel.priceHistory);
+
+        // Don't update if no price data yet
+        if (prices.isEmpty()) {
+            return;
+        }
+
+        // Create x-axis data (time indices)
+        List<Integer> xData = new ArrayList<>();
+        for (int i = 0; i < prices.size(); i++) {
+            xData.add(i);
+        }
+
+        // Calculate min and max prices for dynamic y-axis
+        double minPrice = prices.stream().min(Double::compare).orElse(0.0);
+        double maxPrice = prices.stream().max(Double::compare).orElse(100.0);
+
+        // Add 5% padding to top and bottom for better visualization
+        double range = maxPrice - minPrice;
+        double padding = range * 0.05;
+        chart.getStyler().setYAxisMin(minPrice - padding);
+        chart.getStyler().setYAxisMax(maxPrice + padding);
+
+        // Update chart series
+        chart.updateCategorySeries("Price", xData, prices, null);
+        chartPanel.repaint();
     }
 
     // end of game view
@@ -146,8 +177,31 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         priceLabel = new JLabel("Price: 0", SwingConstants.CENTER);
         priceLabel.setFont(new Font("Arial", Font.BOLD, 26));
 
-        arrowLabel = new JLabel("—", SwingConstants.CENTER);
-        arrowLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        // Create chart for price history
+        chart = new CategoryChartBuilder()
+                .width(400)
+                .height(200)
+                .title("Stock Price History")
+                .xAxisTitle("")
+                .yAxisTitle("Price ($)")
+                .build();
+
+        // Style the chart to look like candlesticks
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+        chart.getStyler().setLabelsVisible(false); // Remove x-axis labels
+        chart.getStyler().setAvailableSpaceFill(0.9); // Make bars wider (90% of space)
+        chart.getStyler().setOverlapped(true); // Allow bars to be close together
+
+        // Initialize with placeholder data (will be replaced by real prices)
+        List<Integer> xData = new ArrayList<>();
+        List<Double> yData = new ArrayList<>();
+        xData.add(0);
+        yData.add(0.0);
+        chart.addSeries("Price", xData, yData)
+                .setFillColor(new Color(52, 152, 219, 180)); // Blue with transparency
+        chart.getStyler().setSeriesColors(new Color[]{new Color(41, 128, 185)}); // Darker blue outline
+
+        chartPanel = new XChartPanel<>(chart);
 
         cashLabel = new JLabel("Cash: 0");
         sharesLabel = new JLabel("Shares: 0");
@@ -188,7 +242,7 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         buttonPanel.add(sellButton);
 
         frame.add(priceLabel, BorderLayout.NORTH);
-        frame.add(arrowLabel, BorderLayout.CENTER);
+        frame.add(chartPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
         frame.add(east, BorderLayout.EAST);
 

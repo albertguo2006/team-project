@@ -2,6 +2,7 @@ package entity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 // this is a class to represent the portfolio of the playet
 // current only has one type of stock, but could be altered to add more?
