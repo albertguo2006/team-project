@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -89,11 +90,26 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         // Convert queue to list for chart
         List<Double> prices = new ArrayList<>(viewModel.priceHistory);
 
+        // Don't update if no price data yet
+        if (prices.isEmpty()) {
+            return;
+        }
+
         // Create x-axis data (time indices)
         List<Integer> xData = new ArrayList<>();
         for (int i = 0; i < prices.size(); i++) {
             xData.add(i);
         }
+
+        // Calculate min and max prices for dynamic y-axis
+        double minPrice = prices.stream().min(Double::compare).orElse(0.0);
+        double maxPrice = prices.stream().max(Double::compare).orElse(100.0);
+
+        // Add 5% padding to top and bottom for better visualization
+        double range = maxPrice - minPrice;
+        double padding = range * 0.05;
+        chart.getStyler().setYAxisMin(minPrice - padding);
+        chart.getStyler().setYAxisMax(maxPrice + padding);
 
         // Update chart series
         chart.updateCategorySeries("Price", xData, prices, null);
@@ -166,17 +182,24 @@ public class StockGameView implements PlayStockGameOutputBoundary {
                 .width(400)
                 .height(200)
                 .title("Stock Price History")
-                .xAxisTitle("Time")
+                .xAxisTitle("")
                 .yAxisTitle("Price ($)")
                 .build();
 
-        // Style the chart
+        // Style the chart to look like candlesticks
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+        chart.getStyler().setLabelsVisible(false); // Remove x-axis labels
+        chart.getStyler().setAvailableSpaceFill(0.9); // Make bars wider (90% of space)
+        chart.getStyler().setOverlapped(true); // Allow bars to be close together
 
-        // Initialize with empty data
+        // Initialize with placeholder data (will be replaced by real prices)
         List<Integer> xData = new ArrayList<>();
         List<Double> yData = new ArrayList<>();
-        chart.addSeries("Price", xData, yData);
+        xData.add(0);
+        yData.add(0.0);
+        chart.addSeries("Price", xData, yData)
+                .setFillColor(new Color(52, 152, 219, 180)); // Blue with transparency
+        chart.getStyler().setSeriesColors(new Color[]{new Color(41, 128, 185)}); // Darker blue outline
 
         chartPanel = new XChartPanel<>(chart);
 
