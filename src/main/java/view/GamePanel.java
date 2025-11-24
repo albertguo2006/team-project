@@ -23,17 +23,21 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
 import entity.GameMap;
+import entity.NPC;
 import entity.Player;
 import entity.Transition;
 import entity.Zone;
 import interface_adapter.events.PlayerInputController;
 import use_case.Direction;
 import use_case.PlayerMovementUseCase;
+import data_access.NPCDataAccessObject;
+import java.util.List;
 
 public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
     private final Timer gameTimer;
     private final GameMap gameMap;
+    private final NPCDataAccessObject npcDataAccess;
     
     // Background image cache (thread-safe)
     private final Map<String, BufferedImage> backgroundImageCache = new java.util.concurrent.ConcurrentHashMap<>();
@@ -83,14 +87,18 @@ public class GamePanel extends JPanel implements ActionListener {
     /**
      * Constructs a GamePanel with the given use case and input controller.
      * Initializes the game loop timer and sets up the panel.
-     * 
+     *
      * @param playerMovementUseCase the use case managing player movement
      * @param playerInputController the controller handling keyboard input
+     * @param gameMap the game map containing zones
+     * @param npcDataAccess the NPC data access object
      */
     public GamePanel(PlayerMovementUseCase playerMovementUseCase,
-                     PlayerInputController playerInputController, GameMap gameMap) {
+                     PlayerInputController playerInputController, GameMap gameMap,
+                     NPCDataAccessObject npcDataAccess) {
         this.playerMovementUseCase = playerMovementUseCase;
         this.gameMap = gameMap;
+        this.npcDataAccess = npcDataAccess;
 
         // Set panel properties - no preferred size since we're resizable
         this.setBackground(Color.BLACK);  // Black for letterbox bars
@@ -453,7 +461,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Draw player
         drawPlayer(g);
-        
+
+        // Draw NPCs
+        drawNPCs(g);
+
         // Draw sleep zone indicator if in Home and player is in zone
         Zone currentZone = gameMap.getCurrentZone();
         if (currentZone != null && "Home".equals(currentZone.getName()) && inSleepZone) {
