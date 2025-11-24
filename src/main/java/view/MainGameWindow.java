@@ -236,14 +236,32 @@ public class MainGameWindow extends JFrame {
      * Starts a new game.
      */
     private void startNewGame() {
-        // Create game components if not already created
-        if (gamePanel == null) {
-            initializeGamePanel(new Player("Player"), new GameMap());
+        // Stop existing game if running
+        if (gamePanel != null) {
+            gamePanel.stopGameLoop();
+            cardPanel.remove(gamePanel);
         }
-        
+
+        // Remove old panels if they exist
+        if (inGameMenuPanel != null) {
+            cardPanel.remove(inGameMenuPanel);
+        }
+        if (daySummaryView != null) {
+            cardPanel.remove(daySummaryView);
+        }
+        if (endGameView != null) {
+            cardPanel.remove(endGameView);
+        }
+        if (paybillView != null) {
+            cardPanel.remove(paybillView);
+        }
+
+        // Always create a fresh game with a new player and map
+        initializeGamePanel(new Player("Player"), new GameMap());
+
         // Switch to game view
         cardLayout.show(cardPanel, GAME_CARD);
-        
+
         // Start the game
         startGame();
     }
@@ -385,6 +403,13 @@ public class MainGameWindow extends JFrame {
         // Create Stock Game View (Presenter)
         this.stockGameView = new StockGameView();
         stockGameView.setPlayer(player);  // Set player reference for balance updates
+
+        // Set callback to resume the main game when stock game ends
+        stockGameView.setOnGameEndCallback(() -> {
+            if (gamePanel != null) {
+                gamePanel.resumeGame();
+            }
+        });
         
         // Create Stock Game Interactor
         PlayStockGameInputBoundary stockGameInteractor = new PlayStockGameInteractor(

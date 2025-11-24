@@ -44,6 +44,7 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     private Stock stock;
     private entity.Player player;  // Reference to player for crediting balance
     private double initialInvestment;  // Track initial investment for profit/loss calculation
+    private Runnable onGameEndCallback;  // Callback to execute when game ends
 
     /**
      * Sets the player reference for crediting balance on game end.
@@ -51,6 +52,14 @@ public class StockGameView implements PlayStockGameOutputBoundary {
      */
     public void setPlayer(entity.Player player) {
         this.player = player;
+    }
+
+    /**
+     * Sets the callback to be executed when the game ends.
+     * @param callback the callback to execute
+     */
+    public void setOnGameEndCallback(Runnable callback) {
+        this.onGameEndCallback = callback;
     }
     
     // view at the start of the game
@@ -146,6 +155,11 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         // Close the stock game window
         if (frame != null) {
             frame.dispose();
+        }
+
+        // Execute callback if set (e.g., to resume the main game)
+        if (onGameEndCallback != null) {
+            onGameEndCallback.run();
         }
     }
 

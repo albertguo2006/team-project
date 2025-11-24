@@ -7,6 +7,8 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -46,6 +48,18 @@ public class InGameMenuPanel extends JPanel {
     public InGameMenuPanel() {
         setOpaque(false);  // Allow transparency
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        setFocusable(true);  // Allow this panel to receive focus for key events
+        
+        // Add key listener for ESC key to resume game
+        addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    // Trigger the resume button action
+                    resumeButton.doClick();
+                }
+            }
+        });
         
         // Add vertical glue to center content
         add(Box.createVerticalGlue());
