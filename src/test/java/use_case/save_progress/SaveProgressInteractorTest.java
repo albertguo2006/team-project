@@ -5,6 +5,7 @@ import data_access.ItemDataAccessObject;
 import data_access.NPCDataAccessObject;
 import data_access.SaveFileUserDataObject;
 import entity.*;
+import interface_adapter.save_progress.SaveProgressPresenter;
 import org.junit.jupiter.api.Test;
 import use_case.inventory.ItemDataAccessInterface;
 import use_case.npc_interactions.NpcInteractionsUserDataAccessInterface;
@@ -19,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SaveProgressInteractorTest {
     SaveProgressDataAccessInterface saveFileUserDAO = new SaveFileUserDataObject();
-    SaveProgressInteractor saveProgressInteractor = new SaveProgressInteractor(saveFileUserDAO);
+    SaveProgressOutputBoundary saveProgressPresenter = new SaveProgressPresenter();
+    SaveProgressInteractor saveProgressInteractor = new SaveProgressInteractor(saveFileUserDAO, saveProgressPresenter);
     NpcInteractionsUserDataAccessInterface npcDAO = new NPCDataAccessObject();
     EventDataAccessObject eventDAO = new EventDataAccessObject();
     ItemDataAccessInterface itemDAO = new ItemDataAccessObject();
@@ -53,8 +55,9 @@ public class SaveProgressInteractorTest {
 
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
 
-        saveProgressInteractor.saveGame(testPlayer, gameMap.getCurrentZone().getName(),
-                "src/main/resources/testSuccessSaveFile.json");
+        SaveProgressInputData inputData = new SaveProgressInputData(testPlayer,
+                "src/main/resources/testSuccessSaveFile.json", gameMap.getCurrentZone().getName());
+        saveProgressInteractor.saveGame(inputData);
 
         // TODO: write assertions for this,,  a bit unsure on how to do so when comparing JSON files
     }
@@ -64,8 +67,10 @@ public class SaveProgressInteractorTest {
         Player player = new Player("Armand");
         GameMap gameMap = new GameMap();
 
-        saveProgressInteractor.saveGame(player, gameMap.getCurrentZone().getName(),
-                "src/main/resources/testFailSaveFile.json");
+        SaveProgressInputData inputData = new SaveProgressInputData(player,
+                "src/main/resources/testSuccessSaveFile.json", gameMap.getCurrentZone().getName());
+
+        saveProgressInteractor.saveGame(inputData);
 
 
         // TODO: write assertions for this,,  a bit unsure on how to do so when comparing JSON files
@@ -76,8 +81,11 @@ public class SaveProgressInteractorTest {
         Player player = new Player("Cynthia");
         GameMap gameMap = new GameMap();
 
+        SaveProgressInputData inputData = new SaveProgressInputData(player,
+                "invalid/file/path/.json", gameMap.getCurrentZone().getName());
+
         Exception exception = assertThrows(FileNotFoundException.class, () -> {
-            saveProgressInteractor.saveGame(player, gameMap.getCurrentZone().getName(), "invalid/file/path/.json");
+            saveProgressInteractor.saveGame(inputData);
         });
         assert(exception.getMessage().equals("Invalid Filepath! Unable to save!"));
         // Considering making custom exceptions.... but IDK what custom exceptions are actually for....

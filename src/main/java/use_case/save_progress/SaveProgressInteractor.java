@@ -1,19 +1,28 @@
 package use_case.save_progress;
 
-import entity.Player;
-
 import java.io.IOException;
 
-public class SaveProgressInteractor {
+public class SaveProgressInteractor implements SaveProgressInputBoundary{
 
     SaveProgressDataAccessInterface saveProgressDataAccessObject;
+    SaveProgressOutputBoundary saveProgressPresenter;
 
-    public SaveProgressInteractor(SaveProgressDataAccessInterface saveProgressDataAccessObject) {
+    public SaveProgressInteractor(SaveProgressDataAccessInterface saveProgressDataAccessObject,
+                                  SaveProgressOutputBoundary saveProgressPresenter) {
         this.saveProgressDataAccessObject = saveProgressDataAccessObject;
+        this.saveProgressPresenter = saveProgressPresenter;
     }
 
-    public void saveGame(Player player, String currentZone, String SAVE_FILE) throws IOException {
-        saveProgressDataAccessObject.save(player, currentZone, SAVE_FILE);
+    @Override
+    public void saveGame(SaveProgressInputData saveProgressInputData) throws IOException {
+        try {
+            saveProgressDataAccessObject.save(saveProgressInputData.player, saveProgressInputData.getCurrentZone(),
+                    saveProgressInputData.getFileName());
+            saveProgressPresenter.prepareSuccessView();
+        }
+        catch (Exception e) {
+            saveProgressPresenter.prepareFailView();
+        }
     }
 }
 
