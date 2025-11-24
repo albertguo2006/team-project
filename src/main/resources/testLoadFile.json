@@ -2,8 +2,8 @@
   {
     "name": "Anya",
     "balance": 308.06,
-    "xLocation": 37.2,
-    "yLocation": 56.1,
+    "xLocation": 1567.9,
+    "yLocation": 601.2,
     "stats": {"Hunger":  30, "Energy":  70, "Mood": 80},
     "currentDay": "TUESDAY"
   },
