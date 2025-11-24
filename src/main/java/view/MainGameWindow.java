@@ -413,10 +413,18 @@ public class MainGameWindow extends JFrame {
      */
     private void initializeStockTradingSystem() {
         System.out.println("=== INITIALIZE STOCK TRADING SYSTEM STARTED ===");
-        
+
+        // Get Alpha Vantage API key from environment variable
+        String apiKey = System.getenv("ALPHA_VANTAGE_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.err.println("WARNING: ALPHA_VANTAGE_API_KEY environment variable not set.");
+            System.err.println("Stock data fetching will not work. Set the environment variable to enable API calls.");
+            apiKey = "DEMO";  // Use demo key as fallback (very limited)
+        }
+
         // Create Stock Game Data Access
         PlayStockGameDataAccessInterface stockDataAccess = new AlphaStockDataAccessObject();
-        
+
         // Create Stock Game View (Presenter)
         this.stockGameView = new StockGameView();
         stockGameView.setPlayer(player);  // Set player reference for balance updates
@@ -427,16 +435,16 @@ public class MainGameWindow extends JFrame {
                 gamePanel.resumeGame();
             }
         });
-        
+
         // Create Stock Game Interactor
         PlayStockGameInputBoundary stockGameInteractor = new PlayStockGameInteractor(
             stockDataAccess,
             stockGameView
         );
-        
-        // Create Stock Trading Controller
-        this.stockTradingController = new StockTradingController(stockGameInteractor);
-        
+
+        // Create Stock Trading Controller with API key
+        this.stockTradingController = new StockTradingController(stockGameInteractor, apiKey);
+
         System.out.println("=== INITIALIZE STOCK TRADING SYSTEM COMPLETED ===");
     }
     
