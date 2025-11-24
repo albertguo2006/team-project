@@ -20,8 +20,9 @@ public class SaveProgressInteractor implements SaveProgressInputBoundary{
                     saveProgressInputData.getFileName());
             saveProgressPresenter.prepareSuccessView();
         }
-        catch (Exception e) {
+        catch (IOException e) {
             saveProgressPresenter.prepareFailView();
+            throw e;
         }
     }
 }

@@ -2,7 +2,6 @@ package view;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
-import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -10,7 +9,6 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
-import data_access.LoadFileUserDataAccessObject;
 import data_access.LoadFileUserDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.SaveFileUserDataObject;
@@ -20,12 +18,10 @@ import entity.GameSettings;
 import entity.Player;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.PlayerInputController;
-import interface_adapter.load_progress.LoadProgressController;
 import interface_adapter.load_progress.LoadProgressPresenter;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
-import interface_adapter.save_progress.SaveProgressController;
 import interface_adapter.save_progress.SaveProgressPresenter;
 import interface_adapter.sleep.SleepController;
 import interface_adapter.sleep.SleepPresenter;

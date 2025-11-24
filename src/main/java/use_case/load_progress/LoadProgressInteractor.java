@@ -15,7 +15,7 @@ public class LoadProgressInteractor implements LoadProgressInputBoundary{
     }
 
     @Override
-    public Player loadGame(LoadProgressInputData loadProgressInputData) {
+    public Player loadGame(LoadProgressInputData loadProgressInputData) throws IOException {
         try{
             Player player = loadProgressDataAccessObject.load(loadProgressInputData.getGameMap(),
                     loadProgressInputData.getFileName());
@@ -24,7 +24,7 @@ public class LoadProgressInteractor implements LoadProgressInputBoundary{
         }
         catch (IOException e){
             loadProgressPresenter.prepareFailView();
-            return null;
+            throw e;
         }
     }
 

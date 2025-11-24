@@ -31,7 +31,7 @@ public class LoadProgressInteractorTest {
     Map<String, NPC> npcs = npcDAO.getAllNpcs();
 
     @Test
-    void successLoadProgress() {
+    void successLoadProgress() throws IOException {
         GameMap gameMap = new GameMap();
 
         LoadProgressInputData inputData = new LoadProgressInputData(gameMap, "src/main/resources/testLoadFile.json");
@@ -63,7 +63,7 @@ public class LoadProgressInteractorTest {
     }
 
     @Test
-    void successLoadProgress_PlayerMismatch() {
+    void successLoadProgress_PlayerMismatch() throws IOException {
         GameMap gameMap = new GameMap();
 
         LoadProgressInputData inputData = new LoadProgressInputData(gameMap, "src/main/resources/testLoadFile.json");
