@@ -9,16 +9,16 @@
     },
     "NVDA" : {
       "name" : "NVIDIA",
-      "riskLevel" : "LOW",
-      "volatility" : 0.13573919124451145,
-      "availableMonths" : [ "2025-10" ],
+      "riskLevel" : "HIGH",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
       "playedPeriods" : [ ]
     },
     "AAPL" : {
       "name" : "Apple",
-      "riskLevel" : "LOW",
-      "volatility" : 0.09953998930004491,
-      "availableMonths" : [ "2025-10" ],
+      "riskLevel" : "MEDIUM",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
       "playedPeriods" : [ ]
     },
     "KO" : {
@@ -80,8 +80,8 @@
     "VOO" : {
       "name" : "Vanguard S&P 500 ETF",
       "riskLevel" : "LOW",
-      "volatility" : 0.054712949303891256,
-      "availableMonths" : [ "2025-10" ],
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
       "playedPeriods" : [ ]
     },
     "AMD" : {

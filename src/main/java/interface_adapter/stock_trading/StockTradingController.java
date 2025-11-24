@@ -61,17 +61,21 @@ public class StockTradingController {
                 return;
             }
 
-            // Step 3: Select a random unplayed period
+            // Step 3: Select a random period (will use unplayed if available, otherwise replay)
             Map<String, Object> periodInfo = stockDataManager.selectRandomUnplayedPeriod(selectedStock.getSymbol());
 
             if (periodInfo == null) {
+                // This should rarely happen now with fallback enabled
                 JOptionPane.showMessageDialog(
                         null,
-                        "No unplayed data available for " + selectedStock.getSymbol() + ".\n" +
-                                "All available time periods have been played.",
-                        "No Data Available",
-                        JOptionPane.INFORMATION_MESSAGE
+                        "Unable to load data for " + selectedStock.getSymbol() + ".\n" +
+                                "The stock data may be corrupted or missing.\n" +
+                                "Please check the console for error details.",
+                        "Data Error",
+                        JOptionPane.ERROR_MESSAGE
                 );
+                // Refund the player since we couldn't start the game
+                player.setBalance(player.getBalance());
                 return;
             }
 

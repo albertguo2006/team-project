@@ -130,7 +130,7 @@ public class StockDataManager {
     }
 
     /**
-     * Ensures stock has data available. Fetches new month if needed.
+     * Ensures stock has data available. Fetches data if needed.
      * @return true if data is available, false otherwise
      */
     public boolean ensureStockData(String symbol) throws Exception {
@@ -139,17 +139,18 @@ public class StockDataManager {
             throw new IllegalArgumentException("Unknown stock symbol: " + symbol);
         }
 
-        // Check if we need to fetch new data
-        if (info.getAvailableMonths().isEmpty() || !info.hasUnplayedData()) {
-            // Fetch data for a recent month
-            String monthToFetch = getNextMonthToFetch(info);
-            stockDataBase.getStockPrices(symbol, monthToFetch);
+        // Check if we need to fetch data (using "recent" as identifier for daily data)
+        if (info.getAvailableMonths().isEmpty()) {
+            System.out.println("No data available for " + symbol + ", fetching...");
 
-            // Add month to available months
-            info.addAvailableMonth(monthToFetch);
+            // Fetch recent data (will get ~100 days)
+            stockDataBase.getStockPrices(symbol, null);
+
+            // Add "recent" as available data identifier
+            info.addAvailableMonth("recent");
 
             // Calculate volatility from the fetched data
-            calculateAndUpdateVolatility(symbol, monthToFetch);
+            calculateAndUpdateVolatility(symbol, "recent");
 
             saveMetadata();
             return true;
@@ -187,9 +188,9 @@ public class StockDataManager {
     /**
      * Calculates volatility from stock data and updates metadata.
      */
-    private void calculateAndUpdateVolatility(String symbol, String month) {
+    private void calculateAndUpdateVolatility(String symbol, String dataIdentifier) {
         try {
-            String filePath = STOCK_DATA_DIR + symbol + "_" + month + ".json";
+            String filePath = STOCK_DATA_DIR + symbol + "_" + dataIdentifier + ".json";
             File file = new File(filePath);
 
             if (!file.exists()) {
@@ -258,30 +259,30 @@ public class StockDataManager {
      * Selects a random unplayed 5-day period for the given stock.
      * Falls back to replaying data if no unplayed periods exist.
      * @param allowReplay if true, allows replaying previously played periods
-     * @return a map containing the month and start day index, or null if no data at all
+     * @return a map containing the data identifier and start day index, or null if no data at all
      */
     public Map<String, Object> selectRandomUnplayedPeriod(String symbol, boolean allowReplay) throws Exception {
         StockInfo info = stockMetadata.get(symbol);
         if (info == null || info.getAvailableMonths().isEmpty()) {
-            System.err.println("No available months for " + symbol);
+            System.err.println("No available data for " + symbol);
             return null;
         }
 
         Random random = new Random();
-        List<String> months = info.getAvailableMonths();
+        List<String> dataIdentifiers = info.getAvailableMonths(); // This will be ["recent"] for free tier
 
         // First, try to find an unplayed period
         for (int attempt = 0; attempt < 50; attempt++) {
-            String month = months.get(random.nextInt(months.size()));
+            String dataId = dataIdentifiers.get(random.nextInt(dataIdentifiers.size()));
 
-            // Get the number of available days in this month's data
-            int availableDays = getAvailableDaysInMonth(symbol, month);
+            // Get the number of available days in this data
+            int availableDays = getAvailableDaysInData(symbol, dataId);
 
-            System.out.println("Month " + month + " has " + availableDays + " days of data");
+            System.out.println("Data '" + dataId + "' has " + availableDays + " days for " + symbol);
 
             if (availableDays < 5) {
-                System.out.println("Not enough days in " + month + " (need 5, have " + availableDays + ")");
-                continue;  // Not enough data in this month
+                System.out.println("Not enough days in " + dataId + " (need 5, have " + availableDays + ")");
+                continue;  // Not enough data
             }
 
             // Pick a random start day (0-indexed)
@@ -289,13 +290,13 @@ public class StockDataManager {
             int startDay = random.nextInt(maxStartDay + 1);
 
             // Create period identifier
-            String periodId = month + "_day" + startDay + "-" + (startDay + 4);
+            String periodId = dataId + "_day" + startDay + "-" + (startDay + 4);
 
             // Check if this period has been played
             if (!info.getPlayedPeriods().contains(periodId)) {
                 System.out.println("Found unplayed period: " + periodId);
                 Map<String, Object> result = new HashMap<>();
-                result.put("month", month);
+                result.put("month", dataId);  // Keep "month" key for backward compatibility
                 result.put("startDay", startDay);
                 result.put("periodId", periodId);
                 return result;
@@ -305,16 +306,16 @@ public class StockDataManager {
         // If no unplayed period found and replay is allowed, select any valid period
         if (allowReplay) {
             System.out.println("No unplayed periods found, allowing replay for " + symbol);
-            for (String month : months) {
-                int availableDays = getAvailableDaysInMonth(symbol, month);
+            for (String dataId : dataIdentifiers) {
+                int availableDays = getAvailableDaysInData(symbol, dataId);
                 if (availableDays >= 5) {
                     int maxStartDay = availableDays - 5;
                     int startDay = random.nextInt(maxStartDay + 1);
-                    String periodId = month + "_day" + startDay + "-" + (startDay + 4) + "_REPLAY";
+                    String periodId = dataId + "_day" + startDay + "-" + (startDay + 4) + "_REPLAY";
 
                     System.out.println("Selected replay period: " + periodId);
                     Map<String, Object> result = new HashMap<>();
-                    result.put("month", month);
+                    result.put("month", dataId);  // Keep "month" key for backward compatibility
                     result.put("startDay", startDay);
                     result.put("periodId", periodId);
                     return result;
@@ -334,13 +335,14 @@ public class StockDataManager {
     }
 
     /**
-     * Gets the number of trading days available in a month's data file.
+     * Gets the number of trading days available in a data file.
      */
-    private int getAvailableDaysInMonth(String symbol, String month) throws Exception {
-        String filePath = STOCK_DATA_DIR + symbol + "_" + month + ".json";
+    private int getAvailableDaysInData(String symbol, String dataIdentifier) throws Exception {
+        String filePath = STOCK_DATA_DIR + symbol + "_" + dataIdentifier + ".json";
         File file = new File(filePath);
 
         if (!file.exists()) {
+            System.err.println("File not found: " + filePath);
             return 0;
         }
 
@@ -352,17 +354,20 @@ public class StockDataManager {
         }
 
         if (timeSeries == null) {
+            System.err.println("No time series data found in: " + filePath);
             return 0;
         }
 
         // Count unique dates
         Set<String> uniqueDates = new HashSet<>();
         timeSeries.fieldNames().forEachRemaining(timestamp -> {
-            String date = timestamp.substring(0, 10);  // Extract YYYY-MM-DD
+            String date = timestamp.length() >= 10 ? timestamp.substring(0, 10) : timestamp;  // Extract YYYY-MM-DD
             uniqueDates.add(date);
         });
 
-        return uniqueDates.size();
+        int count = uniqueDates.size();
+        System.out.println("Found " + count + " unique trading days in " + filePath);
+        return count;
     }
 
     /**

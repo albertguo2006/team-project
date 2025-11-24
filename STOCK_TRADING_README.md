@@ -63,28 +63,37 @@ export ALPHA_VANTAGE_API_KEY=your_api_key_here
 
 ### Data Storage
 - Stock data is stored in `src/main/resources/stock_data/` as JSON files
-- Files are named: `{SYMBOL}_{YYYY-MM}.json` (e.g., `TSLA_2024-11.json`)
+- Files are named: `{SYMBOL}_recent.json` (e.g., `TSLA_recent.json`)
 - Metadata tracking is stored in `src/main/resources/stock_metadata.json`
 
 ### Game Flow
 1. **Stock Selection**: Player chooses a stock from the dialog showing risk levels
-2. **Data Check**: System checks if unplayed data exists; fetches new month if needed
-3. **Period Selection**: Random 5-day period is selected from available data
+2. **Data Check**: System checks if data exists; fetches ~100 days of recent data if needed
+3. **Period Selection**: Random 5-day period is selected from available data (unplayed preferred)
 4. **Investment**: Player enters investment amount
-5. **Trading**: 5-day trading period begins with real historical prices
+5. **Trading**: 5-day trading period begins with real historical prices (simulated intraday)
 6. **Tracking**: After game ends, the period is marked as played
 
-### API Call Optimization
-- Fetches entire month of data per API call (maximum data efficiency)
-- Only fetches when no unplayed data is available
-- Caches all data locally to minimize API calls
-- With 15 stocks × 1 month each = 15 API calls initially (well under 25/day limit)
+### Free Tier Optimization
+- Uses **TIME_SERIES_DAILY** API (more efficient than intraday for free tier)
+- "Compact" output gives ~100 trading days (~5 months of data)
+- Each API call provides multiple 5-day periods to play
+- Simulates intraday price movement from daily OHLC data
+- One API call per stock is typically sufficient for many gameplay sessions
 
-### Played Period Tracking
-- Each 5-day period is identified by: `{YYYY-MM}_day{start}-{end}`
-- Example: `2024-11_day0-4` represents days 0-4 of November 2024
+### API Call Optimization
+- Fetches ~100 days of data per API call (maximum efficiency)
+- Only fetches when no data is available for a stock
+- Caches all data locally to minimize API calls
+- With 15 stocks = 15 API calls total (well under 25/day free tier limit)
+- Data remains valid for extended gameplay
+
+### Played Period Tracking & Replay
+- Each 5-day period is identified by: `recent_day{start}-{end}`
+- Example: `recent_day15-19` represents days 15-19 from recent data
 - Globally tracked (all players share the same pool)
-- Prevents replaying the same historical periods
+- **Replay enabled**: When all periods are played, system allows replaying
+- Replay periods are marked with `_REPLAY` suffix for tracking
 
 ## File Structure
 
@@ -119,30 +128,35 @@ src/main/
 2. Stock selection dialog appears with all 15 stocks grouped by risk
 3. Player selects "TSLA (HIGH RISK)"
 4. System checks for available data:
-   - If no data exists: fetches October 2024 data from Alpha Vantage
-   - If all data is played: fetches September 2024 data
-5. System selects random unplayed 5-day period (e.g., days 7-11)
+   - If no data exists: fetches ~100 recent trading days from Alpha Vantage
+   - Data is cached as `TSLA_recent.json`
+5. System selects random 5-day period from the 100 days (preferring unplayed)
+   - Example: days 42-46 (unplayed)
 6. Player enters investment amount (e.g., $1000)
-7. Game starts with real historical prices from those 5 days
-8. After game ends, period `2024-10_day7-11` is marked as played
+7. Game starts with simulated intraday prices based on daily OHLC data
+8. After game ends, period `recent_day42-46` is marked as played
+9. Next time: System will prefer unplayed periods, but can replay if all are played
 
 ## Troubleshooting
 
-### "No unplayed data available"
-- All downloaded periods for that stock have been played
-- System will attempt to fetch a new month
-- If API limit reached, wait until next day or upgrade to premium tier
-
-### "Failed to fetch stock data"
-- Check API key is set correctly
+### "Unable to load data"
+- Check that API key is set correctly via `ALPHA_VANTAGE_API_KEY` environment variable
 - Verify internet connection
-- Check if Alpha Vantage API is operational
+- Check if Alpha Vantage API is operational (status.alphavantage.co)
 - Ensure you haven't exceeded daily API call limit (25 for free tier)
+- Check console output for detailed error messages
 
-### "Stock data file not found"
-- Data needs to be fetched from API first
-- System will automatically fetch on first play
-- Ensure API key is valid
+### Data shows wrong dates or insufficient periods
+- The system now uses TIME_SERIES_DAILY for better free tier compatibility
+- Each stock gets ~100 trading days of data
+- This provides 20+ unique 5-day periods per stock
+- After all periods are played, replay is automatically enabled
+
+### Replay behavior
+- Once all unique 5-day periods are played, the system allows replaying
+- Replay periods are marked with `_REPLAY` suffix in metadata
+- This ensures the game remains playable indefinitely
+- To get fresh data, delete `{SYMBOL}_recent.json` and it will re-fetch
 
 ## Future Enhancements
 - Support for per-player tracking (each player has their own history)
