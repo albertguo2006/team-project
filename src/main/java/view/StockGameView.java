@@ -1,6 +1,7 @@
 package view;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -171,19 +172,25 @@ public class StockGameView implements PlayStockGameOutputBoundary {
                 .width(400)
                 .height(200)
                 .title("Stock Price History")
-                .xAxisTitle("Time")
+                .xAxisTitle("")
                 .yAxisTitle("Price ($)")
                 .build();
 
-        // Style the chart
+        // Style the chart to look like candlesticks
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+        chart.getStyler().setLabelsVisible(false); // Remove x-axis labels
+        chart.getStyler().setYAxisMin(null); // Let y-axis be dynamic (don't force 0)
+        chart.getStyler().setAvailableSpaceFill(0.9); // Make bars wider (90% of space)
+        chart.getStyler().setOverlapped(true); // Allow bars to be close together
 
         // Initialize with placeholder data (will be replaced by real prices)
         List<Integer> xData = new ArrayList<>();
         List<Double> yData = new ArrayList<>();
         xData.add(0);
         yData.add(0.0);
-        chart.addSeries("Price", xData, yData);
+        chart.addSeries("Price", xData, yData)
+                .setFillColor(new Color(52, 152, 219, 180)); // Blue with transparency
+        chart.getStyler().setSeriesColors(new Color[]{new Color(41, 128, 185)}); // Darker blue outline
 
         chartPanel = new XChartPanel<>(chart);
 
