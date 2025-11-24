@@ -1,4 +1,4 @@
-package Sleep;
+package use_case.sleep;
 
 import data_access.InMemorySleepDataAccessObject;
 import entity.Day;
@@ -6,10 +6,6 @@ import entity.DaySummary;
 import entity.GameEnding;
 import entity.Player;
 import org.junit.jupiter.api.BeforeEach;
-import use_case.sleep.SleepInputData;
-import use_case.sleep.SleepInteractor;
-import use_case.sleep.SleepOutputBoundary;
-import use_case.sleep.SleepOutputData;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -308,6 +304,55 @@ public class SleepInteractorTest {
 
         // Should not throw exception, should handle gracefully
         assertDoesNotThrow(() -> sleepInteractor.execute(inputData));
+    }
+
+    @Test
+    void failureDayAdvancementTest() {
+        // Setup - Create a scenario where advanceDay() returns false unexpectedly
+        Player player = new Player("TestPlayer");
+        player.setCurrentDay(Day.WEDNESDAY); // Not Friday, so should advance
+        player.setHasSleptToday(false);
+        player.setHealth(50);
+
+        // Create a mock player that always fails to advance
+        Player failingPlayer = new Player("FailingPlayer") {
+            @Override
+            public boolean advanceDay() {
+                return false; // Simulate advancement failure
+            }
+        };
+        failingPlayer.setCurrentDay(Day.WEDNESDAY);
+        failingPlayer.setHasSleptToday(false);
+        failingPlayer.setHealth(50);
+
+        // Create failure presenter
+        testPresenter = new SleepOutputBoundary() {
+            @Override
+            public void presentDaySummary(SleepOutputData outputData) {
+                fail("Should not present day summary when day advancement fails");
+            }
+
+            @Override
+            public void presentGameEnding(GameEnding ending) {
+                fail("Should not present game ending for Wednesday sleep");
+            }
+
+            @Override
+            public void presentSleepError(String errorMessage) {
+                // This is the expected path
+                assertNotNull(errorMessage);
+                assertTrue(errorMessage.contains("Unable to advance to next day"));
+            }
+        };
+
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        SleepInputData inputData = new SleepInputData(failingPlayer);
+        sleepInteractor.execute(inputData);
+
+        // Verify player state - should still have slept but day not advanced
+        assertTrue(failingPlayer.hasSleptToday()); // Sleep was processed
+        assertEquals(Day.WEDNESDAY, failingPlayer.getCurrentDay()); // Day didn't advance
+        assertEquals(100, failingPlayer.getHealth()); // Health still restored
     }
 }
 
