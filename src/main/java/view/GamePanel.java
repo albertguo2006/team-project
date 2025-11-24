@@ -105,7 +105,10 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Initialize viewport
         calculateViewport();
-        
+
+        // Preload all background images to prevent flashing during transitions
+        preloadAllBackgroundImages();
+
         // Start background music for initial zone
         playBackgroundMusic(gameMap.getCurrentZone().getBackgroundMusicPath());
     }
@@ -728,6 +731,50 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     
     /**
+     * Preloads all background images for all zones in the game map.
+     * This prevents the brief flash of generic background during zone transitions.
+     * Loads images synchronously in a background thread to ensure they're ready.
+     */
+    private void preloadAllBackgroundImages() {
+        new Thread(() -> {
+            System.out.println("Preloading all background images...");
+            // Get all zone names from the GameMap
+            String[] zoneNames = {
+                "Home", "Subway Station 1", "Street 1", "Street 2",
+                "Grocery Store", "Subway Station 2", "Office (Your Cubicle)",
+                "Street 3", "Office Lobby"
+            };
+
+            for (String zoneName : zoneNames) {
+                Zone zone = gameMap.getZone(zoneName);
+                if (zone != null) {
+                    String imagePath = zone.getBackgroundImagePath();
+                    if (imagePath != null && !imagePath.isEmpty()) {
+                        // Only load if not already in cache
+                        if (!backgroundImageCache.containsKey(imagePath)) {
+                            try {
+                                InputStream imageStream = getClass().getResourceAsStream(imagePath);
+                                if (imageStream != null) {
+                                    BufferedImage image = ImageIO.read(imageStream);
+                                    imageStream.close();
+
+                                    if (image != null) {
+                                        backgroundImageCache.put(imagePath, image);
+                                        System.out.println("Preloaded: " + zoneName + " (" + imagePath + ")");
+                                    }
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Failed to preload background for " + zoneName + ": " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+            System.out.println("Background image preloading complete!");
+        }, "BackgroundPreloader").start();
+    }
+
+    /**
      * Loads a background image from resources with caching.
      * Async loading to prevent EDT freezing.
      * Returns cached image immediately, or null if not yet loaded.
@@ -739,12 +786,12 @@ public class GamePanel extends JPanel implements ActionListener {
         if (imagePath == null || imagePath.isEmpty()) {
             return null;
         }
-        
+
         // Check cache first (fast path)
         if (backgroundImageCache.containsKey(imagePath)) {
             return backgroundImageCache.get(imagePath);
         }
-        
+
         // If not in cache and not currently being loaded, start async load
         if (imagesBeingLoaded.add(imagePath)) {
             // Successfully added to loading set, start load in background
@@ -752,17 +799,17 @@ public class GamePanel extends JPanel implements ActionListener {
                 try {
                     System.out.println("Async loading background image: " + imagePath);
                     InputStream imageStream = getClass().getResourceAsStream(imagePath);
-                    
+
                     if (imageStream == null) {
                         System.err.println("Image stream is null for: " + imagePath);
                         backgroundImageCache.put(imagePath, null);
                         imagesBeingLoaded.remove(imagePath);
                         return;
                     }
-                    
+
                     BufferedImage image = ImageIO.read(imageStream);
                     imageStream.close();
-                    
+
                     if (image != null) {
                         backgroundImageCache.put(imagePath, image);
                         System.out.println("Successfully loaded background image: " + imagePath +
@@ -783,7 +830,7 @@ public class GamePanel extends JPanel implements ActionListener {
                 }
             }, "ImageLoader-" + imagePath.hashCode()).start();
         }
-        
+
         // Return null for now - image will appear when loaded
         return null;
     }
