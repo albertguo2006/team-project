@@ -480,7 +480,12 @@ public class GamePanel extends JPanel implements ActionListener {
         if (currentZone != null && "Office (Your Cubicle)".equals(currentZone.getName()) && inStockTradingZone) {
             drawStockTradingZone(g);
         }
-        
+
+        // Draw NPC interaction prompt if near an NPC
+        if (nearbyNPC != null) {
+            drawNPCPrompt(g);
+        }
+
         drawUI(g);
     }
     
@@ -768,6 +773,31 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public boolean isInStockTradingZone() {
         return inStockTradingZone;
+    }
+
+    /**
+     * Draws a prompt at the bottom of the screen indicating the player can talk to the nearby NPC.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawNPCPrompt(Graphics2D g) {
+        if (nearbyNPC == null) return;
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 36));
+
+        String prompt = "Press E to talk to " + nearbyNPC.getName();
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int x = (VIRTUAL_WIDTH - promptWidth) / 2;
+        int y = VIRTUAL_HEIGHT - 100;
+
+        // Semi-transparent black background
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(x - 20, y - 40, promptWidth + 40, 60);
+
+        // White text
+        g.setColor(Color.WHITE);
+        g.drawString(prompt, x, y);
     }
 
     /**

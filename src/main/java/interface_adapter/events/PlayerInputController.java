@@ -5,6 +5,7 @@ import java.awt.event.KeyListener;
 
 import javax.swing.JFrame;
 
+import entity.NPC;
 import use_case.Direction;
 import use_case.PlayerMovementUseCase;
 
@@ -57,7 +58,21 @@ public class PlayerInputController implements KeyListener {
     public interface StockTradingActionListener {
         void onStockTradingRequested();
     }
-    
+
+    /**
+     * Callback interface for NPC proximity checks.
+     */
+    public interface NPCInteractionChecker {
+        NPC getNearbyNPC();
+    }
+
+    /**
+     * Callback interface for NPC interaction actions.
+     */
+    public interface NPCInteractionListener {
+        void onNPCInteractionRequested(NPC npc);
+    }
+
     private final PlayerMovementUseCase playerMovementUseCase;
     private JFrame parentFrame;  // Optional: for frame reference
     private PauseMenuListener pauseMenuListener;
@@ -65,6 +80,8 @@ public class PlayerInputController implements KeyListener {
     private SleepActionListener sleepActionListener;
     private StockTradingZoneChecker stockTradingZoneChecker;
     private StockTradingActionListener stockTradingActionListener;
+    private NPCInteractionChecker npcInteractionChecker;
+    private NPCInteractionListener npcInteractionListener;
     
     /**
      * Constructs a PlayerInputController with the given use case.
