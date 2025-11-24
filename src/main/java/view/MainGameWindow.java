@@ -2,6 +2,7 @@ package view;
 
 import java.awt.CardLayout;
 import java.awt.Dimension;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -9,24 +10,36 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
+import data_access.LoadFileUserDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
+import data_access.SaveFileUserDataObject;
 import data_access.SleepDataAccessObject;
+import entity.GameMap;
 import entity.GameSettings;
 import entity.Player;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.PlayerInputController;
+import interface_adapter.load_progress.LoadProgressController;
+import interface_adapter.load_progress.LoadProgressPresenter;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
+import interface_adapter.save_progress.SaveProgressController;
+import interface_adapter.save_progress.SaveProgressPresenter;
 import interface_adapter.sleep.SleepController;
 import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
 import interface_adapter.stock_trading.StockTradingController;
 import use_case.PlayerMovementUseCase;
+import use_case.load_progress.*;
 import use_case.paybills.PaybillDataAccessInterface;
 import use_case.paybills.PaybillInputBoundary;
 import use_case.paybills.PaybillInteractor;
 import use_case.paybills.PaybillOutputBoundary;
+import use_case.save_progress.SaveProgressDataAccessInterface;
+import use_case.save_progress.SaveProgressInputBoundary;
+import use_case.save_progress.SaveProgressInteractor;
+import use_case.save_progress.SaveProgressOutputBoundary;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
 import use_case.sleep.SleepInteractor;
@@ -76,6 +89,9 @@ public class MainGameWindow extends JFrame {
     // Stock trading system components
     private StockTradingController stockTradingController;
     private StockGameView stockGameView;
+
+    // Filepath for SAVE_FILE
+    private static final String SAVE_FILE_PATH = "invalid/file/invalid/file/.json";
     
     // Card names for CardLayout
     private static final String LOADING_CARD = "loading";
@@ -213,7 +229,7 @@ public class MainGameWindow extends JFrame {
     private void startNewGame() {
         // Create game components if not already created
         if (gamePanel == null) {
-            initializeGamePanel();
+            initializeGamePanel(new Player("Player"), new GameMap());
         }
         
         // Switch to game view
@@ -226,9 +242,9 @@ public class MainGameWindow extends JFrame {
     /**
      * Initializes the game panel with all required dependencies.
      */
-    private void initializeGamePanel() {
+    private void initializeGamePanel(Player player, GameMap gameMap) {
         // Create player entity
-        this.player = new Player("Player");
+        this.player = player;
 
 
         // Create view manager model
@@ -267,7 +283,7 @@ public class MainGameWindow extends JFrame {
         playerInputController.setPauseMenuListener(() -> showInGameMenu());
         
         // Create game panel
-        this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController);
+        this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController, gameMap);
         
         // Set up sleep system callbacks
         playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
@@ -399,14 +415,31 @@ public class MainGameWindow extends JFrame {
      * Saves the game (frontend stub - backend to be implemented).
      */
     private void saveGame() {
-        JOptionPane.showMessageDialog(
-            this,
-            "Game saved successfully!\n" +
-            "(Save functionality will be fully implemented later.\n" +
-            "The backend for save/load is being developed by another team member.)",
-            "Game Saved",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        SaveProgressOutputBoundary saveProgressPresenter = new SaveProgressPresenter();
+        SaveProgressDataAccessInterface saveProgressDAO = new SaveFileUserDataObject();
+        SaveProgressInputBoundary saveProgressInteractor = new SaveProgressInteractor(saveProgressDAO,
+                saveProgressPresenter);
+        SaveProgressController saveProgressController = new SaveProgressController(saveProgressInteractor);
+        try{
+            saveProgressController.saveGame(player, SAVE_FILE_PATH, gamePanel.getGameMap().getCurrentZone().getName());
+
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Game saved successfully!\n" +
+                            "All progress up to this point is stored!",
+                    "Game Saved",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
+        catch(IOException e){
+            JOptionPane.showMessageDialog(
+                    this,
+                    "Game did not save!\n" +
+                            "Be careful! Your progress WAS NOT SAVED!",
+                    "Game not Saved",
+                    JOptionPane.INFORMATION_MESSAGE
+            );
+        }
     }
     
     /**
@@ -454,13 +487,26 @@ public class MainGameWindow extends JFrame {
      * Loads a saved game (frontend stub - backend to be implemented).
      */
     private void loadGame() {
-        JOptionPane.showMessageDialog(
-            this,
-            "Load game functionality will be implemented later.\n" +
-            "The backend for save/load is being developed by another team member.",
-            "Coming Soon",
-            JOptionPane.INFORMATION_MESSAGE
-        );
+        try{
+            String saveFilePath = "src/main/resources/testLoadFile.json";
+            GameMap gameMap = new GameMap();
+            //Setup IDK IF I'M DOING THIS RIGHT :(
+
+            LoadProgressDataAccessInterface DAO = new LoadFileUserDataAccessObject();
+            LoadProgressOutputBoundary presenter = new LoadProgressPresenter();
+            LoadProgressInputBoundary loadProgressInteractor = new LoadProgressInteractor(DAO, presenter);
+            LoadProgressController loadProgressController = new LoadProgressController(loadProgressInteractor);
+
+            Player player = loadProgressController.loadGame(gameMap, saveFilePath);
+            if (player != null) {
+                initializeGamePanel(player, gameMap);
+                cardLayout.show(cardPanel, GAME_CARD);
+            }
+        }
+        catch(Exception e){
+            JOptionPane.showMessageDialog(this, "Failed to load game", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+
     }
     
     /**

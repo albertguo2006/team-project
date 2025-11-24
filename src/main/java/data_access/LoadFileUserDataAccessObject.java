@@ -56,11 +56,15 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
             stats.put(stat, statsData.getInt(stat));
         }
 
+        Day day = Day.valueOf(playerData.getString("currentDay"));
+
         Player player = new Player(playerData.getString("name"),
                 playerData.getDouble("balance"),
                 playerData.getDouble("xLocation"),
                 playerData.getDouble("yLocation"),
                 stats);
+
+        player.setCurrentDay(day);
 
         return player;
     }

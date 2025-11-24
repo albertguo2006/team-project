@@ -40,6 +40,7 @@ public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
         playerData.put("balance", player.getBalance());
         playerData.put("xLocation", player.getX());
         playerData.put("yLocation", player.getY());
+        playerData.put("currentDay", player.getCurrentDay());
 
         JSONObject stats = new JSONObject();
         for (String stat: player.getStats().keySet()) {

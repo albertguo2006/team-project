@@ -40,8 +40,9 @@ public class LoadProgressInteractorTest {
         stats.put("Hunger", 30);
         stats.put("Energy", 70);
         stats.put("Mood", 80);
-        Player testPlayer = new Player("Anya", 308.06, 37.2, 56.1, stats);
+        Player testPlayer = new Player("Anya", 308.06, 1567.9, 601.2, stats);
         testPlayer.addNPCScore(npcs.get("Bob"), 5);
+        testPlayer.setCurrentDay(Day.TUESDAY);
 
         testPlayer.addEvent(events.get(0));
         testPlayer.addEvent(events.get(1));

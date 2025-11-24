@@ -4,7 +4,8 @@
     "balance": 308.06,
     "xLocation": 37.2,
     "yLocation": 56.1,
-    "stats": {"Hunger":  30, "Energy":  70, "Mood": 80}
+    "stats": {"Hunger":  30, "Energy":  70, "Mood": 80},
+    "currentDay": "TUESDAY"
   },
   {
     "Bob": 5

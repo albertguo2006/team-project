@@ -88,9 +88,9 @@ public class GamePanel extends JPanel implements ActionListener {
      * @param playerInputController the controller handling keyboard input
      */
     public GamePanel(PlayerMovementUseCase playerMovementUseCase,
-                     PlayerInputController playerInputController) {
+                     PlayerInputController playerInputController, GameMap gameMap) {
         this.playerMovementUseCase = playerMovementUseCase;
-        this.gameMap = new GameMap();
+        this.gameMap = gameMap;
 
         // Set panel properties - no preferred size since we're resizable
         this.setBackground(Color.BLACK);  // Black for letterbox bars
@@ -930,4 +930,8 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         currentMusicPath = null;
     }
+    public GameMap getGameMap(){
+        return gameMap;
+    }
+
 }

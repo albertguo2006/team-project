@@ -54,6 +54,7 @@ public class SaveProgressInteractorTest {
         investments.put(stock2, 6.32);
 
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
+        testPlayer.setCurrentDay(Day.WEDNESDAY);
 
         SaveProgressInputData inputData = new SaveProgressInputData(testPlayer,
                 "src/main/resources/testSuccessSaveFile.json", gameMap.getCurrentZone().getName());
