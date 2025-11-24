@@ -938,8 +938,5 @@ public class GamePanel extends JPanel implements ActionListener {
         }
         currentMusicPath = null;
     }
-    public GameMap getGameMap(){
-        return gameMap;
-    }
 
 }
