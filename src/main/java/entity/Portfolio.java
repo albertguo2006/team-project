@@ -2,6 +2,7 @@ package entity;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 // this is a class to represent the portfolio of the playet
 // current only has one type of stock, but could be altered to add more?
@@ -74,6 +75,21 @@ public class Portfolio {
 
     public void  setInvestments(Map<Stock, Double> investments) {
         this.investments = (HashMap<Stock, Double>) investments;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Portfolio)) return false;
+        Portfolio portfolio = (Portfolio) obj;
+        return Double.compare(portfolio.cash, cash) == 0 &&
+               Double.compare(portfolio.totalEquity, totalEquity) == 0 &&
+               Objects.equals(investments, portfolio.investments);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cash, totalEquity, investments);
     }
 
 }

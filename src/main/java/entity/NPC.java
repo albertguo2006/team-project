@@ -1,5 +1,7 @@
 package entity;
 
+import java.util.Objects;
+
 public class NPC {
     private final String name;
     private String dialoguePrompt;
@@ -49,4 +51,21 @@ public class NPC {
     // added a default score just in case certain NPCs start out with different default relationship
     // scores (for example, some NPCs may start out friendlier than others, thus having higher starting scores).
     // this can be deleted if we decide against this.
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof NPC)) return false;
+        NPC npc = (NPC) obj;
+        return Double.compare(npc.cashBalance, cashBalance) == 0 &&
+               defaultScore == npc.defaultScore &&
+               Objects.equals(name, npc.name) &&
+               Objects.equals(dialoguePrompt, npc.dialoguePrompt) &&
+               Objects.equals(location, npc.location);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, dialoguePrompt, location, cashBalance, defaultScore);
+    }
 }

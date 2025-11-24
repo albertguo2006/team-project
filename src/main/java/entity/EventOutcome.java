@@ -1,5 +1,7 @@
 package entity;
 
+import java.util.Objects;
+
 public class EventOutcome {
     private final int outcomeID;
     private final String outcomeName;
@@ -27,5 +29,22 @@ public class EventOutcome {
     }
     public int getOutcomeResult() {
         return outcomeResult;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof EventOutcome)) return false;
+        EventOutcome outcome = (EventOutcome) obj;
+        return outcomeID == outcome.outcomeID &&
+               Double.compare(outcome.outcomeChance, outcomeChance) == 0 &&
+               outcomeResult == outcome.outcomeResult &&
+               Objects.equals(outcomeName, outcome.outcomeName) &&
+               Objects.equals(outcomeDescription, outcome.outcomeDescription);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(outcomeID, outcomeName, outcomeDescription, outcomeChance, outcomeResult);
     }
 }
