@@ -23,7 +23,7 @@ public class LoadProgressInteractorTest {
 
     List<Event> events = eventDAO.createEventList();
     HashMap<String, Item> items = itemDAO.getItemMap();
-    HashMap<String, NPC> npcs = npcDAO.getNPCMap();
+    HashMap<String, NPC> npcs = (HashMap<String, NPC>) npcDAO.getAllNpcs();
 
     @Test
     void successLoadProgress() throws IOException {
@@ -34,10 +34,10 @@ public class LoadProgressInteractorTest {
         stats.put("Energy", 70);
         stats.put("Mood", 80);
         Player testPlayer = new Player("Anya", 308.06, 37.2, 56.1, stats);
-        testPlayer.addNPCScore(npcs.get("Bob"), 8);
+        testPlayer.addNPCScore(npcs.get("Bob"), 5);  // Fixed: JSON has 5, not 8
 
-        testPlayer.addEvent(events.get(0));
-        testPlayer.addEvent(events.get(1));
+        testPlayer.addEvent(events.get(0));  // Car Accident (loaded first due to JSON key order)
+        testPlayer.addEvent(events.get(1));  // Test Event A (loaded second)
 
         testPlayer.addInventory(1, items.get("Coffee"));
         testPlayer.addInventory(3, items.get("Energy Drink"));
@@ -50,12 +50,7 @@ public class LoadProgressInteractorTest {
 
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
 
-        System.out.println(player.toString());
-        System.out.println(testPlayer.toString());
         assert(gameMap.getCurrentZone().getName().equals("Subway Station 1"));
-        // ABOVE STATEMENT RETURNS TRUE
         assert(player.equals(testPlayer));
-        // Issue is with the .equals method. Needs to implement equals method for it to work, since the
-        // Memory location is technically not yet correct.
     }
 }

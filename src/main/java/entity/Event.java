@@ -1,6 +1,7 @@
 package entity;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Event {
     private final int eventID;
@@ -26,6 +27,22 @@ public class Event {
     }
     public HashMap<Integer, EventOutcome> getOutcomes() {
         return outcomes;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Event)) return false;
+        Event event = (Event) obj;
+        return eventID == event.eventID &&
+               Objects.equals(eventName, event.eventName) &&
+               Objects.equals(eventDescription, event.eventDescription) &&
+               Objects.equals(outcomes, event.outcomes);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventID, eventName, eventDescription, outcomes);
     }
 
 }
