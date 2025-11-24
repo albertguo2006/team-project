@@ -23,7 +23,7 @@ public class LoadProgressInteractorTest {
 
     List<Event> events = eventDAO.createEventList();
     HashMap<String, Item> items = itemDAO.getItemMap();
-    HashMap<String, NPC> npcs = npcDAO.getNPCMap();
+    HashMap<String, NPC> npcs = (HashMap<String, NPC>) npcDAO.getAllNpcs();
 
     @Test
     void successLoadProgress() throws IOException {
