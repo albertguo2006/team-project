@@ -641,7 +641,15 @@ public class GamePanel extends JPanel implements ActionListener {
     public boolean isInStockTradingZone() {
         return inStockTradingZone;
     }
-    
+
+    /**
+     * Gets the game map containing all zones and current zone information.
+     * @return the GameMap instance
+     */
+    public GameMap getGameMap() {
+        return gameMap;
+    }
+
     /**
      * Draws UI elements (HUD, status, debug info).
      *

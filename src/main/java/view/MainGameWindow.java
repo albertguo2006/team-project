@@ -11,6 +11,7 @@ import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
 import data_access.LoadFileUserDataAccessObject;
+import data_access.LoadFileUserDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.SaveFileUserDataObject;
 import data_access.SleepDataAccessObject;
@@ -31,15 +32,14 @@ import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
 import interface_adapter.stock_trading.StockTradingController;
 import use_case.PlayerMovementUseCase;
-import use_case.load_progress.*;
+import use_case.load_progress.LoadProgressDataAccessInterface;
+import use_case.load_progress.LoadProgressInteractor;
 import use_case.paybills.PaybillDataAccessInterface;
 import use_case.paybills.PaybillInputBoundary;
 import use_case.paybills.PaybillInteractor;
 import use_case.paybills.PaybillOutputBoundary;
 import use_case.save_progress.SaveProgressDataAccessInterface;
-import use_case.save_progress.SaveProgressInputBoundary;
 import use_case.save_progress.SaveProgressInteractor;
-import use_case.save_progress.SaveProgressOutputBoundary;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
 import use_case.sleep.SleepInteractor;
@@ -90,9 +90,11 @@ public class MainGameWindow extends JFrame {
     private StockTradingController stockTradingController;
     private StockGameView stockGameView;
 
-    // Filepath for SAVE_FILE
-    private static final String SAVE_FILE_PATH = "invalid/file/invalid/file/.json";
-    
+    // Save/Load system components
+    private SaveProgressInteractor saveProgressInteractor;
+    private LoadProgressInteractor loadProgressInteractor;
+    private static final String SAVE_FILE = "savegame.json";
+
     // Card names for CardLayout
     private static final String LOADING_CARD = "loading";
     private static final String MENU_CARD = "menu";
@@ -121,7 +123,14 @@ public class MainGameWindow extends JFrame {
         
         // Initialize game settings
         this.gameSettings = new GameSettings();
-        
+
+        // Initialize save/load system
+        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataObject();
+        this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess);
+
+        LoadProgressDataAccessInterface loadDataAccess = new LoadFileUserDataAccessObject();
+        this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess);
+
         // Set up CardLayout for switching between views
         this.cardLayout = new CardLayout();
         this.cardPanel = new JPanel(cardLayout);
@@ -412,33 +421,40 @@ public class MainGameWindow extends JFrame {
     }
     
     /**
-     * Saves the game (frontend stub - backend to be implemented).
+     * Saves the current game state to file.
      */
     private void saveGame() {
-        SaveProgressOutputBoundary saveProgressPresenter = new SaveProgressPresenter();
-        SaveProgressDataAccessInterface saveProgressDAO = new SaveFileUserDataObject();
-        SaveProgressInputBoundary saveProgressInteractor = new SaveProgressInteractor(saveProgressDAO,
-                saveProgressPresenter);
-        SaveProgressController saveProgressController = new SaveProgressController(saveProgressInteractor);
-        try{
-            saveProgressController.saveGame(player, SAVE_FILE_PATH, gamePanel.getGameMap().getCurrentZone().getName());
+        if (gamePanel == null || player == null) {
+            JOptionPane.showMessageDialog(
+                this,
+                "No game in progress to save!",
+                "Cannot Save",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
+
+        try {
+            // Get current zone name from the game map
+            String currentZone = gamePanel.getGameMap().getCurrentZone().getName();
+
+            // Save the game using the interactor
+            saveProgressInteractor.saveGame(player, currentZone, SAVE_FILE);
 
             JOptionPane.showMessageDialog(
-                    this,
-                    "Game saved successfully!\n" +
-                            "All progress up to this point is stored!",
-                    "Game Saved",
-                    JOptionPane.INFORMATION_MESSAGE
+                this,
+                "Game saved successfully to " + SAVE_FILE + "!",
+                "Game Saved",
+                JOptionPane.INFORMATION_MESSAGE
             );
-        }
-        catch(IOException e){
+        } catch (Exception e) {
             JOptionPane.showMessageDialog(
-                    this,
-                    "Game did not save!\n" +
-                            "Be careful! Your progress WAS NOT SAVED!",
-                    "Game not Saved",
-                    JOptionPane.INFORMATION_MESSAGE
+                this,
+                "Failed to save game: " + e.getMessage(),
+                "Save Error",
+                JOptionPane.ERROR_MESSAGE
             );
+            e.printStackTrace();
         }
     }
     
@@ -484,29 +500,68 @@ public class MainGameWindow extends JFrame {
     }
 
     /**
-     * Loads a saved game (frontend stub - backend to be implemented).
+     * Loads a saved game from file.
      */
     private void loadGame() {
-        try{
-            String saveFilePath = "src/main/resources/testLoadFile.json";
-            GameMap gameMap = new GameMap();
-            //Setup IDK IF I'M DOING THIS RIGHT :(
+        // Check if save file exists
+        java.io.File saveFile = new java.io.File(SAVE_FILE);
+        if (!saveFile.exists()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "No saved game found!\n" +
+                "Save file: " + SAVE_FILE,
+                "Cannot Load",
+                JOptionPane.WARNING_MESSAGE
+            );
+            return;
+        }
 
-            LoadProgressDataAccessInterface DAO = new LoadFileUserDataAccessObject();
-            LoadProgressOutputBoundary presenter = new LoadProgressPresenter();
-            LoadProgressInputBoundary loadProgressInteractor = new LoadProgressInteractor(DAO, presenter);
-            LoadProgressController loadProgressController = new LoadProgressController(loadProgressInteractor);
+        try {
+            // Create a temporary GameMap for loading
+            GameMap tempGameMap = new GameMap();
 
-            Player player = loadProgressController.loadGame(gameMap, saveFilePath);
-            if (player != null) {
-                initializeGamePanel(player, gameMap);
-                cardLayout.show(cardPanel, GAME_CARD);
+            // Load the player using the interactor
+            Player loadedPlayer = loadProgressInteractor.loadGame(tempGameMap, SAVE_FILE);
+
+            // If we haven't initialized the game panel yet, do it now
+            if (gamePanel == null) {
+                initializeGamePanel();
             }
-        }
-        catch(Exception e){
-            JOptionPane.showMessageDialog(this, "Failed to load game", "Error", JOptionPane.ERROR_MESSAGE);
-        }
 
+            // Replace the current player with the loaded player
+            this.player = loadedPlayer;
+
+            // Update the player movement use case with the loaded player
+            PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(loadedPlayer);
+            playerInputController.setPlayerMovementUseCase(playerMovementUseCase);
+
+            // Update the game panel with the loaded game state
+            gamePanel.loadGameState(playerMovementUseCase, tempGameMap);
+
+            // Update stock game view with loaded player
+            if (stockGameView != null) {
+                stockGameView.setPlayer(loadedPlayer);
+            }
+
+            // Switch to game view
+            cardLayout.show(cardPanel, GAME_CARD);
+            startGame();
+
+            JOptionPane.showMessageDialog(
+                this,
+                "Game loaded successfully from " + SAVE_FILE + "!",
+                "Game Loaded",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Failed to load game: " + e.getMessage(),
+                "Load Error",
+                JOptionPane.ERROR_MESSAGE
+            );
+            e.printStackTrace();
+        }
     }
     
     /**
