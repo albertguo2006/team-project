@@ -89,6 +89,11 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         // Convert queue to list for chart
         List<Double> prices = new ArrayList<>(viewModel.priceHistory);
 
+        // Don't update if no price data yet
+        if (prices.isEmpty()) {
+            return;
+        }
+
         // Create x-axis data (time indices)
         List<Integer> xData = new ArrayList<>();
         for (int i = 0; i < prices.size(); i++) {
@@ -173,9 +178,11 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         // Style the chart
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
 
-        // Initialize with empty data
+        // Initialize with placeholder data (will be replaced by real prices)
         List<Integer> xData = new ArrayList<>();
         List<Double> yData = new ArrayList<>();
+        xData.add(0);
+        yData.add(0.0);
         chart.addSeries("Price", xData, yData);
 
         chartPanel = new XChartPanel<>(chart);
