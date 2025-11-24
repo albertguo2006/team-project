@@ -1,9 +1,10 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -15,6 +16,10 @@ import javax.swing.Timer;
 
 import entity.Portfolio;
 import entity.Stock;
+import org.knowm.xchart.CategoryChart;
+import org.knowm.xchart.CategoryChartBuilder;
+import org.knowm.xchart.XChartPanel;
+import org.knowm.xchart.style.Styler;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
 
@@ -30,7 +35,9 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     private JLabel cashLabel;
     private JLabel sharesLabel;
     private JLabel equityLabel;
-    private JLabel arrowLabel;
+
+    private CategoryChart chart;
+    private XChartPanel<CategoryChart> chartPanel;
 
     private Portfolio portfolio;
     private Stock stock;
@@ -64,25 +71,33 @@ public class StockGameView implements PlayStockGameOutputBoundary {
 
         // change viewmodel
         viewModel.update(data);
+        viewModel.addPriceToHistory(data.price);
+
         // set text
         priceLabel.setText("Price: " + String.format("%.2f", viewModel.price));
         cashLabel.setText("Cash: " + String.format("%.2f", viewModel.cash));
         sharesLabel.setText("Shares: " + String.format("%.2f", viewModel.shares));
         equityLabel.setText("Total Equity: " + String.format("%.2f", viewModel.equity));
 
-        // change arrow (compare new price to last price)
-        if (viewModel.price > viewModel.lastPrice) {
-            arrowLabel.setText("▲");
-            arrowLabel.setForeground(Color.GREEN);
-        } else if (viewModel.price < viewModel.lastPrice) {
-            arrowLabel.setText("▼");
-            arrowLabel.setForeground(Color.RED);
-        } else {
-            arrowLabel.setText("—");
-            arrowLabel.setForeground(Color.BLACK);
-        }
+        // update chart with price history
+        updateChartData();
 
         viewModel.lastPrice = viewModel.price; // store new price as last price
+    }
+
+    private void updateChartData() {
+        // Convert queue to list for chart
+        List<Double> prices = new ArrayList<>(viewModel.priceHistory);
+
+        // Create x-axis data (time indices)
+        List<Integer> xData = new ArrayList<>();
+        for (int i = 0; i < prices.size(); i++) {
+            xData.add(i);
+        }
+
+        // Update chart series
+        chart.updateCategorySeries("Price", xData, prices, null);
+        chartPanel.repaint();
     }
 
     // end of game view
@@ -146,8 +161,24 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         priceLabel = new JLabel("Price: 0", SwingConstants.CENTER);
         priceLabel.setFont(new Font("Arial", Font.BOLD, 26));
 
-        arrowLabel = new JLabel("—", SwingConstants.CENTER);
-        arrowLabel.setFont(new Font("Arial", Font.BOLD, 48));
+        // Create chart for price history
+        chart = new CategoryChartBuilder()
+                .width(400)
+                .height(200)
+                .title("Stock Price History")
+                .xAxisTitle("Time")
+                .yAxisTitle("Price ($)")
+                .build();
+
+        // Style the chart
+        chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+
+        // Initialize with empty data
+        List<Integer> xData = new ArrayList<>();
+        List<Double> yData = new ArrayList<>();
+        chart.addSeries("Price", xData, yData);
+
+        chartPanel = new XChartPanel<>(chart);
 
         cashLabel = new JLabel("Cash: 0");
         sharesLabel = new JLabel("Shares: 0");
@@ -188,7 +219,7 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         buttonPanel.add(sellButton);
 
         frame.add(priceLabel, BorderLayout.NORTH);
-        frame.add(arrowLabel, BorderLayout.CENTER);
+        frame.add(chartPanel, BorderLayout.CENTER);
         frame.add(buttonPanel, BorderLayout.SOUTH);
         frame.add(east, BorderLayout.EAST);
 
