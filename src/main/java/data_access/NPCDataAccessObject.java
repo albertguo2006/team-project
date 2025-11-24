@@ -37,6 +37,16 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
         return (NPC) values[new Random().nextInt(values.length)];
     }
 
+    public java.util.List<NPC> getNPCsInZone(String zoneName) {
+        java.util.List<NPC> npcsInZone = new java.util.ArrayList<>();
+        for (NPC npc : allNpcs.values()) {
+            if (npc.getLocation().equals(zoneName)) {
+                npcsInZone.add(npc);
+            }
+        }
+        return npcsInZone;
+    }
+
     private Map<String, NPC> loadNpcsFromJson(String filePath) {
         Map<String, NPC> npcMap = new HashMap<>();
         try {
@@ -59,6 +69,9 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
                         0.0,                 // starting cash
                         0                    // default relationship score
                 ); // NPC cash is not implemented and default relationship score is also not implmented (its too complex)
+
+                // Assign position based on NPC name (arbitrary positions)
+                assignNpcPosition(npc, name);
 
                 npcMap.put(name, npc);
             }
