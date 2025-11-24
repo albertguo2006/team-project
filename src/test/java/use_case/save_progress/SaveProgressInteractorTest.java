@@ -72,12 +72,12 @@ public class SaveProgressInteractorTest {
     }
 
     @Test
-    void failSaveProgress_ThrowsException() throws IOException {
+    void failSaveProgress_ThrowsException() {
         Player player = new Player("Cynthia");
         GameMap gameMap = new GameMap();
 
         Exception exception = assertThrows(FileNotFoundException.class, () -> {
-            saveProgressInteractor.saveGame(player, gameMap.getCurrentZone().getName(), "invalid-file-path-json");
+            saveProgressInteractor.saveGame(player, gameMap.getCurrentZone().getName(), "invalid/file/path/.json");
         });
         assert(exception.getMessage().equals("Invalid Filepath! Unable to save!"));
         // Considering making custom exceptions.... but IDK what custom exceptions are actually for....
