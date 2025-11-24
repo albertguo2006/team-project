@@ -1,7 +1,6 @@
 package view;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.util.ArrayList;
@@ -173,8 +172,6 @@ public class StockGameView implements PlayStockGameOutputBoundary {
 
         // Style the chart
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
-        chart.getStyler().setDefaultSeriesRenderStyle(org.knowm.xchart.style.lines.SeriesLines.NONE);
-        chart.getStyler().setMarkerSize(0);
 
         // Initialize with empty data
         List<Integer> xData = new ArrayList<>();
