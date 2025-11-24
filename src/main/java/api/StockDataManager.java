@@ -172,13 +172,16 @@ public class StockDataManager {
         for (int i = 0; i < 24; i++) {  // Look back up to 24 months
             String monthStr = candidate.format(formatter);
             if (!info.getAvailableMonths().contains(monthStr)) {
+                System.out.println("Fetching month: " + monthStr + " for " + info.getSymbol());
                 return monthStr;
             }
             candidate = candidate.minusMonths(1);
         }
 
         // If all months are fetched, return the most recent one
-        return now.minusMonths(1).format(formatter);
+        String fallback = now.minusMonths(1).format(formatter);
+        System.out.println("All months fetched, using fallback: " + fallback);
+        return fallback;
     }
 
     /**
@@ -253,25 +256,31 @@ public class StockDataManager {
 
     /**
      * Selects a random unplayed 5-day period for the given stock.
-     * @return a map containing the month and start day index, or null if no unplayed data
+     * Falls back to replaying data if no unplayed periods exist.
+     * @param allowReplay if true, allows replaying previously played periods
+     * @return a map containing the month and start day index, or null if no data at all
      */
-    public Map<String, Object> selectRandomUnplayedPeriod(String symbol) throws Exception {
+    public Map<String, Object> selectRandomUnplayedPeriod(String symbol, boolean allowReplay) throws Exception {
         StockInfo info = stockMetadata.get(symbol);
         if (info == null || info.getAvailableMonths().isEmpty()) {
+            System.err.println("No available months for " + symbol);
             return null;
         }
 
         Random random = new Random();
         List<String> months = info.getAvailableMonths();
 
-        // Try up to 50 times to find an unplayed period
+        // First, try to find an unplayed period
         for (int attempt = 0; attempt < 50; attempt++) {
             String month = months.get(random.nextInt(months.size()));
 
             // Get the number of available days in this month's data
             int availableDays = getAvailableDaysInMonth(symbol, month);
 
+            System.out.println("Month " + month + " has " + availableDays + " days of data");
+
             if (availableDays < 5) {
+                System.out.println("Not enough days in " + month + " (need 5, have " + availableDays + ")");
                 continue;  // Not enough data in this month
             }
 
@@ -284,6 +293,7 @@ public class StockDataManager {
 
             // Check if this period has been played
             if (!info.getPlayedPeriods().contains(periodId)) {
+                System.out.println("Found unplayed period: " + periodId);
                 Map<String, Object> result = new HashMap<>();
                 result.put("month", month);
                 result.put("startDay", startDay);
@@ -292,7 +302,35 @@ public class StockDataManager {
             }
         }
 
-        return null;  // No unplayed period found
+        // If no unplayed period found and replay is allowed, select any valid period
+        if (allowReplay) {
+            System.out.println("No unplayed periods found, allowing replay for " + symbol);
+            for (String month : months) {
+                int availableDays = getAvailableDaysInMonth(symbol, month);
+                if (availableDays >= 5) {
+                    int maxStartDay = availableDays - 5;
+                    int startDay = random.nextInt(maxStartDay + 1);
+                    String periodId = month + "_day" + startDay + "-" + (startDay + 4) + "_REPLAY";
+
+                    System.out.println("Selected replay period: " + periodId);
+                    Map<String, Object> result = new HashMap<>();
+                    result.put("month", month);
+                    result.put("startDay", startDay);
+                    result.put("periodId", periodId);
+                    return result;
+                }
+            }
+        }
+
+        System.err.println("No valid periods found for " + symbol);
+        return null;  // No valid period found at all
+    }
+
+    /**
+     * Selects a random unplayed 5-day period (with replay fallback enabled by default).
+     */
+    public Map<String, Object> selectRandomUnplayedPeriod(String symbol) throws Exception {
+        return selectRandomUnplayedPeriod(symbol, true);
     }
 
     /**

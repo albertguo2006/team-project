@@ -49,18 +49,16 @@ public class AlphaStockDataBase implements StockDataBase {
      * @throws Exception if something goes wrong (api call doesn't work)
      */
     public void getStockPrices(String symbol, String month) throws Exception {
-        // create the url using the parameters needed for the API call
+        // For free tier, use TIME_SERIES_DAILY which gives 100 days of data with compact
+        // This is much more useful than 100 5-minute data points
         String url = BASE_URL +
-                "?function=TIME_SERIES_INTRADAY" +
-                "&interval=" + "5min" +
-                "&outputsize=" + "compact" + // Use compact for free tier
+                "?function=TIME_SERIES_DAILY" +
+                "&outputsize=compact" + // Compact gives 100 most recent days (works for free tier)
                 "&symbol=" + symbol +
                 "&apikey=" + apiKey;
 
-        // Add month parameter if specified
-        if (month != null && !month.isEmpty()) {
-            url += "&month=" + month;
-        }
+        // Note: month parameter doesn't work well with free tier, so we just fetch recent data
+        // The compact daily data will give us ~100 trading days (about 5 months worth)
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url)) // url to go to
@@ -74,8 +72,10 @@ public class AlphaStockDataBase implements StockDataBase {
             throw new RuntimeException("API request failed with code: " + response.statusCode());
         }
         else { // otherwise (api call successful, can save data to a JSON file)
-            String filename = month != null ? symbol + "_" + month : symbol;
+            // For daily data, we'll use "recent" as the identifier since we can't specify month with free tier
+            String filename = symbol + "_recent";
             saveToFile(response.body(), filename);
+            System.out.println("Fetched " + symbol + " data and saved to " + filename + ".json");
         }
     }
 
