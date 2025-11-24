@@ -19,7 +19,7 @@ public class Player {
     private double x;
     private double y;
     private double speed;  // pixels per second
-    
+
     // Day system properties
     private Day currentDay;
     private boolean hasSleptToday;
@@ -37,7 +37,7 @@ public class Player {
         this.x = 960.0;  // Center of 1920 width
         this.y = 600.0;  // Center of 1200 height
         this.speed = 360.0;  // Scaled up for 1920x1200 (was 150 for 800x600)
-        
+
         // Initialize day system
         this.currentDay = Day.MONDAY;
         this.hasSleptToday = false;
@@ -53,7 +53,7 @@ public class Player {
         this.y = y;
         this.speed = 360.0;  // Scaled up for 1920x1200 virtual resolution
         this.stats.putAll(stats);
-        
+
         // Initialize day system with defaults
         this.currentDay = Day.MONDAY;
         this.hasSleptToday = false;
@@ -163,7 +163,7 @@ public class Player {
         return events;
     }
 
-    public Portfolio getPortfolio() { return portfolio; };
+    public Portfolio getPortfolio() { return portfolio; }
 
     public void setPortfolio(Portfolio portfolio) { this.portfolio = portfolio; }
 
@@ -191,9 +191,9 @@ public class Player {
     public void setSpeed(double speed) {
         this.speed = speed;
     }
-    
+
     // Day system getters and setters
-    
+
     /**
      * Gets the current day of the week.
      * @return the current Day
@@ -201,7 +201,7 @@ public class Player {
     public Day getCurrentDay() {
         return currentDay;
     }
-    
+
     /**
      * Sets the current day.
      * @param day the day to set
@@ -209,7 +209,7 @@ public class Player {
     public void setCurrentDay(Day day) {
         this.currentDay = day;
     }
-    
+
     /**
      * Checks if the player has slept today.
      * @return true if already slept, false otherwise
@@ -217,7 +217,7 @@ public class Player {
     public boolean hasSleptToday() {
         return hasSleptToday;
     }
-    
+
     /**
      * Sets whether the player has slept today.
      * @param slept true if slept, false otherwise
@@ -225,7 +225,7 @@ public class Player {
     public void setHasSleptToday(boolean slept) {
         this.hasSleptToday = slept;
     }
-    
+
     /**
      * Gets the player's health (0-100).
      * @return current health
@@ -233,7 +233,7 @@ public class Player {
     public int getHealth() {
         return health;
     }
-    
+
     /**
      * Sets the player's health.
      * @param health the health value (0-100)
@@ -241,7 +241,7 @@ public class Player {
     public void setHealth(int health) {
         this.health = Math.max(0, Math.min(100, health));
     }
-    
+
     /**
      * Gets the daily earnings accumulated today.
      * @return daily earnings
@@ -249,7 +249,7 @@ public class Player {
     public double getDailyEarnings() {
         return dailyEarnings;
     }
-    
+
     /**
      * Adds to the daily earnings.
      * @param amount the amount to add
@@ -257,7 +257,7 @@ public class Player {
     public void addDailyEarnings(double amount) {
         this.dailyEarnings += amount;
     }
-    
+
     /**
      * Gets the daily spending accumulated today.
      * @return daily spending
@@ -265,7 +265,7 @@ public class Player {
     public double getDailySpending() {
         return dailySpending;
     }
-    
+
     /**
      * Adds to the daily spending.
      * @param amount the amount to add
@@ -273,7 +273,7 @@ public class Player {
     public void addDailySpending(double amount) {
         this.dailySpending += amount;
     }
-    
+
     /**
      * Resets daily financial tracking.
      * Called at the start of a new day.
@@ -282,7 +282,7 @@ public class Player {
         this.dailyEarnings = 0.0;
         this.dailySpending = 0.0;
     }
-    
+
     /**
      * Advances to the next day and resets daily flags.
      * @return true if successfully advanced, false if already Friday
@@ -295,6 +295,22 @@ public class Player {
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean equals(Object obj){
+        if (this == obj){
+            return true;
+        }
+        if (!(obj instanceof Player)){
+            return false;
+        }
+        Player player = (Player) obj;
+
+        return name.equals(player.name) && x == player.x && y == player.y && stats.equals(player.stats) &&
+                inventory.equals(player.inventory) && relationships.equals(player.relationships) &&
+                events.equals(player.events) && portfolio.equals(player.portfolio) &&
+                currentDay.equals(player.currentDay);
     }
 
 }

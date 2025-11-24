@@ -1,9 +1,9 @@
-package use_case.load_progress;
+package use_case.save_progress;
 
 import data_access.EventDataAccessObject;
 import data_access.ItemDataAccessObject;
-import data_access.LoadFileUserDataAccessObject;
 import data_access.NPCDataAccessObject;
+import data_access.SaveFileUserDataObject;
 import entity.*;
 import org.junit.jupiter.api.Test;
 import use_case.inventory.ItemDataAccessInterface;
@@ -17,9 +17,9 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class LoadProgressInteractorTest {
-    LoadProgressDataAccessInterface loadFileDAO = new LoadFileUserDataAccessObject();
-    LoadProgressInteractor loadProgressInteractor = new LoadProgressInteractor(loadFileDAO);
+public class SaveProgressInteractorTest {
+    SaveProgressDataAccessInterface saveFileUserDAO = new SaveFileUserDataObject();
+    SaveProgressInteractor saveProgressInteractor = new SaveProgressInteractor(saveFileUserDAO);
     NpcInteractionsUserDataAccessInterface npcDAO = new NPCDataAccessObject();
     EventDataAccessObject eventDAO = new EventDataAccessObject();
     ItemDataAccessInterface itemDAO = new ItemDataAccessObject();
@@ -28,10 +28,10 @@ public class LoadProgressInteractorTest {
     HashMap<String, Item> items = itemDAO.getItemMap();
     Map<String, NPC> npcs = npcDAO.getAllNpcs();
 
+
     @Test
-    void successLoadProgress() throws IOException {
+    void successSaveProgress() throws IOException {
         GameMap gameMap = new GameMap();
-        Player player = loadProgressInteractor.loadGame(gameMap, "src/main/resources/testLoadFile.json");
         HashMap<String, Integer> stats = new HashMap<>();
         stats.put("Hunger", 30);
         stats.put("Energy", 70);
@@ -53,35 +53,34 @@ public class LoadProgressInteractorTest {
 
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
 
-        assert(gameMap.getCurrentZone().getName().equals("Subway Station 1"));
-        assert(player.equals(testPlayer));
+        saveProgressInteractor.saveGame(testPlayer, gameMap.getCurrentZone().getName(),
+                "src/main/resources/testSuccessSaveFile.json");
+
+        // TODO: write assertions for this,,  a bit unsure on how to do so when comparing JSON files
     }
 
     @Test
-    void successLoadProgress_PlayerMismatch()throws IOException {
+    void successSaveProgress_FileMismatch() throws IOException {
+        Player player = new Player("Armand");
         GameMap gameMap = new GameMap();
 
-        Player player = loadProgressInteractor.loadGame(gameMap, "src/main/resources/testLoadFile.json");
-        HashMap<String, Integer> stats = new HashMap<>();
-        stats.put("Hunger", 30);
-        stats.put("Energy", 70);
-        stats.put("Mood", 80);
-        Player testPlayer = new Player("Anya", 308.06, 37.2, 56.1, stats);
-        testPlayer.addNPCScore(npcs.get("Sebestian"), 5);
+        saveProgressInteractor.saveGame(player, gameMap.getCurrentZone().getName(),
+                "src/main/resources/testFailSaveFile.json");
 
-        testPlayer.addEvent(events.get(1));
 
-        assert(!player.equals(testPlayer));
+        // TODO: write assertions for this,,  a bit unsure on how to do so when comparing JSON files
     }
 
     @Test
-    void failLoadProgress_FileNotFound() {
+    void failSaveProgress_ThrowsException() throws IOException {
+        Player player = new Player("Cynthia");
         GameMap gameMap = new GameMap();
+
         Exception exception = assertThrows(FileNotFoundException.class, () -> {
-            loadProgressInteractor.loadGame(gameMap, "this/file/is/invalid.json");
+            saveProgressInteractor.saveGame(player, gameMap.getCurrentZone().getName(), "invalid-file-path-json");
         });
-        assert(exception.getMessage().equals("Save File not found! Cannot load progress into Game!"));
+        assert(exception.getMessage().equals("Invalid Filepath! Unable to save!"));
         // Considering making custom exceptions.... but IDK what custom exceptions are actually for....
-
     }
+
 }

@@ -5,6 +5,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import use_case.load_progress.LoadProgressDataAccessInterface;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -24,7 +25,7 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
             return new JSONArray(data);
         }
         catch(IOException e){
-            throw new RuntimeException();
+            throw new FileNotFoundException("Save File not found! Cannot load progress into Game!");
         }
     }
 
@@ -106,8 +107,3 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
         player.setPortfolio(portfolio);
     }
 }
-
-
-
-
-

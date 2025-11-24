@@ -76,5 +76,32 @@ public class Portfolio {
         this.investments = (HashMap<Stock, Double>) investments;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj){
+            return true;
+        }
+        if (!(obj instanceof Portfolio)){
+            return false;
+        }
+        Portfolio portfolio = (Portfolio) obj;
+        if (totalEquity != portfolio.totalEquity) {
+            return false;
+        }
+        if (investments.size() != portfolio.investments.size()) {
+            return false;
+        }
+        Map <Stock, Double> other_investments = portfolio.getInvestments();
+        for (Stock stock: investments.keySet()) {
+            if (!other_investments.containsKey(stock)) {
+                return false;
+            }
+            if (!investments.get(stock).equals(other_investments.get(stock))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }
 
