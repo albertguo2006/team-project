@@ -103,6 +103,41 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
         }
     }
 
+    /**
+     * Assigns arbitrary x,y positions to NPCs based on their name.
+     * These positions can be adjusted later as needed.
+     * @param npc The NPC to position
+     * @param npcName The name of the NPC
+     */
+    private void assignNpcPosition(NPC npc, String npcName) {
+        switch (npcName) {
+            case "Bob":
+                npc.setX(960);  // Center of lobby area
+                npc.setY(600);
+                break;
+            case "Danny":
+                npc.setX(1100);  // Near desk, avoiding stock trading zone
+                npc.setY(400);
+                break;
+            case "Sebestian":
+                npc.setX(960);  // Center platform
+                npc.setY(700);
+                break;
+            case "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon":
+                npc.setX(960);  // Center aisle
+                npc.setY(400);
+                break;
+            case "Sophia":
+                npc.setX(700);  // Street corner
+                npc.setY(600);
+                break;
+            default:
+                npc.setX(800);  // Default position
+                npc.setY(500);
+                break;
+        }
+    }
+
 
     // -- ignore (to be changed)
     private final Map<String, NPC> npcs = new HashMap<>();
