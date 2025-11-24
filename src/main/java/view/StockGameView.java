@@ -60,7 +60,10 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         this.stock = stock;
         this.initialInvestment = portfolio.getCash();  // Store initial investment
 
+        // Clear any old price history and add initial price
+        viewModel.priceHistory.clear();
         viewModel.lastPrice = stock.stockPrice;  // set initial price
+        viewModel.addPriceToHistory(stock.stockPrice);  // Add initial price to history
 
         buildUI();
         timer.start();
@@ -183,20 +186,37 @@ public class StockGameView implements PlayStockGameOutputBoundary {
                 .height(200)
                 .title("Stock Price History")
                 .xAxisTitle("")
-                .yAxisTitle("Price ($)")
+                .yAxisTitle("")
                 .build();
 
         // Style the chart to look like candlesticks
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
         chart.getStyler().setLabelsVisible(false); // Remove x-axis labels
+        chart.getStyler().setYAxisTicksVisible(false); // Remove y-axis labels
         chart.getStyler().setAvailableSpaceFill(0.9); // Make bars wider (90% of space)
         chart.getStyler().setOverlapped(true); // Allow bars to be close together
 
-        // Initialize with placeholder data (will be replaced by real prices)
+        // Initialize with initial price from history (or placeholder if empty)
         List<Integer> xData = new ArrayList<>();
         List<Double> yData = new ArrayList<>();
-        xData.add(0);
-        yData.add(0.0);
+        if (!viewModel.priceHistory.isEmpty()) {
+            // Use actual initial price
+            List<Double> prices = new ArrayList<>(viewModel.priceHistory);
+            for (int i = 0; i < prices.size(); i++) {
+                xData.add(i);
+            }
+            yData.addAll(prices);
+
+            // Set initial y-axis range based on initial price
+            double initialPrice = prices.get(0);
+            double padding = initialPrice * 0.05;
+            chart.getStyler().setYAxisMin(initialPrice - padding);
+            chart.getStyler().setYAxisMax(initialPrice + padding);
+        } else {
+            // Fallback to placeholder
+            xData.add(0);
+            yData.add(0.0);
+        }
         chart.addSeries("Price", xData, yData)
                 .setFillColor(new Color(52, 152, 219, 180)); // Blue with transparency
         chart.getStyler().setSeriesColors(new Color[]{new Color(41, 128, 185)}); // Darker blue outline
