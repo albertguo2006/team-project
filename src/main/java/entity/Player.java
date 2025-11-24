@@ -30,7 +30,7 @@ public class Player {
 
     public Player(String name) {
         this.name = name;
-        balance = 1000.0;
+        balance = 10000.0;
         stats.put("Hunger", 100);
         stats.put("Energy", 100);
         stats.put("Mood", 100);
