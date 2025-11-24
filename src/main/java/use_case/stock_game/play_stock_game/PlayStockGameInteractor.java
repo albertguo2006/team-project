@@ -33,7 +33,25 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
     public void execute(PlayStockGameInputData inputData) {
 
         try {   // get the list of prices for that symbol and the corresponding day
-            List<Double> realPrices = dataAccess.getIntradayPrices(inputData.symbol, inputData.days);
+            List<Double> realPrices;
+
+            // Use new method if month and startDayIndex are provided
+            if (inputData.month != null) {
+                var fiveDayPrices = dataAccess.getFiveDayPrices(
+                        inputData.symbol,
+                        inputData.month,
+                        inputData.startDayIndex
+                );
+
+                // Concatenate all 5 days of prices into a single list
+                realPrices = new java.util.ArrayList<>();
+                for (int day = 1; day <= 5; day++) {
+                    realPrices.addAll(fiveDayPrices.get(day));
+                }
+            } else {
+                // Fall back to legacy method
+                realPrices = dataAccess.getIntradayPrices(inputData.symbol, inputData.days);
+            }
 
             Portfolio portfolio = new Portfolio(); // make new portfolio
             double startingPrice = realPrices.get(0); // get first stock price
