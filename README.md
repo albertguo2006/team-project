@@ -43,6 +43,7 @@ California Prop. 65 is a 2D simulation game that provides satirical commentary o
 - **GUI Framework**: Java Swing
 - **Build Tool**: Maven
 - **APIs**: Alpha Vantage (stock data), Google Gemini (NPC dialogue)
+- **Charting Library**: XChart (stock price visualization)
 - **Data Format**: JSON (for saves, events, items, NPC prompts)
 - **Audio**: Java AudioSystem (WAV format)
 
@@ -302,17 +303,18 @@ All dependencies point **inward** toward entities. Outer layers depend on inner 
 
 #### Stock Trading Minigame
 
-**Implementation**: Use Case #6  
-**Responsible**: Cynthia  
-**Status**: Backend complete, UI integration pending
+**Implementation**: Use Case #6
+**Responsible**: Cynthia
+**Status**: Backend complete, chart visualization implemented
 
 - Alpha Vantage API integration
 - 30-second trading sessions
 - Buy/sell stock mechanics
-- Price history tracking
+- Real-time price chart with 50-bar history (XChart)
+- Dynamic y-axis that zooms to current price range
 - Portfolio management
 
-**Files**: [`AlphaStockDataAccessObject.java`](src/main/java/api/AlphaStockDataAccessObject.java), [`Stock.java`](src/main/java/entity/Stock.java), [`Portfolio.java`](src/main/java/entity/Portfolio.java), [`use_case/stock_game/`](src/main/java/use_case/stock_game/)
+**Files**: [`AlphaStockDataAccessObject.java`](src/main/java/api/AlphaStockDataAccessObject.java), [`Stock.java`](src/main/java/entity/Stock.java), [`Portfolio.java`](src/main/java/entity/Portfolio.java), [`use_case/stock_game/`](src/main/java/use_case/stock_game/), [`StockGameView.java`](src/main/java/view/StockGameView.java)
 
 #### NPC Interactions
 
@@ -637,29 +639,28 @@ This section describes how planned features will be implemented using Clean Arch
 
 ### 🔮 Stock Trading UI Integration
 
-**Current Status**: Backend complete, UI pending  
-**Implementation Plan**:
+**Current Status**: Chart visualization complete, full game integration pending
+**Completed**:
+- ✅ Stock price chart using XChart library
+- ✅ Real-time price updates with 50-bar history
+- ✅ Dynamic y-axis that zooms to price range
+- ✅ Buy/sell buttons with all-in/all-out mechanics
+- ✅ Portfolio display (cash, shares, total equity)
 
-1. **View Layer**: Create `StockGamePanel.java` extending `JPanel`
-   - Display stock price chart using `Graphics2D`
-   - Buy/sell buttons with ActionListeners
-   - Timer display for 30-second sessions
-   - Portfolio display showing holdings
+**Remaining Work**:
 
-2. **Controller**: `StockGameController.java`
-   - Connect button clicks to `BuyStockGameInteractor`
-   - Update chart in real-time from use case outputs
-   - Handle session start/end
-
-3. **Integration**: Add to `MainGameWindow` CardLayout
+1. **Game Integration**: Connect to main game loop
    - Trigger when player enters Office zone
    - Press E to start trading session
-   - Display in overlay or separate panel
+   - Return to main game after session ends
 
-**Files to Create**:
-- `view/StockGamePanel.java`
-- `interface_adapter/stock_game/StockGameController.java`
-- Update `GamePanel.java` for Office interaction
+2. **Controller**: `StockGameController.java`
+   - Bridge between GamePanel and StockGameView
+   - Handle game state transitions
+
+**Files to Update**:
+- `GamePanel.java` - Add Office interaction trigger
+- Create `interface_adapter/stock_game/StockGameController.java`
 
 ### 🔮 NPC Dialogue System
 
@@ -1117,6 +1118,7 @@ This is a course project for CSC207 at University of Toronto. Contributions are 
 
 - **Alpha Vantage**: Stock market data ([alphavantage.co](https://www.alphavantage.co/))
 - **Google Gemini**: AI-generated NPC dialogue ([ai.google.dev](https://ai.google.dev/))
+- **XChart**: Lightweight charting library for stock price visualization ([knowm.org/open-source/xchart](https://knowm.org/open-source/xchart/))
 - **Java Swing**: GUI framework (built into Java)
 - **Maven**: Build automation ([maven.apache.org](https://maven.apache.org/))
 - **Gson**: JSON parsing (used for data files)
