@@ -47,20 +47,4 @@ public class Item {
     public int hashCode() {
         return Objects.hash(name);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (!(obj instanceof Item)) return false;
-        Item item = (Item) obj;
-        return score == item.score &&
-               Objects.equals(name, item.name) &&
-               Objects.equals(description, item.description) &&
-               Objects.equals(type, item.type);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, description, type, score);
-    }
 }
