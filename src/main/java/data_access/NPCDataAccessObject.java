@@ -125,7 +125,7 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
                 break;
             case "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon":
                 npc.setX(960);  // Center aisle
-                npc.setY(400);
+                npc.setY(1100);
                 break;
             case "Sophia":
                 npc.setX(700);  // Street corner
