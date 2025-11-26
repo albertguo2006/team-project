@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -22,16 +23,18 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import data_access.NPCDataAccessObject;
+import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
+import entity.Item;
 import entity.NPC;
 import entity.Player;
 import entity.Transition;
+import entity.WorldItem;
 import entity.Zone;
 import interface_adapter.events.PlayerInputController;
 import use_case.Direction;
 import use_case.PlayerMovementUseCase;
-import data_access.NPCDataAccessObject;
-import java.util.List;
 
 public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
@@ -67,11 +70,30 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int STOCK_TRADING_ZONE_WIDTH = 239;  // 1427 - 1188
     private static final int STOCK_TRADING_ZONE_HEIGHT = 226; // 470 - 244
     private boolean inStockTradingZone = false;
+    
+    // Mailbox zone (bottom middle of Home, near front door)
+    private static final int MAILBOX_ZONE_X = 760;  // Center-ish area
+    private static final int MAILBOX_ZONE_Y = 900;  // Bottom area
+    private static final int MAILBOX_ZONE_WIDTH = 400;
+    private static final int MAILBOX_ZONE_HEIGHT = 300;
+    private boolean inMailboxZone = false;
 
     // NPC interaction
     private static final double NPC_INTERACTION_RADIUS = 100.0;
     private NPC nearbyNPC = null;
-    
+
+    // Inventory system
+    private int selectedInventorySlot = -1;  // -1 means no slot selected, 0-4 for slots 1-5
+    private static final int INVENTORY_SLOT_SIZE = 80;
+    private static final int INVENTORY_SLOT_GAP = 10;
+    private static final int INVENTORY_SLOTS = 5;
+
+    // World items
+    private WorldItemDataAccessObject worldItemDataAccess;
+    private WorldItem nearbyWorldItem = null;
+    private static final double ITEM_INTERACTION_RADIUS = 80.0;
+    private static final int WORLD_ITEM_SIZE = 40;
+
     // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
     private int viewportWidth;
     private int viewportHeight;
@@ -132,7 +154,41 @@ public class GamePanel extends JPanel implements ActionListener {
     public void startGameLoop() {
         gameTimer.start();
     }
-    
+
+    /**
+     * Sets the world item data access object.
+     * @param worldItemDataAccess the world item data access
+     */
+    public void setWorldItemDataAccess(WorldItemDataAccessObject worldItemDataAccess) {
+        this.worldItemDataAccess = worldItemDataAccess;
+    }
+
+    /**
+     * Gets the currently selected inventory slot.
+     * @return slot index (0-4), or -1 if no slot selected
+     */
+    public int getSelectedInventorySlot() {
+        return selectedInventorySlot;
+    }
+
+    /**
+     * Sets the selected inventory slot.
+     * @param slot the slot index (0-4), or -1 to deselect
+     */
+    public void setSelectedInventorySlot(int slot) {
+        if (slot >= -1 && slot < INVENTORY_SLOTS) {
+            this.selectedInventorySlot = slot;
+        }
+    }
+
+    /**
+     * Gets the world item the player is currently near, if any.
+     * @return the nearby world item, or null
+     */
+    public WorldItem getNearbyWorldItem() {
+        return nearbyWorldItem;
+    }
+
     /**
      * Stops the game loop.
      * Useful for closing the game.
@@ -190,7 +246,9 @@ public class GamePanel extends JPanel implements ActionListener {
         checkZoneTransition();
         checkSleepZone();
         checkStockTradingZone();
+        checkMailboxZone();
         checkNPCProximity();
+        checkWorldItemProximity();
 
         // === RENDER PHASE ===
         this.repaint();
@@ -480,13 +538,27 @@ public class GamePanel extends JPanel implements ActionListener {
         if (currentZone != null && "Office (Your Cubicle)".equals(currentZone.getName()) && inStockTradingZone) {
             drawStockTradingZone(g);
         }
+        
+        // Draw mailbox zone indicator if in Home and player is in zone
+        if (currentZone != null && "Home".equals(currentZone.getName()) && inMailboxZone) {
+            drawMailboxZone(g);
+        }
 
         // Draw NPC interaction prompt if near an NPC
         if (nearbyNPC != null) {
             drawNPCPrompt(g);
         }
 
+        // Draw world items in current zone
+        drawWorldItems(g);
+
+        // Draw item interaction prompt if near a world item
+        if (nearbyWorldItem != null) {
+            drawWorldItemPrompt(g);
+        }
+
         drawUI(g);
+        drawInventory(g);
     }
     
     /**
@@ -773,6 +845,62 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public boolean isInStockTradingZone() {
         return inStockTradingZone;
+    }
+    
+    /**
+     * Checks if the player is in the mailbox zone (bottom middle area in Home).
+     */
+    private void checkMailboxZone() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        
+        // Only check if in Home zone
+        if (!"Home".equals(currentZone.getName())) {
+            inMailboxZone = false;
+            return;
+        }
+        
+        double playerX = player.getX();
+        double playerY = player.getY();
+        
+        // Check if player is within mailbox zone bounds
+        inMailboxZone = playerX >= MAILBOX_ZONE_X &&
+                        playerX <= MAILBOX_ZONE_X + MAILBOX_ZONE_WIDTH &&
+                        playerY >= MAILBOX_ZONE_Y &&
+                        playerY <= MAILBOX_ZONE_Y + MAILBOX_ZONE_HEIGHT;
+    }
+    
+    /**
+     * Draws the mailbox zone indicator and prompt.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawMailboxZone(Graphics2D g) {
+        // Draw semi-transparent overlay
+        g.setColor(new Color(255, 200, 100, 77));  // Light orange/yellow with 30% opacity
+        g.fillRect(MAILBOX_ZONE_X, MAILBOX_ZONE_Y, MAILBOX_ZONE_WIDTH, MAILBOX_ZONE_HEIGHT);
+        
+        // Draw border
+        g.setColor(new Color(255, 200, 100, 200));
+        g.setStroke(new BasicStroke(4));
+        g.drawRect(MAILBOX_ZONE_X, MAILBOX_ZONE_Y, MAILBOX_ZONE_WIDTH, MAILBOX_ZONE_HEIGHT);
+        
+        // Draw prompt text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 32));
+        String prompt = "Press E to Check Bills";
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int promptX = MAILBOX_ZONE_X + (MAILBOX_ZONE_WIDTH - promptWidth) / 2;
+        int promptY = MAILBOX_ZONE_Y + MAILBOX_ZONE_HEIGHT / 2;
+        g.drawString(prompt, promptX, promptY);
+    }
+    
+    /**
+     * Checks if the player is currently in the mailbox zone.
+     * @return true if in mailbox zone, false otherwise
+     */
+    public boolean isInMailboxZone() {
+        return inMailboxZone;
     }
 
     /**
@@ -1175,6 +1303,199 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
         currentMusicPath = null;
+    }
+
+    /**
+     * Checks if the player is near any world item in the current zone.
+     */
+    private void checkWorldItemProximity() {
+        if (worldItemDataAccess == null) {
+            nearbyWorldItem = null;
+            return;
+        }
+
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone == null) {
+            nearbyWorldItem = null;
+            return;
+        }
+
+        List<WorldItem> items = worldItemDataAccess.getItemsInZone(currentZone.getName());
+        nearbyWorldItem = null;
+
+        for (WorldItem item : items) {
+            if (item.isInRange(player.getX(), player.getY(), ITEM_INTERACTION_RADIUS)) {
+                nearbyWorldItem = item;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Draws world items in the current zone.
+     * @param g the Graphics2D context
+     */
+    private void drawWorldItems(Graphics2D g) {
+        if (worldItemDataAccess == null) return;
+
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone == null) return;
+
+        List<WorldItem> items = worldItemDataAccess.getItemsInZone(currentZone.getName());
+
+        for (WorldItem worldItem : items) {
+            int x = (int) worldItem.getX();
+            int y = (int) worldItem.getY();
+            Item item = worldItem.getItem();
+
+            // Get color based on item type
+            Color itemColor = getItemColor(item.getType());
+
+            // Draw item as a colored square
+            g.setColor(itemColor);
+            g.fillRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+
+            // Draw border
+            g.setColor(Color.BLACK);
+            g.setStroke(new BasicStroke(2));
+            g.drawRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+
+            // Draw price tag for store items
+            if (worldItem.isStoreItem()) {
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 16));
+                String priceText = "$" + item.getPrice();
+                int textWidth = g.getFontMetrics().stringWidth(priceText);
+                g.drawString(priceText, x + (WORLD_ITEM_SIZE - textWidth) / 2, y - 5);
+            }
+        }
+    }
+
+    /**
+     * Gets the color for an item based on its type.
+     */
+    private Color getItemColor(String type) {
+        switch (type) {
+            case "Hunger": return new Color(255, 140, 0);   // Orange
+            case "Energy": return new Color(255, 255, 0);   // Yellow
+            case "Mood": return new Color(255, 182, 193);   // Pink
+            case "Speed": return new Color(0, 255, 255);    // Cyan
+            case "Quest": return new Color(148, 0, 211);    // Purple
+            case "Special": return new Color(50, 205, 50);  // Lime green
+            default: return new Color(200, 200, 200);       // Gray
+        }
+    }
+
+    /**
+     * Draws the world item interaction prompt.
+     * @param g the Graphics2D context
+     */
+    private void drawWorldItemPrompt(Graphics2D g) {
+        if (nearbyWorldItem == null) return;
+
+        Item item = nearbyWorldItem.getItem();
+        String prompt;
+        if (nearbyWorldItem.isStoreItem()) {
+            prompt = "Press E to buy " + item.getName() + " ($" + item.getPrice() + ")";
+        } else {
+            prompt = "Press E to pick up " + item.getName();
+        }
+
+        g.setFont(new Font("Arial", Font.BOLD, 28));
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int x = (VIRTUAL_WIDTH - promptWidth) / 2;
+        int y = VIRTUAL_HEIGHT - 180;
+
+        // Semi-transparent black background
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(x - 20, y - 30, promptWidth + 40, 50);
+
+        // White text
+        g.setColor(Color.WHITE);
+        g.drawString(prompt, x, y);
+    }
+
+    /**
+     * Draws the inventory UI at the bottom center of the screen.
+     * @param g the Graphics2D context
+     */
+    private void drawInventory(Graphics2D g) {
+        Player player = playerMovementUseCase.getPlayer();
+        Map<Integer, Item> inventory = player.getInventory();
+
+        // Calculate inventory bar position
+        int totalWidth = INVENTORY_SLOTS * INVENTORY_SLOT_SIZE + (INVENTORY_SLOTS - 1) * INVENTORY_SLOT_GAP;
+        int startX = (VIRTUAL_WIDTH - totalWidth) / 2;
+        int startY = VIRTUAL_HEIGHT - INVENTORY_SLOT_SIZE - 20;
+
+        for (int i = 0; i < INVENTORY_SLOTS; i++) {
+            int slotX = startX + i * (INVENTORY_SLOT_SIZE + INVENTORY_SLOT_GAP);
+            int slotY = startY;
+            int slotKey = i + 1;  // Inventory uses 1-5, not 0-4
+            Item item = inventory.get(slotKey);
+
+            // Draw slot background
+            if (i == selectedInventorySlot) {
+                g.setColor(new Color(100, 150, 255, 150));  // Highlighted
+            } else {
+                g.setColor(new Color(50, 50, 50, 180));  // Normal
+            }
+            g.fillRect(slotX, slotY, INVENTORY_SLOT_SIZE, INVENTORY_SLOT_SIZE);
+
+            // Draw slot border
+            if (i == selectedInventorySlot) {
+                g.setColor(new Color(100, 150, 255));
+                g.setStroke(new BasicStroke(4));
+            } else {
+                g.setColor(Color.GRAY);
+                g.setStroke(new BasicStroke(2));
+            }
+            g.drawRect(slotX, slotY, INVENTORY_SLOT_SIZE, INVENTORY_SLOT_SIZE);
+
+            // Draw slot number
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 16));
+            g.drawString(String.valueOf(slotKey), slotX + 5, slotY + 18);
+
+            // Draw item if present
+            if (item != null) {
+                // Draw item color square
+                Color itemColor = getItemColor(item.getType());
+                int itemSize = INVENTORY_SLOT_SIZE - 20;
+                int itemX = slotX + 10;
+                int itemY = slotY + 10;
+
+                g.setColor(itemColor);
+                g.fillRect(itemX, itemY, itemSize, itemSize);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(1));
+                g.drawRect(itemX, itemY, itemSize, itemSize);
+
+                // Draw item name (abbreviated)
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.PLAIN, 12));
+                String name = item.getName();
+                if (name.length() > 8) {
+                    name = name.substring(0, 7) + "..";
+                }
+                int nameWidth = g.getFontMetrics().stringWidth(name);
+                g.drawString(name, slotX + (INVENTORY_SLOT_SIZE - nameWidth) / 2, slotY + INVENTORY_SLOT_SIZE - 5);
+            }
+        }
+
+        // Draw "use item" prompt if slot is selected and has item
+        if (selectedInventorySlot >= 0 && selectedInventorySlot < INVENTORY_SLOTS) {
+            int slotKey = selectedInventorySlot + 1;
+            Item selectedItem = inventory.get(slotKey);
+            if (selectedItem != null && nearbyNPC == null && nearbyWorldItem == null && !inSleepZone && !inStockTradingZone) {
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 20));
+                String usePrompt = "Press E to use " + selectedItem.getName();
+                int promptWidth = g.getFontMetrics().stringWidth(usePrompt);
+                g.drawString(usePrompt, (VIRTUAL_WIDTH - promptWidth) / 2, startY - 15);
+            }
+        }
     }
 
     /**

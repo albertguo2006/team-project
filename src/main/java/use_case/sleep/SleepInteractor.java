@@ -1,5 +1,9 @@
 package use_case.sleep;
 
+import java.util.List;
+
+import data_access.Paybill.PaybillDataAccessObject;
+import entity.Bill;
 import entity.Day;
 import entity.DaySummary;
 import entity.GameEnding;
@@ -12,6 +16,7 @@ import entity.Player;
 public class SleepInteractor implements SleepInputBoundary {
     private final SleepOutputBoundary presenter;
     private final SleepDataAccessInterface dataAccess;
+    private final PaybillDataAccessObject billDataAccess;
     
     /**
      * Constructs a SleepInteractor.
@@ -22,6 +27,7 @@ public class SleepInteractor implements SleepInputBoundary {
     public SleepInteractor(SleepOutputBoundary presenter, SleepDataAccessInterface dataAccess) {
         this.presenter = presenter;
         this.dataAccess = dataAccess;
+        this.billDataAccess = new PaybillDataAccessObject();
     }
     
     /**
@@ -74,8 +80,24 @@ public class SleepInteractor implements SleepInputBoundary {
         
         // Check if this was Friday (end of week)
         if (completedDay.isLastDay()) {
+            // Calculate total unpaid debt with interest
+            List<Bill> unpaidBills = billDataAccess.getUnpaidBills();
+            double totalDebt = 0.0;
+            for (Bill bill : unpaidBills) {
+                totalDebt += bill.getAmount();
+            }
+            
+            // Deduct unpaid debt from balance
+            double finalBalance = newBalance - totalDebt;
+            player.setBalance(finalBalance);
+            
+            System.out.println("=== END OF WEEK ===");
+            System.out.println("Balance before debt: $" + String.format("%.2f", newBalance));
+            System.out.println("Total unpaid debt: $" + String.format("%.2f", totalDebt));
+            System.out.println("Final balance: $" + String.format("%.2f", finalBalance));
+            
             // Week complete - determine ending
-            GameEnding ending = GameEnding.determineEnding(player.getBalance());
+            GameEnding ending = GameEnding.determineEnding(finalBalance);
             
             // Save player state
             dataAccess.savePlayerState(player);
@@ -87,6 +109,21 @@ public class SleepInteractor implements SleepInputBoundary {
             boolean advanced = player.advanceDay();
             
             if (advanced) {
+                // Apply interest to all unpaid bills for the new day
+                List<Bill> allBills = billDataAccess.getAllBills();
+                for (Bill bill : allBills) {
+                    if (!bill.getPaid()) {
+                        bill.applyDailyInterest();
+                        billDataAccess.saveBill(bill);
+                    }
+                }
+                
+                // Generate new bills for the new week day
+                billDataAccess.advanceToNextWeek();
+                System.out.println("=== NEW DAY: " + player.getCurrentDay().getDisplayName() + " ===");
+                System.out.println("New bills generated and delivered to mailbox");
+                System.out.println("Interest applied to all unpaid bills");
+                
                 // Reset daily financials for new day
                 player.resetDailyFinancials();
                 

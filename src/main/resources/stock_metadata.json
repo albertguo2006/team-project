@@ -9,10 +9,10 @@
     },
     "NVDA" : {
       "name" : "NVIDIA",
-      "riskLevel" : "HIGH",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "riskLevel" : "LOW",
+      "volatility" : 2.1001390850279966,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day1-5" ]
     },
     "AAPL" : {
       "name" : "Apple",

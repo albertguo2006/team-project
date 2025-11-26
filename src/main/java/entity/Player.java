@@ -16,10 +16,14 @@ public class Player {
     Map <Integer, Item> inventory = new HashMap<>();
     // Maps inventory slot number to item in that slot.
 
+    // Buff system
+    private final Map<String, Boolean> activeBuffs = new HashMap<>();
+    private double baseSpeed;  // Original speed before buffs
+
     // Movement properties (for Use Case 1: Environment Interaction)
     private double x;
     private double y;
-    private double speed;  // pixels per second
+    private double speed;  // pixels per second (can be modified by buffs)
 
     // Day system properties
     private Day currentDay;
@@ -37,6 +41,7 @@ public class Player {
         // Updated for 1920x1200 virtual resolution
         this.x = 960.0;  // Center of 1920 width
         this.y = 600.0;  // Center of 1200 height
+        this.baseSpeed = 360.0;  // Store original speed
         this.speed = 360.0;  // Scaled up for 1920x1200 (was 150 for 800x600)
 
         // Initialize day system
@@ -52,6 +57,7 @@ public class Player {
         this.balance = balance;
         this.x = x;
         this.y = y;
+        this.baseSpeed = 360.0;  // Store original speed
         this.speed = 360.0;  // Scaled up for 1920x1200 virtual resolution
         this.stats.putAll(stats);
 
@@ -121,17 +127,62 @@ public class Player {
 
     public void itemUsed(int index) {
         Item item = inventory.get(index);
-        if (item.getType().equals("Speed")){
+        if (item == null) return;
+
+        // Handle buff items
+        String buffType = item.getBuffType();
+        if (buffType != null) {
+            applyBuff(buffType);
+            // If it's a speed buff, also apply the speed bonus
+            if ("SpeedBoost".equals(buffType) && item.getScore() > 0) {
+                setSpeed(speed + item.getScore());
+            }
+        } else if (item.getType().equals("Speed")) {
+            // Legacy speed items without buffType
             setSpeed(speed + item.getScore());
+        } else if (!item.getType().equals("Quest") && !item.getType().equals("Special")) {
+            // Regular stat items (Hunger, Energy, Mood)
+            int currentStat = stats.getOrDefault(item.getType(), 0);
+            setStat(item.getType(), Math.min(100, currentStat + item.getScore()));
         }
-        else{
-            setStat(item.getType(), item.getScore());
+
+        // Remove consumable items from inventory
+        if (item.isConsumable()) {
+            removeInventory(index);
         }
     }
 
 
     public Map<String, Integer> getStats(){
         return stats;
+    }
+
+    // Buff system methods
+    public void applyBuff(String buffType) {
+        activeBuffs.put(buffType, true);
+    }
+
+    public boolean hasBuff(String buffType) {
+        return activeBuffs.getOrDefault(buffType, false);
+    }
+
+    public void removeBuff(String buffType) {
+        activeBuffs.remove(buffType);
+    }
+
+    public void clearDailyBuffs() {
+        // Reset speed to base speed
+        this.speed = this.baseSpeed;
+        // Clear all active buffs
+        activeBuffs.clear();
+    }
+
+    public double getBaseSpeed() {
+        return baseSpeed;
+    }
+
+    public Map<String, Boolean> getActiveBuffs() {
+        return activeBuffs;
     }
 
     public int getNPCScore(NPC npc) {
@@ -286,6 +337,7 @@ public class Player {
 
     /**
      * Advances to the next day and resets daily flags.
+     * Also clears all daily buffs (like speed boost from coffee).
      * @return true if successfully advanced, false if already Friday
      */
     public boolean advanceDay() {
@@ -293,6 +345,7 @@ public class Player {
         if (nextDay != null) {
             this.currentDay = nextDay;
             this.hasSleptToday = false;
+            clearDailyBuffs();  // Reset buffs when sleeping
             return true;
         }
         return false;

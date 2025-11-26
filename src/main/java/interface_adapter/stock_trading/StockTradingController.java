@@ -124,12 +124,21 @@ public class StockTradingController {
             int startDayIndex = (Integer) periodInfo.get("startDay");
             String periodId = (String) periodInfo.get("periodId");
 
+            // Check for StockSlowdown buff - doubles the timer interval (slows game down)
+            int timerInterval = 250;  // Normal speed
+            if (player.hasBuff("StockSlowdown")) {
+                timerInterval = 500;  // Slowed down (2x slower)
+                player.removeBuff("StockSlowdown");  // One-time use
+                System.out.println("Focus Pill effect activated! Stock game slowed down.");
+            }
+
             PlayStockGameInputData inputData = new PlayStockGameInputData(
                     selectedStock.getSymbol(),
                     investmentAmount,
                     month,
                     startDayIndex,
-                    periodId
+                    periodId,
+                    timerInterval
             );
 
             // Step 6: Execute the stock game
