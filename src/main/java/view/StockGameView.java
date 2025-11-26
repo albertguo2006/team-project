@@ -15,12 +15,13 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 
-import entity.Portfolio;
-import entity.Stock;
 import org.knowm.xchart.CategoryChart;
 import org.knowm.xchart.CategoryChartBuilder;
 import org.knowm.xchart.XChartPanel;
 import org.knowm.xchart.style.Styler;
+
+import entity.Portfolio;
+import entity.Stock;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
 import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
 
@@ -205,6 +206,7 @@ public class StockGameView implements PlayStockGameOutputBoundary {
 
         // Style the chart to look like candlesticks
         chart.getStyler().setLegendPosition(Styler.LegendPosition.InsideNE);
+        chart.getStyler().setXAxisTicksVisible(false); // Hide x-axis ticks
         chart.getStyler().setLabelsVisible(false); // Remove x-axis labels
         chart.getStyler().setYAxisTicksVisible(false); // Remove y-axis labels
         chart.getStyler().setAvailableSpaceFill(0.9); // Make bars wider (90% of space)
