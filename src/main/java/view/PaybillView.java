@@ -29,12 +29,12 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 
-import data_access.Paybill.PaybillDataAccessObject;
 import entity.Bill;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillState;
 import interface_adapter.paybills.PaybillViewModel;
+import use_case.paybills.PaybillDataAccessInterface;
 
 /**
  * The View for the Paybill Use Case
@@ -45,7 +45,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final PaybillController paybillController;
     private final ViewManagerModel viewManagerModel;
     private final String viewName = "bills";
-    private final PaybillDataAccessObject paybillDataAccessObject = new PaybillDataAccessObject();
+    private final PaybillDataAccessInterface paybillDataAccessObject;
 
     // UI Components
     private final JLabel title = new JLabel("Bills");
@@ -63,10 +63,11 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final JPanel actionButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
     public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController,
-                       ViewManagerModel viewManagerModel){
+                       ViewManagerModel viewManagerModel, PaybillDataAccessInterface paybillDataAccessObject){
         this.paybillViewModel = paybillViewModel;
         this.paybillController = paybillController;
         this.viewManagerModel = viewManagerModel;
+        this.paybillDataAccessObject = paybillDataAccessObject;
         this.paybillViewModel.addPropertyChangeListener(this);
 
         // Initialize table model
@@ -84,10 +85,10 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
         loadInitialBills(); // Load initial bills
 
-        // Add keyboard support for returning to game - use WHEN_FOCUSED instead
-        InputMap inputMap = this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        // Add keyboard support for returning to game - use WHEN_IN_FOCUSED_WINDOW for global escape
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "goBack");
-        
+
         ActionMap actionMap = this.getActionMap();
         actionMap.put("goBack", new AbstractAction() {
             @Override
@@ -109,7 +110,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
     private void setupUI() {
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 310, 10, 10));
 
         // HeaderPanel with title and week info
         JPanel headerPanel = new JPanel(new BorderLayout());

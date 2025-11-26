@@ -5,6 +5,7 @@ import java.util.Random;
 
 import javax.swing.Timer;
 
+import entity.Player;
 import entity.Portfolio;
 import entity.Stock;
 
@@ -65,7 +66,8 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             int[] ticks = {0}; // counter to eventually end game
             final int MAX_TICKS = 120; // 120 ticks * 250ms = 30 seconds
 
-            Timer timer = new Timer(250, e -> {
+            int timerInterval = inputData.timerIntervalMs > 0 ? inputData.timerIntervalMs : 250;
+            Timer timer = new Timer(timerInterval, e -> {
                 ticks[0]++;
 
                 // check to make sure it is not game over yet (limit to ~30 seconds or 120 ticks)

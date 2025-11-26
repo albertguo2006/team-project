@@ -1,0 +1,47 @@
+[
+  {
+    "id": "sophia_book",
+    "npcName": "Sophia",
+    "requiredItemName": "Old Book",
+    "description": "Sophia is always looking for new reading material. Find her an old book!",
+    "moneyReward": 150,
+    "itemReward": null,
+    "relationshipReward": 25
+  },
+  {
+    "id": "sir_max_coin",
+    "npcName": "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon",
+    "requiredItemName": "Lucky Coin",
+    "description": "The aristocrat is an avid coin collector. He'd pay handsomely for a rare coin.",
+    "moneyReward": 500,
+    "itemReward": "Mystery Box",
+    "relationshipReward": 20
+  },
+  {
+    "id": "sebestian_toy",
+    "npcName": "Sebestian",
+    "requiredItemName": "Cat Toy",
+    "description": "Sebestian seems to have an unusual fondness for cat toys... meow?",
+    "moneyReward": 75,
+    "itemReward": "Energy Drink",
+    "relationshipReward": 30
+  },
+  {
+    "id": "danny_coffee",
+    "npcName": "Danny",
+    "requiredItemName": "Coffee",
+    "description": "Danny the CS TA desperately needs caffeine to grade all those assignments.",
+    "moneyReward": 100,
+    "itemReward": null,
+    "relationshipReward": 15
+  },
+  {
+    "id": "bob_sandwich",
+    "npcName": "Bob",
+    "requiredItemName": "Sandwich",
+    "description": "Bob is too busy with bureaucratic paperwork to get lunch. Bring him a sandwich.",
+    "moneyReward": 80,
+    "itemReward": "Soda",
+    "relationshipReward": 10
+  }
+]
