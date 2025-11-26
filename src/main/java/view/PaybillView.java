@@ -1,23 +1,40 @@
 package view;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
+
 import data_access.Paybill.PaybillDataAccessObject;
 import entity.Bill;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillState;
 import interface_adapter.paybills.PaybillViewModel;
-import io.opencensus.stats.ViewManager;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
 
 /**
  * The View for the Paybill Use Case
@@ -67,13 +84,15 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
         loadInitialBills(); // Load initial bills
 
-        // Add keyboard support for returning to game
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"),
-                "goBack");
-        this.getActionMap().put("goBack", new AbstractAction() {
-
+        // Add keyboard support for returning to game - use WHEN_FOCUSED instead
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "goBack");
+        
+        ActionMap actionMap = this.getActionMap();
+        actionMap.put("goBack", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("PaybillView: Escape pressed, returning to game");
                 // Switch back to game view
                 viewManagerModel.setState("game");
                 viewManagerModel.firePropertyChange();

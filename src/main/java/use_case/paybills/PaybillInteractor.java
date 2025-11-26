@@ -1,9 +1,9 @@
 package use_case.paybills;
 
+import java.util.List;
+
 import entity.Bill;
 import entity.Player;
-
-import java.util.List;
 
 public class PaybillInteractor implements PaybillInputBoundary {
     private final PaybillDataAccessInterface paybillDataAccess;
@@ -23,11 +23,18 @@ public class PaybillInteractor implements PaybillInputBoundary {
         double totalDue = calculateTotalDue(unpaidBills);
 
         if (player.getBalance() >= totalDue) {
+            // Deduct money first
+            player.setBalance(player.getBalance() - totalDue);
+            System.out.println("PaybillInteractor: Deducted $" + String.format("%.2f", totalDue) + " from player balance");
+            System.out.println("PaybillInteractor: New balance: $" + String.format("%.2f", player.getBalance()));
+            
+            // Mark bills as paid and save
             for (Bill bill : unpaidBills) {
                 bill.setIsPaid(true);
                 paybillDataAccess.saveBill(bill);
+                System.out.println("PaybillInteractor: Paid bill: " + bill.getName());
             }
-            player.setBalance(player.getBalance() - totalDue);
+            
             PaybillOutputData outputData = new PaybillOutputData(true, "All bills paid successfully!", totalDue);
             paybillPresenter.prepareSuccessView(outputData);
         }
@@ -65,10 +72,19 @@ public class PaybillInteractor implements PaybillInputBoundary {
             paybillPresenter.prepareFailureView(outputData);
             return;
         }
+        
+        // Deduct money first
+        double amount = billToPay.getAmount();
+        player.setBalance(player.getBalance() - amount);
+        System.out.println("PaybillInteractor: Deducted $" + String.format("%.2f", amount) + " from player balance");
+        System.out.println("PaybillInteractor: New balance: $" + String.format("%.2f", player.getBalance()));
+        
+        // Mark bill as paid and save
         billToPay.setIsPaid(true);
         paybillDataAccess.saveBill(billToPay);
-        player.setBalance(player.getBalance() - billToPay.getAmount());
-        PaybillOutputData outputData = new PaybillOutputData(true, "Paid: " + billToPay.getName(), billToPay.getAmount());
+        System.out.println("PaybillInteractor: Paid bill: " + billToPay.getName());
+        
+        PaybillOutputData outputData = new PaybillOutputData(true, "Paid: " + billToPay.getName(), amount);
         paybillPresenter.prepareSuccessView(outputData);
     }
 

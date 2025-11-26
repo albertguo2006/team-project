@@ -205,9 +205,6 @@ public class MainGameWindow extends JFrame {
             inGameMenuPanel.addSaveListener(e -> saveGame());
             inGameMenuPanel.addSettingsListener(e -> showSettingsFromGame());
             inGameMenuPanel.addSaveAndExitListener(e -> saveAndExit());
-            inGameMenuPanel.addPayBillsListener(e -> {
-                showPaybillView();
-            });
         }
     }
     
@@ -331,6 +328,13 @@ public class MainGameWindow extends JFrame {
         playerInputController.setStockTradingActionListener(() -> {
             gamePanel.pauseGame();  // Pause main game while trading
             stockTradingController.startStockTrading(player);
+        });
+        
+        // Set up mailbox system callbacks
+        playerInputController.setMailboxZoneChecker(() -> gamePanel.isInMailboxZone());
+        playerInputController.setMailboxActionListener(() -> {
+            gamePanel.pauseGame();  // Pause main game while viewing bills
+            showPaybillView();
         });
 
         // Set up NPC interaction callbacks

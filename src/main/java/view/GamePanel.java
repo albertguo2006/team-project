@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -22,16 +23,18 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import data_access.NPCDataAccessObject;
+import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
+import entity.Item;
 import entity.NPC;
 import entity.Player;
 import entity.Transition;
+import entity.WorldItem;
 import entity.Zone;
 import interface_adapter.events.PlayerInputController;
 import use_case.Direction;
 import use_case.PlayerMovementUseCase;
-import data_access.NPCDataAccessObject;
-import java.util.List;
 
 public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
@@ -67,11 +70,30 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int STOCK_TRADING_ZONE_WIDTH = 239;  // 1427 - 1188
     private static final int STOCK_TRADING_ZONE_HEIGHT = 226; // 470 - 244
     private boolean inStockTradingZone = false;
+    
+    // Mailbox zone (bottom middle of Home, near front door)
+    private static final int MAILBOX_ZONE_X = 760;  // Center-ish area
+    private static final int MAILBOX_ZONE_Y = 900;  // Bottom area
+    private static final int MAILBOX_ZONE_WIDTH = 400;
+    private static final int MAILBOX_ZONE_HEIGHT = 300;
+    private boolean inMailboxZone = false;
 
     // NPC interaction
     private static final double NPC_INTERACTION_RADIUS = 100.0;
     private NPC nearbyNPC = null;
-    
+
+    // Inventory system
+    private int selectedInventorySlot = -1;  // -1 means no slot selected, 0-4 for slots 1-5
+    private static final int INVENTORY_SLOT_SIZE = 80;
+    private static final int INVENTORY_SLOT_GAP = 10;
+    private static final int INVENTORY_SLOTS = 5;
+
+    // World items
+    private WorldItemDataAccessObject worldItemDataAccess;
+    private WorldItem nearbyWorldItem = null;
+    private static final double ITEM_INTERACTION_RADIUS = 80.0;
+    private static final int WORLD_ITEM_SIZE = 40;
+
     // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
     private int viewportWidth;
     private int viewportHeight;
@@ -190,6 +212,7 @@ public class GamePanel extends JPanel implements ActionListener {
         checkZoneTransition();
         checkSleepZone();
         checkStockTradingZone();
+        checkMailboxZone();
         checkNPCProximity();
 
         // === RENDER PHASE ===
@@ -479,6 +502,11 @@ public class GamePanel extends JPanel implements ActionListener {
         // Draw stock trading zone indicator if in Office and player is in zone
         if (currentZone != null && "Office (Your Cubicle)".equals(currentZone.getName()) && inStockTradingZone) {
             drawStockTradingZone(g);
+        }
+        
+        // Draw mailbox zone indicator if in Home and player is in zone
+        if (currentZone != null && "Home".equals(currentZone.getName()) && inMailboxZone) {
+            drawMailboxZone(g);
         }
 
         // Draw NPC interaction prompt if near an NPC
@@ -773,6 +801,62 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public boolean isInStockTradingZone() {
         return inStockTradingZone;
+    }
+    
+    /**
+     * Checks if the player is in the mailbox zone (bottom middle area in Home).
+     */
+    private void checkMailboxZone() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        
+        // Only check if in Home zone
+        if (!"Home".equals(currentZone.getName())) {
+            inMailboxZone = false;
+            return;
+        }
+        
+        double playerX = player.getX();
+        double playerY = player.getY();
+        
+        // Check if player is within mailbox zone bounds
+        inMailboxZone = playerX >= MAILBOX_ZONE_X &&
+                        playerX <= MAILBOX_ZONE_X + MAILBOX_ZONE_WIDTH &&
+                        playerY >= MAILBOX_ZONE_Y &&
+                        playerY <= MAILBOX_ZONE_Y + MAILBOX_ZONE_HEIGHT;
+    }
+    
+    /**
+     * Draws the mailbox zone indicator and prompt.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawMailboxZone(Graphics2D g) {
+        // Draw semi-transparent overlay
+        g.setColor(new Color(255, 200, 100, 77));  // Light orange/yellow with 30% opacity
+        g.fillRect(MAILBOX_ZONE_X, MAILBOX_ZONE_Y, MAILBOX_ZONE_WIDTH, MAILBOX_ZONE_HEIGHT);
+        
+        // Draw border
+        g.setColor(new Color(255, 200, 100, 200));
+        g.setStroke(new BasicStroke(4));
+        g.drawRect(MAILBOX_ZONE_X, MAILBOX_ZONE_Y, MAILBOX_ZONE_WIDTH, MAILBOX_ZONE_HEIGHT);
+        
+        // Draw prompt text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 32));
+        String prompt = "Press E to Check Bills";
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int promptX = MAILBOX_ZONE_X + (MAILBOX_ZONE_WIDTH - promptWidth) / 2;
+        int promptY = MAILBOX_ZONE_Y + MAILBOX_ZONE_HEIGHT / 2;
+        g.drawString(prompt, promptX, promptY);
+    }
+    
+    /**
+     * Checks if the player is currently in the mailbox zone.
+     * @return true if in mailbox zone, false otherwise
+     */
+    public boolean isInMailboxZone() {
+        return inMailboxZone;
     }
 
     /**

@@ -58,6 +58,20 @@ public class PlayerInputController implements KeyListener {
     public interface StockTradingActionListener {
         void onStockTradingRequested();
     }
+    
+    /**
+     * Callback interface for mailbox zone checks.
+     */
+    public interface MailboxZoneChecker {
+        boolean isInMailboxZone();
+    }
+    
+    /**
+     * Callback interface for mailbox actions.
+     */
+    public interface MailboxActionListener {
+        void onMailboxRequested();
+    }
 
     /**
      * Callback interface for NPC proximity checks.
@@ -80,6 +94,8 @@ public class PlayerInputController implements KeyListener {
     private SleepActionListener sleepActionListener;
     private StockTradingZoneChecker stockTradingZoneChecker;
     private StockTradingActionListener stockTradingActionListener;
+    private MailboxZoneChecker mailboxZoneChecker;
+    private MailboxActionListener mailboxActionListener;
     private NPCInteractionChecker npcInteractionChecker;
     private NPCInteractionListener npcInteractionListener;
     
@@ -144,6 +160,24 @@ public class PlayerInputController implements KeyListener {
      */
     public void setStockTradingActionListener(StockTradingActionListener listener) {
         this.stockTradingActionListener = listener;
+    }
+    
+    /**
+     * Sets the mailbox zone checker callback.
+     *
+     * @param checker the mailbox zone checker
+     */
+    public void setMailboxZoneChecker(MailboxZoneChecker checker) {
+        this.mailboxZoneChecker = checker;
+    }
+    
+    /**
+     * Sets the mailbox action listener callback.
+     *
+     * @param listener the mailbox action listener
+     */
+    public void setMailboxActionListener(MailboxActionListener listener) {
+        this.mailboxActionListener = listener;
     }
 
     /**
@@ -217,6 +251,11 @@ public class PlayerInputController implements KeyListener {
                 else if (stockTradingZoneChecker != null && stockTradingZoneChecker.isInStockTradingZone() &&
                          stockTradingActionListener != null) {
                     stockTradingActionListener.onStockTradingRequested();
+                }
+                // Handle mailbox action if in mailbox zone
+                else if (mailboxZoneChecker != null && mailboxZoneChecker.isInMailboxZone() &&
+                         mailboxActionListener != null) {
+                    mailboxActionListener.onMailboxRequested();
                 }
                 break;
         }
