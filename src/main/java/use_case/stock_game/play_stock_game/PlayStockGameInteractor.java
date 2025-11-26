@@ -1,11 +1,12 @@
 package use_case.stock_game.play_stock_game;
 
-import entity.Portfolio;
-import entity.Stock;
-
-import javax.swing.*;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.Timer;
+
+import entity.Portfolio;
+import entity.Stock;
 
 /**
  * The PLAY stock game use case interactor.
@@ -61,13 +62,14 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             portfolio.setCash(inputData.startAmount); // set portfolio cash to starting amount (at the very start)
 
             double[] lastPrice = {startingPrice};
-            int[] ticks = {0}; // counter to eevntaulyl end game
+            int[] ticks = {0}; // counter to eventually end game
+            final int MAX_TICKS = 120; // 120 ticks * 250ms = 30 seconds
 
             Timer timer = new Timer(250, e -> {
                 ticks[0]++;
 
-                // check to make sure it is not game over yet
-                if (ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
+                // check to make sure it is not game over yet (limit to ~30 seconds or 120 ticks)
+                if (ticks[0] >= MAX_TICKS || ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
                     ((Timer) e.getSource()).stop();
 
                     // present game-over view

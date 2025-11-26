@@ -24,9 +24,9 @@
     "KO" : {
       "name" : "Coca-Cola",
       "riskLevel" : "LOW",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "volatility" : 0.9712996224105298,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day8-12" ]
     },
     "JPM" : {
       "name" : "JPMorgan Chase",

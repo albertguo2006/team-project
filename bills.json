@@ -1,0 +1,50 @@
+{
+  "subscription_1_4_1764187221547": {
+    "id": "subscription_1_4_1764187221547",
+    "amount": 13.9,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 3, 2025, 3:00:21 PM",
+    "isPaid": true,
+    "type": "SUBSCRIPTION"
+  },
+  "water_1_2_1764187221547": {
+    "id": "water_1_2_1764187221547",
+    "amount": 54.6,
+    "name": "Water Bill",
+    "dueDate": "Dec 3, 2025, 3:00:21 PM",
+    "isPaid": true,
+    "type": "WATER"
+  },
+  "internet_1_3_1764187221547": {
+    "id": "internet_1_3_1764187221547",
+    "amount": 91.93,
+    "name": "Internet Service",
+    "dueDate": "Dec 3, 2025, 3:00:21 PM",
+    "isPaid": true,
+    "type": "INTERNET"
+  },
+  "gas_1_0_1764187221542": {
+    "id": "gas_1_0_1764187221542",
+    "amount": 69.79,
+    "name": "Gas Bill",
+    "dueDate": "Dec 3, 2025, 3:00:21 PM",
+    "isPaid": true,
+    "type": "GAS"
+  },
+  "subscription_1_5_1764187221547": {
+    "id": "subscription_1_5_1764187221547",
+    "amount": 19.74,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 3, 2025, 3:00:21 PM",
+    "isPaid": true,
+    "type": "SUBSCRIPTION"
+  },
+  "internet_1_1_1764187221546": {
+    "id": "internet_1_1_1764187221546",
+    "amount": 76.61,
+    "name": "Internet Service",
+    "dueDate": "Dec 3, 2025, 3:00:21 PM",
+    "isPaid": true,
+    "type": "INTERNET"
+  }
+}

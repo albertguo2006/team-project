@@ -26,6 +26,8 @@ public class NpcInteractionsView {
 
         JTextArea chatArea = new JTextArea();
         chatArea.setEditable(false);
+        chatArea.setLineWrap(true);
+        chatArea.setWrapStyleWord(true);
         JScrollPane scrollPane = new JScrollPane(chatArea);
 
         JTextField inputField = new JTextField(25);
