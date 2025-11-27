@@ -107,6 +107,7 @@ public class Player {
             for (int i = 1; i <= 5; i++) {
                 if (!inventory.containsKey(i)){
                     inventory.put(i, item);
+                    break;
                 }
                 // Places the item in the first open slot in the player's inventory.
                 // For example, if both slots 3 and 5 are empty, the item picked up will be placed in inventory slot 3.

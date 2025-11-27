@@ -416,6 +416,17 @@ public class MainGameWindow extends JFrame {
             }
         });
 
+        // Set up inventory item drop callback
+        playerInputController.setInventoryDropListener((int slotIndex) -> {
+            int slotKey = slotIndex + 1;  // Convert 0-4 to 1-5
+            Item item = player.getInventory().get(slotKey);
+            if (item != null) {
+                player.removeInventory(slotKey);
+                System.out.println("Dropped " + item.getName());
+                gamePanel.setSelectedInventorySlot(-1);  // Deselect after drop
+            }
+        });
+
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
         this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
