@@ -1,0 +1,22 @@
+[
+    {
+        "xLocation": 636.0800000000003,
+        "balance": 9900,
+        "currentDay": "MONDAY",
+        "stats": {
+            "Hunger": 100,
+            "Mood": 100,
+            "Energy": 100
+        },
+        "name": "Player",
+        "yLocation": 473.7200000000006
+    },
+    {},
+    {},
+    {"1": "Steak"},
+    {
+        "totalEquity": 0,
+        "investments": {}
+    },
+    "Grocery Store"
+]

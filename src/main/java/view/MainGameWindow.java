@@ -105,7 +105,7 @@ public class MainGameWindow extends JFrame {
     // Save/Load system components
     private SaveProgressInteractor saveProgressInteractor;
     private LoadProgressInteractor loadProgressInteractor;
-    private static final String SAVE_FILE = "savegame.json";
+    private static final String SAVE_FILE = "src/main/resources/saveFile.json";
 
     // Quest system components
     private QuestDataAccessObject questDataAccess;
