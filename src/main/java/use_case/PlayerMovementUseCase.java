@@ -156,4 +156,12 @@ public class PlayerMovementUseCase {
         if (movingLeft) return Direction.LEFT;
         return null;
     }
+
+    /// Stops the player's movement in all directions
+    public void stopMovement() {
+        movingUp = false;
+        movingDown = false;
+        movingLeft = false;
+        movingRight = false;
+    }
 }

@@ -27,6 +27,7 @@ import entity.Player;
 import entity.Transition;
 import entity.Zone;
 import interface_adapter.events.PlayerInputController;
+import interface_adapter.events.StartEventController;
 import use_case.Direction;
 import use_case.PlayerMovementUseCase;
 
@@ -79,7 +80,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final Color PLAYER_COLOR = Color.BLUE;
     private static final int PLAYER_WIDTH = 64;   // Scaled up from 32 for 1920x1200
     private static final int PLAYER_HEIGHT = 64;  // Scaled up from 32 for 1920x1200
-    
+
+    // Event Controller
+    private StartEventController startEventController;
     /**
      * Constructs a GamePanel with the given use case and input controller.
      * Initializes the game loop timer and sets up the panel.
@@ -316,6 +319,8 @@ public class GamePanel extends JPanel implements ActionListener {
                 System.out.println("Successfully transitioned to zone: " + newZone.getName());
                 setBackground(newZone.getBackgroundColor());
                 playBackgroundMusic(newZone.getBackgroundMusicPath());
+                // Attempt to start a random event
+                startEventController.execute();
             } else {
                 System.err.println("ERROR: Transition resulted in null zone!");
             }
@@ -962,6 +967,16 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Repaint to reflect any changes
         repaint();
+    }
+
+    /// Sets the startEventController
+    public void setStartEventController(StartEventController startEventController) {
+        this.startEventController = startEventController;
+    }
+
+    /// Calls the playerMovementUseCase to stop the player's movement in all directions
+    public void stopMovement(){
+        this.playerMovementUseCase.stopMovement();
     }
 
 }

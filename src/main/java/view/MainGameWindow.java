@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
+import data_access.EventDataAccessObject;
 import data_access.LoadFileUserDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.SaveFileUserDataObject;
@@ -17,7 +18,7 @@ import entity.GameMap;
 import entity.GameSettings;
 import entity.Player;
 import interface_adapter.ViewManagerModel;
-import interface_adapter.events.PlayerInputController;
+import interface_adapter.events.*;
 import interface_adapter.load_progress.LoadProgressPresenter;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
@@ -28,6 +29,14 @@ import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
 import interface_adapter.stock_trading.StockTradingController;
 import use_case.PlayerMovementUseCase;
+import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeDataAccessInterface;
+import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInputBoundary;
+import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInteractor;
+import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeOutputBoundary;
+import use_case.events.StartRandomEvent.StartRandomEventDataAccessInterface;
+import use_case.events.StartRandomEvent.StartRandomEventInputBoundary;
+import use_case.events.StartRandomEvent.StartRandomEventInteractor;
+import use_case.events.StartRandomEvent.StartRandomEventOutputBoundary;
 import use_case.load_progress.LoadProgressDataAccessInterface;
 import use_case.load_progress.LoadProgressInputData;
 import use_case.load_progress.LoadProgressInteractor;
@@ -83,6 +92,9 @@ public class MainGameWindow extends JFrame {
     private PaybillView paybillView;
     private PaybillViewModel paybillViewModel;
     PaybillController paybillController;
+    private EventView eventView;
+    private EventViewModel eventViewModel;
+    private StartEventController startEventController;
     
     // Stock trading system components
     private StockTradingController stockTradingController;
@@ -102,7 +114,8 @@ public class MainGameWindow extends JFrame {
     private static final String DAY_SUMMARY_CARD = "daySummary";
     private static final String END_GAME_CARD = "endGame";
     private static final String PAYBILL_CARD = "paybill";
-    
+    private static final String EVENT_CARD = "event";
+
     /**
      * Constructs the MainGameWindow.
      * Sets up the window frame with menu system and prepares for display.
@@ -298,7 +311,7 @@ public class MainGameWindow extends JFrame {
         
         // Initialize Stock Trading system
         initializeStockTradingSystem();
-        
+
         // Create use case
         PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(player);
         
@@ -322,6 +335,9 @@ public class MainGameWindow extends JFrame {
             gamePanel.pauseGame();  // Pause main game while trading
             stockTradingController.startStockTrading(player);
         });
+
+        // Set up Event system
+        initializeEventSystem();
         
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
@@ -421,6 +437,49 @@ public class MainGameWindow extends JFrame {
         this.stockTradingController = new StockTradingController(stockGameInteractor);
         
         System.out.println("=== INITIALIZE STOCK TRADING SYSTEM COMPLETED ===");
+    }
+
+    private void initializeEventSystem() {
+        System.out.println("=== INITIALIZE EVENT SYSTEM STARTED ===");
+
+        // Create Event ViewModel
+        this.eventViewModel = new EventViewModel("event");
+
+        // Create Event Data Access
+        StartRandomEventDataAccessInterface eventDataAccess = new EventDataAccessObject();
+        eventDataAccess.createEventList();
+        eventDataAccess.setPlayer(player);
+
+        // Create Event Presenter
+        StartRandomEventOutputBoundary startRandomEventPresenter= new StartEventPresenter(eventViewModel,
+                                                                        viewManagerModel);
+        // Create Event Interactor
+        StartRandomEventInputBoundary startRandomEventInteractor = new StartRandomEventInteractor(eventDataAccess,
+                startRandomEventPresenter);
+
+        // Create Event Controller
+        this.startEventController = new StartEventController(startRandomEventInteractor);
+        gamePanel.setStartEventController(startEventController);
+
+        // Create Outcome Presenter
+        ActivateRandomOutcomeOutputBoundary activateOutcomePresenter = new ActivateOutcomePresenter(eventViewModel,
+                viewManagerModel);
+
+        // Create Outcome Interactor
+        ActivateRandomOutcomeInputBoundary activateRandomOutcomeInteractor = new ActivateRandomOutcomeInteractor(
+                (ActivateRandomOutcomeDataAccessInterface) eventDataAccess, activateOutcomePresenter);
+
+        // Create Outcome Controller
+        EventOutcomeController eventOutcomeController = new EventOutcomeController(activateRandomOutcomeInteractor);
+
+        // Create Event View
+        this.eventView = new EventView(eventViewModel, viewManagerModel);
+        this.eventView.setActivateRandomOutcomeController(eventOutcomeController);
+        this.eventView.setGamePanel(this.gamePanel);
+
+        // Add to card panel
+        cardPanel.add(eventView, EVENT_CARD);
+
     }
     
     /**
