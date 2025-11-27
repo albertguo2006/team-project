@@ -42,3 +42,10 @@ build/
 /.idea/misc.xml
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
+
+### Stock Data ###
+src/main/resources/stock_data
+
+### Saves ###
+bills.json
+savegame.json

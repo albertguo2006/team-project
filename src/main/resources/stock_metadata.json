@@ -65,10 +65,10 @@
     },
     "MSFT" : {
       "name" : "Microsoft",
-      "riskLevel" : "MEDIUM",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "riskLevel" : "LOW",
+      "volatility" : 1.1201075816031554,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day36-40" ]
     },
     "TSLA" : {
       "name" : "Tesla",
