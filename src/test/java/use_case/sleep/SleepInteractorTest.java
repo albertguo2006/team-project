@@ -1,5 +1,6 @@
 package use_case.sleep;
 
+import data_access.InMemoryPaybillDataAccessObject;
 import data_access.InMemorySleepDataAccessObject;
 import entity.Day;
 import entity.DaySummary;
@@ -14,6 +15,7 @@ public class SleepInteractorTest {
 
     private Player player;
     private InMemorySleepDataAccessObject inMemorySleepDataAccessObject;
+    private InMemoryPaybillDataAccessObject inMemoryPaybillDataAccessObject;
     private SleepInteractor sleepInteractor;
     private SleepOutputBoundary testPresenter;
 
@@ -21,6 +23,7 @@ public class SleepInteractorTest {
     public void setUp(){
         player = new Player("TestPlayer");
         inMemorySleepDataAccessObject = new InMemorySleepDataAccessObject();
+        inMemoryPaybillDataAccessObject = new InMemoryPaybillDataAccessObject();
     }
 
     @Test
@@ -60,7 +63,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -106,7 +109,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -144,7 +147,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -188,7 +191,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor =  new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor =  new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
     }
@@ -226,7 +229,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -269,7 +272,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -299,7 +302,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(null);
 
         // Should not throw exception, should handle gracefully
@@ -345,7 +348,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(failingPlayer);
         sleepInteractor.execute(inputData);
 

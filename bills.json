@@ -1,68 +1,46 @@
 {
-  "mortgage_1_5_1764190490514": {
-    "id": "mortgage_1_5_1764190490514",
-    "originalAmount": 2142.72,
-    "currentAmount": 2142.72,
-    "name": "Mortgage Payment",
-    "dueDate": "Dec 3, 2025, 3:54:50 PM",
-    "createdDate": "Nov 26, 2025, 3:54:50 PM",
-    "isPaid": true,
-    "type": "MORTGAGE",
-    "daysOverdue": 0
+  "gas_1_0_1764249475349": {
+    "id": "gas_1_0_1764249475349",
+    "originalAmount": 96.87,
+    "currentAmount": 98.8074,
+    "name": "Gas Bill",
+    "dueDate": "Dec 4, 2025, 8:17:55 AM",
+    "createdDate": "Nov 27, 2025, 8:17:55 AM",
+    "isPaid": false,
+    "type": "GAS",
+    "daysOverdue": 1
   },
-  "rent_1_3_1764190490514": {
-    "id": "rent_1_3_1764190490514",
-    "originalAmount": 1300.0,
-    "currentAmount": 1300.0,
-    "name": "Rent",
-    "dueDate": "Dec 3, 2025, 3:54:50 PM",
-    "createdDate": "Nov 26, 2025, 3:54:50 PM",
-    "isPaid": true,
-    "type": "RENT",
-    "daysOverdue": 0
+  "internet_1_3_1764249475349": {
+    "id": "internet_1_3_1764249475349",
+    "originalAmount": 99.11,
+    "currentAmount": 101.0922,
+    "name": "Internet Service",
+    "dueDate": "Dec 4, 2025, 8:17:55 AM",
+    "createdDate": "Nov 27, 2025, 8:17:55 AM",
+    "isPaid": false,
+    "type": "INTERNET",
+    "daysOverdue": 1
   },
-  "insurance_1_0_1764190490510": {
-    "id": "insurance_1_0_1764190490510",
-    "originalAmount": 288.95,
-    "currentAmount": 288.95,
+  "water_1_1_1764249475349": {
+    "id": "water_1_1_1764249475349",
+    "originalAmount": 48.24,
+    "currentAmount": 49.204800000000006,
+    "name": "Water Bill",
+    "dueDate": "Dec 4, 2025, 8:17:55 AM",
+    "createdDate": "Nov 27, 2025, 8:17:55 AM",
+    "isPaid": false,
+    "type": "WATER",
+    "daysOverdue": 1
+  },
+  "insurance_1_2_1764249475349": {
+    "id": "insurance_1_2_1764249475349",
+    "originalAmount": 256.64,
+    "currentAmount": 261.7728,
     "name": "Insurance Premium",
-    "dueDate": "Dec 3, 2025, 3:54:50 PM",
-    "createdDate": "Nov 26, 2025, 3:54:50 PM",
-    "isPaid": true,
+    "dueDate": "Dec 4, 2025, 8:17:55 AM",
+    "createdDate": "Nov 27, 2025, 8:17:55 AM",
+    "isPaid": false,
     "type": "INSURANCE",
-    "daysOverdue": 0
-  },
-  "credit_card_1_2_1764190490514": {
-    "id": "credit_card_1_2_1764190490514",
-    "originalAmount": 1771.33,
-    "currentAmount": 1771.33,
-    "name": "Credit Card Payment",
-    "dueDate": "Dec 3, 2025, 3:54:50 PM",
-    "createdDate": "Nov 26, 2025, 3:54:50 PM",
-    "isPaid": true,
-    "type": "CREDIT_CARD",
-    "daysOverdue": 0
-  },
-  "subscription_1_1_1764190490514": {
-    "id": "subscription_1_1_1764190490514",
-    "originalAmount": 12.56,
-    "currentAmount": 12.56,
-    "name": "Streaming Subscription",
-    "dueDate": "Dec 3, 2025, 3:54:50 PM",
-    "createdDate": "Nov 26, 2025, 3:54:50 PM",
-    "isPaid": true,
-    "type": "SUBSCRIPTION",
-    "daysOverdue": 0
-  },
-  "tax_1_4_1764190490514": {
-    "id": "tax_1_4_1764190490514",
-    "originalAmount": 441.95,
-    "currentAmount": 441.95,
-    "name": "Property Tax",
-    "dueDate": "Dec 3, 2025, 3:54:50 PM",
-    "createdDate": "Nov 26, 2025, 3:54:50 PM",
-    "isPaid": true,
-    "type": "TAX",
-    "daysOverdue": 0
+    "daysOverdue": 1
   }
 }

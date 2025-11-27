@@ -17,7 +17,7 @@ public class SleepInteractor implements SleepInputBoundary {
     private final SleepOutputBoundary presenter;
     private final SleepDataAccessInterface dataAccess;
     private final PaybillDataAccessObject billDataAccess;
-    
+
     /**
      * Constructs a SleepInteractor.
      *
@@ -28,6 +28,21 @@ public class SleepInteractor implements SleepInputBoundary {
         this.presenter = presenter;
         this.dataAccess = dataAccess;
         this.billDataAccess = new PaybillDataAccessObject();
+    }
+
+    /**
+     * Constructs a SleepInteractor with a custom bill data access object.
+     * This constructor is primarily for testing purposes.
+     *
+     * @param presenter the output boundary for presenting results
+     * @param dataAccess the data access interface for persistence
+     * @param billDataAccess the bill data access object for bill management
+     */
+    public SleepInteractor(SleepOutputBoundary presenter, SleepDataAccessInterface dataAccess,
+                          PaybillDataAccessObject billDataAccess) {
+        this.presenter = presenter;
+        this.dataAccess = dataAccess;
+        this.billDataAccess = billDataAccess;
     }
     
     /**
