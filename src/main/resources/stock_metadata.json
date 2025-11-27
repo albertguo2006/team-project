@@ -86,10 +86,10 @@
     },
     "AMD" : {
       "name" : "AMD",
-      "riskLevel" : "HIGH",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "riskLevel" : "LOW",
+      "volatility" : 3.906034297048576,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day46-50" ]
     },
     "BND" : {
       "name" : "Vanguard Total Bond Market ETF",
