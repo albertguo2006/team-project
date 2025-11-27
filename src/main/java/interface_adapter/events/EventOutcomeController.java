@@ -3,7 +3,6 @@ package interface_adapter.events;
 import entity.EventOutcome;
 import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInputBoundary;
 import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInputData;
-import use_case.events.StartRandomEvent.StartRandomEventInputBoundary;
 
 import java.util.HashMap;
 

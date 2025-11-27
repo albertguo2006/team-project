@@ -1,7 +1,7 @@
 [
     {
-        "xLocation": 1035.24,
-        "balance": 1000,
+        "xLocation": 960,
+        "balance": -3000,
         "currentDay": "MONDAY",
         "stats": {
             "Hunger": 100,
@@ -9,7 +9,7 @@
             "Energy": 100
         },
         "name": "Player",
-        "yLocation": 196.87999999999994
+        "yLocation": 432.31999999999994
     },
     {},
     {},
@@ -18,5 +18,5 @@
         "totalEquity": 0,
         "investments": {}
     },
-    "Street 1"
+    "Street 3"
 ]

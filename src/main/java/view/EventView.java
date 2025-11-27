@@ -1,31 +1,24 @@
 package view;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 
 import interface_adapter.events.EventOutcomeController;
 import interface_adapter.events.EventState;
 import interface_adapter.events.EventViewModel;
+import interface_adapter.ViewManagerModel;
 
 public class EventView extends JPanel implements ActionListener, PropertyChangeListener {
     private final String viewName = "Event";
     private final EventViewModel eventViewModel;
+    private final ViewManagerModel viewManagerModel;
     private final JButton toOutcome;
 
     private static final Color BACKGROUND_COLOUR = new Color(20, 20, 30);
@@ -41,10 +34,12 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     private final JLabel eventDescription;
 
     private final ArrayList<JLabel> outcomeList = new ArrayList<>();
+    private GamePanel gamePanel;
 
-    public EventView(EventViewModel eventviewModel) {
+    public EventView(EventViewModel eventviewModel, ViewManagerModel viewManagerModel) {
         this.eventViewModel = eventviewModel;
         this.eventViewModel.addPropertyChangeListener(this);
+        this.viewManagerModel = viewManagerModel;
 
         this.setBackground(BACKGROUND_COLOUR);
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -134,7 +129,8 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
                 }
                 else {
                     eventNextState = true;
-                    /// code for exiting the view: to be implemented
+                    clearAll();
+                    returnToGame();
                 }
         }
     }
@@ -142,6 +138,9 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("Event")) {
+            // Pauses the game and stops movement to prevent the player from moving while the event is open
+            gamePanel.pauseGame();
+            gamePanel.stopMovement();
             final EventState state = (EventState) evt.getNewValue();
             eventName.setText(state.getName());
             eventDescription.setText(state.getDescription());
@@ -150,7 +149,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             }
 
         }
-        if (evt.getPropertyName().equals("Outcome")) {
+        else if (evt.getPropertyName().equals("Outcome")) {
             final EventState state = (EventState) evt.getNewValue();
             eventDescription.setText(state.getDescription());
             outcomeList.get(state.getIndex()).setBorder(BorderFactory.createEtchedBorder());
@@ -162,12 +161,31 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     public void setActivateRandomOutcomeController(EventOutcomeController eventOutcomeController){
         this.eventOutcomeController = eventOutcomeController;
     }
+
+    private void returnToGame() {
+        viewManagerModel.setState("game");
+        viewManagerModel.firePropertyChange();
+        gamePanel.resumeGame();
+    }
+    private void clearAll() {
+        for (JLabel jLabel : outcomeList) {
+            jLabel.setBorder(null);
+            jLabel.setText(null);
+        }
+        eventName.setText(null);
+        eventDescription.setText(null);
+    }
+    public void setGamePanel(GamePanel gamePanel){
+        this.gamePanel = gamePanel;
+    }
+ }
+
 // Code for testing
 //    public static void main(String[] args) {
 //        JFrame frame = new JFrame();
 //        EventViewModel eventViewModel = new EventViewModel("Event");
-//        EventView eventView = new EventView(eventViewModel);
 //        ViewManagerModel viewManagerModel = new ViewManagerModel();
+//        EventView eventView = new EventView(eventViewModel, viewManagerModel);
 //        Player player = new Player("Test");
 //        EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
 //        eventDataAccessObject.setPlayer(player);
@@ -190,4 +208,4 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 //                eventDataAccessObject, startEventPresenter, 200);
 //        return new StartEventController(startRandomEventInputBoundary);
 //    }
-}
+

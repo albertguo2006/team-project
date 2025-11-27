@@ -1,9 +1,5 @@
 package use_case.events.ActivateRandomOutcome;
-import data_access.EventDataAccessObject;
-import entity.Event;
 import entity.EventOutcome;
-import entity.Player;
-import interface_adapter.events.ActivateOutcomePresenter;
 
 import java.util.ArrayList;
 import java.util.HashMap;

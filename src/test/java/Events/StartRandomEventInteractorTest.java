@@ -1,10 +1,7 @@
 package Events;
 
 import data_access.EventDataAccessObject;
-import entity.Event;
-import entity.Player;
 import org.junit.Test;
-import use_case.events.ActivateRandomOutcome.*;
 import use_case.events.StartRandomEvent.StartRandomEventInputBoundary;
 import use_case.events.StartRandomEvent.StartRandomEventInteractor;
 import use_case.events.StartRandomEvent.StartRandomEventOutputBoundary;
