@@ -119,6 +119,13 @@ public class PlayerInputController implements KeyListener {
         void onInventoryItemUsed(int slotIndex);
     }
 
+    /**
+     * Callback interface for dropping inventory items.
+     */
+    public interface InventoryDropListener {
+        void onInventoryItemDropped(int slotIndex);
+    }
+
     private final PlayerMovementUseCase playerMovementUseCase;
     private JFrame parentFrame;  // Optional: for frame reference
     private PauseMenuListener pauseMenuListener;
@@ -134,6 +141,7 @@ public class PlayerInputController implements KeyListener {
     private WorldItemChecker worldItemChecker;
     private WorldItemActionListener worldItemActionListener;
     private InventoryUseListener inventoryUseListener;
+    private InventoryDropListener inventoryDropListener;
 
     /**
      * Constructs a PlayerInputController with the given use case.
@@ -271,6 +279,15 @@ public class PlayerInputController implements KeyListener {
     }
 
     /**
+     * Sets the inventory drop listener callback.
+     *
+     * @param listener the inventory drop listener
+     */
+    public void setInventoryDropListener(InventoryDropListener listener) {
+        this.inventoryDropListener = listener;
+    }
+
+    /**
      * Called when a key is pressed.
      * Translates WASD keys to Direction commands and notifies the use case.
      * 
@@ -375,6 +392,16 @@ public class PlayerInputController implements KeyListener {
                     int selectedSlot = inventorySlotSelector.getSelectedInventorySlot();
                     if (selectedSlot >= 0) {
                         inventoryUseListener.onInventoryItemUsed(selectedSlot);
+                    }
+                }
+                break;
+
+            case KeyEvent.VK_Q:
+                // Drop the currently selected inventory item
+                if (inventorySlotSelector != null && inventoryDropListener != null) {
+                    int selectedSlot = inventorySlotSelector.getSelectedInventorySlot();
+                    if (selectedSlot >= 0) {
+                        inventoryDropListener.onInventoryItemDropped(selectedSlot);
                     }
                 }
                 break;

@@ -126,4 +126,17 @@ public class WorldItemDataAccessObject {
             worldItem.setCollected(true);
         }
     }
+
+    /**
+     * Adds a dropped item to the world at the specified location.
+     * The item can be picked up again by the player.
+     * @param item the item to drop
+     * @param zoneName the zone where the item is dropped
+     * @param x the x coordinate
+     * @param y the y coordinate
+     */
+    public void addDroppedItem(Item item, String zoneName, double x, double y) {
+        WorldItem worldItem = new WorldItem(item, zoneName, x, y, false);
+        mapItems.add(worldItem);
+    }
 }

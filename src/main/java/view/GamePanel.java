@@ -46,6 +46,9 @@ public class GamePanel extends JPanel implements ActionListener {
     private final Map<String, BufferedImage> backgroundImageCache = new java.util.concurrent.ConcurrentHashMap<>();
     // Track which images are currently being loaded to avoid duplicate loads
     private final java.util.Set<String> imagesBeingLoaded = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    // Item sprite cache
+    private final Map<String, BufferedImage> itemSpriteCache = new java.util.concurrent.ConcurrentHashMap<>();
     
     // Background music
     private volatile Clip backgroundMusicClip;
@@ -1155,6 +1158,79 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     
     /**
+     * Loads an item sprite from resources with caching.
+     * Returns cached image immediately, or null if not found.
+     *
+     * @param itemName the name of the item
+     * @return the loaded BufferedImage, or null if not found
+     */
+    private BufferedImage loadItemSprite(String itemName) {
+        if (itemName == null || itemName.isEmpty()) {
+            return null;
+        }
+
+        // Check cache first
+        if (itemSpriteCache.containsKey(itemName)) {
+            return itemSpriteCache.get(itemName);
+        }
+
+        // Convert item name to sprite filename
+        String spritePath = getItemSpritePath(itemName);
+        if (spritePath == null) {
+            itemSpriteCache.put(itemName, null);
+            return null;
+        }
+
+        try {
+            InputStream imageStream = getClass().getResourceAsStream(spritePath);
+            if (imageStream == null) {
+                System.err.println("Item sprite not found: " + spritePath);
+                itemSpriteCache.put(itemName, null);
+                return null;
+            }
+
+            BufferedImage image = ImageIO.read(imageStream);
+            imageStream.close();
+
+            if (image != null) {
+                itemSpriteCache.put(itemName, image);
+                System.out.println("Loaded item sprite: " + itemName + " (" + spritePath + ")");
+            } else {
+                itemSpriteCache.put(itemName, null);
+            }
+            return image;
+        } catch (Exception e) {
+            System.err.println("Failed to load item sprite: " + spritePath + " - " + e.getMessage());
+            itemSpriteCache.put(itemName, null);
+            return null;
+        }
+    }
+
+    /**
+     * Maps item names to their sprite file paths.
+     *
+     * @param itemName the name of the item
+     * @return the resource path to the sprite, or null if no sprite exists
+     */
+    private String getItemSpritePath(String itemName) {
+        switch (itemName) {
+            case "Apple": return "/items/apple.png";
+            case "Coffee": return "/items/coffee.png";
+            case "Steak": return "/items/steak.png";
+            case "Energy Drink": return "/items/drink.png";
+            case "Focus Pill": return "/items/pill.png";
+            case "Sandwich": return "/items/sandwich.png";
+            case "Soda": return "/items/soda.png";
+            case "Chocolate Bar": return "/items/chocolate.png";
+            case "Old Book": return "/items/book.png";
+            case "Lucky Coin": return "/items/coin.png";
+            case "Cat Toy": return "/items/cat_toy.png";
+            case "Mystery Box": return "/items/box.png";
+            default: return null;
+        }
+    }
+
+    /**
      * Plays background music for the current zone.
      * Completely non-blocking and fault-tolerant for Linux audio issues.
      * Includes format conversion for compatibility.
@@ -1349,17 +1425,20 @@ public class GamePanel extends JPanel implements ActionListener {
             int y = (int) worldItem.getY();
             Item item = worldItem.getItem();
 
-            // Get color based on item type
-            Color itemColor = getItemColor(item.getType());
-
-            // Draw item as a colored square
-            g.setColor(itemColor);
-            g.fillRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
-
-            // Draw border
-            g.setColor(Color.BLACK);
-            g.setStroke(new BasicStroke(2));
-            g.drawRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+            // Try to load and draw sprite
+            BufferedImage sprite = loadItemSprite(item.getName());
+            if (sprite != null) {
+                // Draw sprite scaled to WORLD_ITEM_SIZE
+                g.drawImage(sprite, x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE, null);
+            } else {
+                // Fallback: draw colored square if no sprite available
+                Color itemColor = getItemColor(item.getType());
+                g.setColor(itemColor);
+                g.fillRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(2));
+                g.drawRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+            }
 
             // Draw price tag for store items
             if (worldItem.isStoreItem()) {
@@ -1460,17 +1539,24 @@ public class GamePanel extends JPanel implements ActionListener {
 
             // Draw item if present
             if (item != null) {
-                // Draw item color square
-                Color itemColor = getItemColor(item.getType());
                 int itemSize = INVENTORY_SLOT_SIZE - 20;
                 int itemX = slotX + 10;
                 int itemY = slotY + 10;
 
-                g.setColor(itemColor);
-                g.fillRect(itemX, itemY, itemSize, itemSize);
-                g.setColor(Color.BLACK);
-                g.setStroke(new BasicStroke(1));
-                g.drawRect(itemX, itemY, itemSize, itemSize);
+                // Try to load and draw sprite
+                BufferedImage sprite = loadItemSprite(item.getName());
+                if (sprite != null) {
+                    // Draw sprite scaled to fit inventory slot
+                    g.drawImage(sprite, itemX, itemY, itemSize, itemSize, null);
+                } else {
+                    // Fallback: draw colored square if no sprite available
+                    Color itemColor = getItemColor(item.getType());
+                    g.setColor(itemColor);
+                    g.fillRect(itemX, itemY, itemSize, itemSize);
+                    g.setColor(Color.BLACK);
+                    g.setStroke(new BasicStroke(1));
+                    g.drawRect(itemX, itemY, itemSize, itemSize);
+                }
 
                 // Draw item name (abbreviated)
                 g.setColor(Color.WHITE);
