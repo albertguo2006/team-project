@@ -1,23 +1,40 @@
 package view;
 
-import data_access.Paybill.PaybillDataAccessObject;
-import entity.Bill;
-import interface_adapter.ViewManagerModel;
-import interface_adapter.paybills.PaybillController;
-import interface_adapter.paybills.PaybillState;
-import interface_adapter.paybills.PaybillViewModel;
-import io.opencensus.stats.ViewManager;
-
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+
+import javax.swing.AbstractAction;
+import javax.swing.ActionMap;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.InputMap;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableModel;
+
+import entity.Bill;
+import interface_adapter.ViewManagerModel;
+import interface_adapter.paybills.PaybillController;
+import interface_adapter.paybills.PaybillState;
+import interface_adapter.paybills.PaybillViewModel;
+import use_case.paybills.PaybillDataAccessInterface;
 
 /**
  * The View for the Paybill Use Case
@@ -28,7 +45,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final PaybillController paybillController;
     private final ViewManagerModel viewManagerModel;
     private final String viewName = "bills";
-    private final PaybillDataAccessObject paybillDataAccessObject = new PaybillDataAccessObject();
+    private final PaybillDataAccessInterface paybillDataAccessObject;
 
     // UI Components
     private final JLabel title = new JLabel("Bills");
@@ -46,10 +63,11 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private final JPanel actionButtonsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 5));
 
     public PaybillView(PaybillViewModel paybillViewModel, PaybillController paybillController,
-                       ViewManagerModel viewManagerModel){
+                       ViewManagerModel viewManagerModel, PaybillDataAccessInterface paybillDataAccessObject){
         this.paybillViewModel = paybillViewModel;
         this.paybillController = paybillController;
         this.viewManagerModel = viewManagerModel;
+        this.paybillDataAccessObject = paybillDataAccessObject;
         this.paybillViewModel.addPropertyChangeListener(this);
 
         // Initialize table model
@@ -67,13 +85,15 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
         loadInitialBills(); // Load initial bills
 
-        // Add keyboard support for returning to game
-        this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(KeyStroke.getKeyStroke("ESCAPE"),
-                "goBack");
-        this.getActionMap().put("goBack", new AbstractAction() {
+        // Add keyboard support for returning to game - use WHEN_IN_FOCUSED_WINDOW for global escape
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "goBack");
 
+        ActionMap actionMap = this.getActionMap();
+        actionMap.put("goBack", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("PaybillView: Escape pressed, returning to game");
                 // Switch back to game view
                 viewManagerModel.setState("game");
                 viewManagerModel.firePropertyChange();
@@ -90,7 +110,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
     private void setupUI() {
         setLayout(new BorderLayout(10, 10));
-        setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        setBorder(BorderFactory.createEmptyBorder(10, 310, 10, 10));
 
         // HeaderPanel with title and week info
         JPanel headerPanel = new JPanel(new BorderLayout());

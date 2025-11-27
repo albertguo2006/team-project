@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
@@ -22,9 +23,14 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 
+import data_access.NPCDataAccessObject;
+import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
+import entity.Item;
+import entity.NPC;
 import entity.Player;
 import entity.Transition;
+import entity.WorldItem;
 import entity.Zone;
 import interface_adapter.events.PlayerInputController;
 import interface_adapter.events.StartEventController;
@@ -35,11 +41,15 @@ public class GamePanel extends JPanel implements ActionListener {
     private final PlayerMovementUseCase playerMovementUseCase;
     private final Timer gameTimer;
     private final GameMap gameMap;
+    private final NPCDataAccessObject npcDataAccess;
     
     // Background image cache (thread-safe)
     private final Map<String, BufferedImage> backgroundImageCache = new java.util.concurrent.ConcurrentHashMap<>();
     // Track which images are currently being loaded to avoid duplicate loads
     private final java.util.Set<String> imagesBeingLoaded = java.util.concurrent.ConcurrentHashMap.newKeySet();
+
+    // Item sprite cache
+    private final Map<String, BufferedImage> itemSpriteCache = new java.util.concurrent.ConcurrentHashMap<>();
     
     // Background music
     private volatile Clip backgroundMusicClip;
@@ -65,6 +75,29 @@ public class GamePanel extends JPanel implements ActionListener {
     private static final int STOCK_TRADING_ZONE_HEIGHT = 226; // 470 - 244
     private boolean inStockTradingZone = false;
     
+    // Mailbox zone (bottom middle of Home, near front door)
+    private static final int MAILBOX_ZONE_X = 760;  // Center-ish area
+    private static final int MAILBOX_ZONE_Y = 900;  // Bottom area
+    private static final int MAILBOX_ZONE_WIDTH = 400;
+    private static final int MAILBOX_ZONE_HEIGHT = 300;
+    private boolean inMailboxZone = false;
+
+    // NPC interaction
+    private static final double NPC_INTERACTION_RADIUS = 100.0;
+    private NPC nearbyNPC = null;
+
+    // Inventory system
+    private int selectedInventorySlot = -1;  // -1 means no slot selected, 0-4 for slots 1-5
+    private static final int INVENTORY_SLOT_SIZE = 80;
+    private static final int INVENTORY_SLOT_GAP = 10;
+    private static final int INVENTORY_SLOTS = 5;
+
+    // World items
+    private WorldItemDataAccessObject worldItemDataAccess;
+    private WorldItem nearbyWorldItem = null;
+    private static final double ITEM_INTERACTION_RADIUS = 80.0;
+    private static final int WORLD_ITEM_SIZE = 40;
+
     // Viewport dimensions (scaled to fit window with letterboxing/pillarboxing)
     private int viewportWidth;
     private int viewportHeight;
@@ -86,14 +119,18 @@ public class GamePanel extends JPanel implements ActionListener {
     /**
      * Constructs a GamePanel with the given use case and input controller.
      * Initializes the game loop timer and sets up the panel.
-     * 
+     *
      * @param playerMovementUseCase the use case managing player movement
      * @param playerInputController the controller handling keyboard input
+     * @param gameMap the game map containing zones
+     * @param npcDataAccess the NPC data access object
      */
     public GamePanel(PlayerMovementUseCase playerMovementUseCase,
-                     PlayerInputController playerInputController, GameMap gameMap) {
+                     PlayerInputController playerInputController, GameMap gameMap,
+                     NPCDataAccessObject npcDataAccess) {
         this.playerMovementUseCase = playerMovementUseCase;
         this.gameMap = gameMap;
+        this.npcDataAccess = npcDataAccess;
 
         // Set panel properties - no preferred size since we're resizable
         this.setBackground(Color.BLACK);  // Black for letterbox bars
@@ -108,7 +145,10 @@ public class GamePanel extends JPanel implements ActionListener {
         
         // Initialize viewport
         calculateViewport();
-        
+
+        // Preload all background images to prevent flashing during transitions
+        preloadAllBackgroundImages();
+
         // Start background music for initial zone
         playBackgroundMusic(gameMap.getCurrentZone().getBackgroundMusicPath());
     }
@@ -120,7 +160,41 @@ public class GamePanel extends JPanel implements ActionListener {
     public void startGameLoop() {
         gameTimer.start();
     }
-    
+
+    /**
+     * Sets the world item data access object.
+     * @param worldItemDataAccess the world item data access
+     */
+    public void setWorldItemDataAccess(WorldItemDataAccessObject worldItemDataAccess) {
+        this.worldItemDataAccess = worldItemDataAccess;
+    }
+
+    /**
+     * Gets the currently selected inventory slot.
+     * @return slot index (0-4), or -1 if no slot selected
+     */
+    public int getSelectedInventorySlot() {
+        return selectedInventorySlot;
+    }
+
+    /**
+     * Sets the selected inventory slot.
+     * @param slot the slot index (0-4), or -1 to deselect
+     */
+    public void setSelectedInventorySlot(int slot) {
+        if (slot >= -1 && slot < INVENTORY_SLOTS) {
+            this.selectedInventorySlot = slot;
+        }
+    }
+
+    /**
+     * Gets the world item the player is currently near, if any.
+     * @return the nearby world item, or null
+     */
+    public WorldItem getNearbyWorldItem() {
+        return nearbyWorldItem;
+    }
+
     /**
      * Stops the game loop.
      * Useful for closing the game.
@@ -178,6 +252,9 @@ public class GamePanel extends JPanel implements ActionListener {
         checkZoneTransition();
         checkSleepZone();
         checkStockTradingZone();
+        checkMailboxZone();
+        checkNPCProximity();
+        checkWorldItemProximity();
 
         // === RENDER PHASE ===
         this.repaint();
@@ -455,7 +532,10 @@ public class GamePanel extends JPanel implements ActionListener {
 
         // Draw player
         drawPlayer(g);
-        
+
+        // Draw NPCs
+        drawNPCs(g);
+
         // Draw sleep zone indicator if in Home and player is in zone
         Zone currentZone = gameMap.getCurrentZone();
         if (currentZone != null && "Home".equals(currentZone.getName()) && inSleepZone) {
@@ -467,7 +547,26 @@ public class GamePanel extends JPanel implements ActionListener {
             drawStockTradingZone(g);
         }
         
+        // Draw mailbox zone indicator if in Home and player is in zone
+        if (currentZone != null && "Home".equals(currentZone.getName()) && inMailboxZone) {
+            drawMailboxZone(g);
+        }
+
+        // Draw NPC interaction prompt if near an NPC
+        if (nearbyNPC != null) {
+            drawNPCPrompt(g);
+        }
+
+        // Draw world items in current zone
+        drawWorldItems(g);
+
+        // Draw item interaction prompt if near a world item
+        if (nearbyWorldItem != null) {
+            drawWorldItemPrompt(g);
+        }
+
         drawUI(g);
+        drawInventory(g);
     }
     
     /**
@@ -534,7 +633,116 @@ public class GamePanel extends JPanel implements ActionListener {
                 break;
         }
     }
-    
+
+    /**
+     * Draws all NPCs in the current zone with personality-based visual styles.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawNPCs(Graphics2D g) {
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone == null) return;
+
+        List<NPC> npcsInZone = npcDataAccess.getNPCsInZone(currentZone.getName());
+
+        for (NPC npc : npcsInZone) {
+            int npcX = (int) npc.getX();
+            int npcY = (int) npc.getY();
+            int npcSize = 64;  // Same size as player
+
+            // Draw NPC shape based on personality
+            drawNPCShape(g, npc, npcX, npcY, npcSize);
+
+            // Draw name label above NPC
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 20));
+            String name = npc.getName();
+            int nameWidth = g.getFontMetrics().stringWidth(name);
+            g.drawString(name, npcX + (npcSize - nameWidth) / 2, npcY - 10);
+        }
+    }
+
+    /**
+     * Draws a specific NPC shape based on their personality.
+     *
+     * @param g the Graphics2D context
+     * @param npc the NPC to draw
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param size the size of the shape
+     */
+    private void drawNPCShape(Graphics2D g, NPC npc, int x, int y, int size) {
+        String name = npc.getName();
+
+        // Different shapes and colors for different NPC personalities
+        switch (name) {
+            case "Bob":
+                // Bureaucrat - Gray square (rigid, formal)
+                g.setColor(new Color(128, 128, 128));
+                g.fillRect(x, y, size, size);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawRect(x, y, size, size);
+                break;
+
+            case "Danny":
+                // CS TA - Green circle (friendly, approachable)
+                g.setColor(new Color(34, 139, 34));  // Forest green
+                g.fillOval(x, y, size, size);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawOval(x, y, size, size);
+                break;
+
+            case "Sebestian":
+                // Eccentric - Purple diamond (quirky, unique)
+                g.setColor(new Color(138, 43, 226));  // Blue violet
+                int[] xPoints = {x + size/2, x + size, x + size/2, x};
+                int[] yPoints = {y, y + size/2, y + size, y + size/2};
+                g.fillPolygon(xPoints, yPoints, 4);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawPolygon(xPoints, yPoints, 4);
+                break;
+
+            case "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon":
+                // Aristocrat - Gold hexagon (distinguished, complex)
+                g.setColor(new Color(218, 165, 32));  // Goldenrod
+                int[] hexX = new int[6];
+                int[] hexY = new int[6];
+                for (int i = 0; i < 6; i++) {
+                    double angle = Math.PI / 3 * i;
+                    hexX[i] = (int) (x + size/2 + size/2 * Math.cos(angle));
+                    hexY[i] = (int) (y + size/2 + size/2 * Math.sin(angle));
+                }
+                g.fillPolygon(hexX, hexY, 6);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawPolygon(hexX, hexY, 6);
+                break;
+
+            case "Sophia":
+                // Curious learner - Pink triangle (dynamic, growing)
+                g.setColor(new Color(255, 182, 193));  // Light pink
+                int[] triX = {x + size/2, x + size, x};
+                int[] triY = {y, y + size, y + size};
+                g.fillPolygon(triX, triY, 3);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(3));
+                g.drawPolygon(triX, triY, 3);
+                break;
+
+            default:
+                // Default - Orange rectangle
+                g.setColor(new Color(255, 140, 0));  // Dark orange
+                g.fillRect(x, y, size, size);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(2));
+                g.drawRect(x, y, size, size);
+                break;
+        }
+    }
+
     /**
      * Checks if the player is in the sleep zone (top-right 400x400px in Home).
      */
@@ -646,6 +854,123 @@ public class GamePanel extends JPanel implements ActionListener {
     public boolean isInStockTradingZone() {
         return inStockTradingZone;
     }
+    
+    /**
+     * Checks if the player is in the mailbox zone (bottom middle area in Home).
+     */
+    private void checkMailboxZone() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        
+        // Only check if in Home zone
+        if (!"Home".equals(currentZone.getName())) {
+            inMailboxZone = false;
+            return;
+        }
+        
+        double playerX = player.getX();
+        double playerY = player.getY();
+        
+        // Check if player is within mailbox zone bounds
+        inMailboxZone = playerX >= MAILBOX_ZONE_X &&
+                        playerX <= MAILBOX_ZONE_X + MAILBOX_ZONE_WIDTH &&
+                        playerY >= MAILBOX_ZONE_Y &&
+                        playerY <= MAILBOX_ZONE_Y + MAILBOX_ZONE_HEIGHT;
+    }
+    
+    /**
+     * Draws the mailbox zone indicator and prompt.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawMailboxZone(Graphics2D g) {
+        // Draw semi-transparent overlay
+        g.setColor(new Color(255, 200, 100, 77));  // Light orange/yellow with 30% opacity
+        g.fillRect(MAILBOX_ZONE_X, MAILBOX_ZONE_Y, MAILBOX_ZONE_WIDTH, MAILBOX_ZONE_HEIGHT);
+        
+        // Draw border
+        g.setColor(new Color(255, 200, 100, 200));
+        g.setStroke(new BasicStroke(4));
+        g.drawRect(MAILBOX_ZONE_X, MAILBOX_ZONE_Y, MAILBOX_ZONE_WIDTH, MAILBOX_ZONE_HEIGHT);
+        
+        // Draw prompt text
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 32));
+        String prompt = "Press E to Check Bills";
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int promptX = MAILBOX_ZONE_X + (MAILBOX_ZONE_WIDTH - promptWidth) / 2;
+        int promptY = MAILBOX_ZONE_Y + MAILBOX_ZONE_HEIGHT / 2;
+        g.drawString(prompt, promptX, promptY);
+    }
+    
+    /**
+     * Checks if the player is currently in the mailbox zone.
+     * @return true if in mailbox zone, false otherwise
+     */
+    public boolean isInMailboxZone() {
+        return inMailboxZone;
+    }
+
+    /**
+     * Draws a prompt at the bottom of the screen indicating the player can talk to the nearby NPC.
+     *
+     * @param g the Graphics2D context
+     */
+    private void drawNPCPrompt(Graphics2D g) {
+        if (nearbyNPC == null) return;
+
+        g.setColor(Color.WHITE);
+        g.setFont(new Font("Arial", Font.BOLD, 36));
+
+        String prompt = "Press E to talk to " + nearbyNPC.getName();
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int x = (VIRTUAL_WIDTH - promptWidth) / 2;
+        int y = VIRTUAL_HEIGHT - 100;
+
+        // Semi-transparent black background
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(x - 20, y - 40, promptWidth + 40, 60);
+
+        // White text
+        g.setColor(Color.WHITE);
+        g.drawString(prompt, x, y);
+    }
+
+    /**
+     * Checks if the player is near any NPC in the current zone.
+     */
+    private void checkNPCProximity() {
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+
+        if (currentZone == null) {
+            nearbyNPC = null;
+            return;
+        }
+
+        List<NPC> npcsInZone = npcDataAccess.getNPCsInZone(currentZone.getName());
+        nearbyNPC = null;
+
+        for (NPC npc : npcsInZone) {
+            double distance = Math.sqrt(
+                Math.pow(player.getX() - npc.getX(), 2) +
+                Math.pow(player.getY() - npc.getY(), 2)
+            );
+
+            if (distance < NPC_INTERACTION_RADIUS) {
+                nearbyNPC = npc;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Gets the NPC that is currently near the player, if any.
+     * @return the nearby NPC, or null if no NPC is nearby
+     */
+    public NPC getNearbyNPC() {
+        return nearbyNPC;
+    }
 
     /**
      * Gets the game map containing all zones and current zone information.
@@ -733,6 +1058,50 @@ public class GamePanel extends JPanel implements ActionListener {
     }
     
     /**
+     * Preloads all background images for all zones in the game map.
+     * This prevents the brief flash of generic background during zone transitions.
+     * Loads images synchronously in a background thread to ensure they're ready.
+     */
+    private void preloadAllBackgroundImages() {
+        new Thread(() -> {
+            System.out.println("Preloading all background images...");
+            // Get all zone names from the GameMap
+            String[] zoneNames = {
+                "Home", "Subway Station 1", "Street 1", "Street 2",
+                "Grocery Store", "Subway Station 2", "Office (Your Cubicle)",
+                "Street 3", "Office Lobby"
+            };
+
+            for (String zoneName : zoneNames) {
+                Zone zone = gameMap.getZone(zoneName);
+                if (zone != null) {
+                    String imagePath = zone.getBackgroundImagePath();
+                    if (imagePath != null && !imagePath.isEmpty()) {
+                        // Only load if not already in cache
+                        if (!backgroundImageCache.containsKey(imagePath)) {
+                            try {
+                                InputStream imageStream = getClass().getResourceAsStream(imagePath);
+                                if (imageStream != null) {
+                                    BufferedImage image = ImageIO.read(imageStream);
+                                    imageStream.close();
+
+                                    if (image != null) {
+                                        backgroundImageCache.put(imagePath, image);
+                                        System.out.println("Preloaded: " + zoneName + " (" + imagePath + ")");
+                                    }
+                                }
+                            } catch (Exception e) {
+                                System.err.println("Failed to preload background for " + zoneName + ": " + e.getMessage());
+                            }
+                        }
+                    }
+                }
+            }
+            System.out.println("Background image preloading complete!");
+        }, "BackgroundPreloader").start();
+    }
+
+    /**
      * Loads a background image from resources with caching.
      * Async loading to prevent EDT freezing.
      * Returns cached image immediately, or null if not yet loaded.
@@ -744,12 +1113,12 @@ public class GamePanel extends JPanel implements ActionListener {
         if (imagePath == null || imagePath.isEmpty()) {
             return null;
         }
-        
+
         // Check cache first (fast path)
         if (backgroundImageCache.containsKey(imagePath)) {
             return backgroundImageCache.get(imagePath);
         }
-        
+
         // If not in cache and not currently being loaded, start async load
         if (imagesBeingLoaded.add(imagePath)) {
             // Successfully added to loading set, start load in background
@@ -757,17 +1126,17 @@ public class GamePanel extends JPanel implements ActionListener {
                 try {
                     System.out.println("Async loading background image: " + imagePath);
                     InputStream imageStream = getClass().getResourceAsStream(imagePath);
-                    
+
                     if (imageStream == null) {
                         System.err.println("Image stream is null for: " + imagePath);
                         backgroundImageCache.put(imagePath, null);
                         imagesBeingLoaded.remove(imagePath);
                         return;
                     }
-                    
+
                     BufferedImage image = ImageIO.read(imageStream);
                     imageStream.close();
-                    
+
                     if (image != null) {
                         backgroundImageCache.put(imagePath, image);
                         System.out.println("Successfully loaded background image: " + imagePath +
@@ -788,11 +1157,84 @@ public class GamePanel extends JPanel implements ActionListener {
                 }
             }, "ImageLoader-" + imagePath.hashCode()).start();
         }
-        
+
         // Return null for now - image will appear when loaded
         return null;
     }
     
+    /**
+     * Loads an item sprite from resources with caching.
+     * Returns cached image immediately, or null if not found.
+     *
+     * @param itemName the name of the item
+     * @return the loaded BufferedImage, or null if not found
+     */
+    private BufferedImage loadItemSprite(String itemName) {
+        if (itemName == null || itemName.isEmpty()) {
+            return null;
+        }
+
+        // Check cache first
+        if (itemSpriteCache.containsKey(itemName)) {
+            return itemSpriteCache.get(itemName);
+        }
+
+        // Convert item name to sprite filename
+        String spritePath = getItemSpritePath(itemName);
+        if (spritePath == null) {
+            itemSpriteCache.put(itemName, null);
+            return null;
+        }
+
+        try {
+            InputStream imageStream = getClass().getResourceAsStream(spritePath);
+            if (imageStream == null) {
+                System.err.println("Item sprite not found: " + spritePath);
+                itemSpriteCache.put(itemName, null);
+                return null;
+            }
+
+            BufferedImage image = ImageIO.read(imageStream);
+            imageStream.close();
+
+            if (image != null) {
+                itemSpriteCache.put(itemName, image);
+                System.out.println("Loaded item sprite: " + itemName + " (" + spritePath + ")");
+            } else {
+                itemSpriteCache.put(itemName, null);
+            }
+            return image;
+        } catch (Exception e) {
+            System.err.println("Failed to load item sprite: " + spritePath + " - " + e.getMessage());
+            itemSpriteCache.put(itemName, null);
+            return null;
+        }
+    }
+
+    /**
+     * Maps item names to their sprite file paths.
+     *
+     * @param itemName the name of the item
+     * @return the resource path to the sprite, or null if no sprite exists
+     */
+    private String getItemSpritePath(String itemName) {
+        switch (itemName) {
+            case "Apple": return "/items/apple.png";
+            case "Coffee": return "/items/coffee.png";
+            case "Steak": return "/items/steak.png";
+            case "Energy Drink": return "/items/drink.png";
+            case "Focus Pill": return "/items/pill.png";
+            case "Sandwich": return "/items/sandwich.png";
+            case "Soda": return "/items/soda.png";
+            case "Chocolate Bar": return "/items/chocolate.png";
+            case "Old Book": return "/items/book.png";
+            case "Lucky Coin": return "/items/coin.png";
+            case "Cat Toy": return "/items/cat_toy.png";
+            case "Mystery Box": return "/items/box.png";
+            default: return null;
+        }
+    }
+
     /**
      * Plays background music for the current zone.
      * Completely non-blocking and fault-tolerant for Linux audio issues.
@@ -942,6 +1384,209 @@ public class GamePanel extends JPanel implements ActionListener {
             }
         }
         currentMusicPath = null;
+    }
+
+    /**
+     * Checks if the player is near any world item in the current zone.
+     */
+    private void checkWorldItemProximity() {
+        if (worldItemDataAccess == null) {
+            nearbyWorldItem = null;
+            return;
+        }
+
+        Player player = playerMovementUseCase.getPlayer();
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone == null) {
+            nearbyWorldItem = null;
+            return;
+        }
+
+        List<WorldItem> items = worldItemDataAccess.getItemsInZone(currentZone.getName());
+        nearbyWorldItem = null;
+
+        for (WorldItem item : items) {
+            if (item.isInRange(player.getX(), player.getY(), ITEM_INTERACTION_RADIUS)) {
+                nearbyWorldItem = item;
+                break;
+            }
+        }
+    }
+
+    /**
+     * Draws world items in the current zone.
+     * @param g the Graphics2D context
+     */
+    private void drawWorldItems(Graphics2D g) {
+        if (worldItemDataAccess == null) return;
+
+        Zone currentZone = gameMap.getCurrentZone();
+        if (currentZone == null) return;
+
+        List<WorldItem> items = worldItemDataAccess.getItemsInZone(currentZone.getName());
+
+        for (WorldItem worldItem : items) {
+            int x = (int) worldItem.getX();
+            int y = (int) worldItem.getY();
+            Item item = worldItem.getItem();
+
+            // Try to load and draw sprite
+            BufferedImage sprite = loadItemSprite(item.getName());
+            if (sprite != null) {
+                // Draw sprite scaled to WORLD_ITEM_SIZE
+                g.drawImage(sprite, x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE, null);
+            } else {
+                // Fallback: draw colored square if no sprite available
+                Color itemColor = getItemColor(item.getType());
+                g.setColor(itemColor);
+                g.fillRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+                g.setColor(Color.BLACK);
+                g.setStroke(new BasicStroke(2));
+                g.drawRect(x, y, WORLD_ITEM_SIZE, WORLD_ITEM_SIZE);
+            }
+
+            // Draw price tag for store items
+            if (worldItem.isStoreItem()) {
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 16));
+                String priceText = "$" + item.getPrice();
+                int textWidth = g.getFontMetrics().stringWidth(priceText);
+                g.drawString(priceText, x + (WORLD_ITEM_SIZE - textWidth) / 2, y - 5);
+            }
+        }
+    }
+
+    /**
+     * Gets the color for an item based on its type.
+     */
+    private Color getItemColor(String type) {
+        switch (type) {
+            case "Hunger": return new Color(255, 140, 0);   // Orange
+            case "Energy": return new Color(255, 255, 0);   // Yellow
+            case "Mood": return new Color(255, 182, 193);   // Pink
+            case "Speed": return new Color(0, 255, 255);    // Cyan
+            case "Quest": return new Color(148, 0, 211);    // Purple
+            case "Special": return new Color(50, 205, 50);  // Lime green
+            default: return new Color(200, 200, 200);       // Gray
+        }
+    }
+
+    /**
+     * Draws the world item interaction prompt.
+     * @param g the Graphics2D context
+     */
+    private void drawWorldItemPrompt(Graphics2D g) {
+        if (nearbyWorldItem == null) return;
+
+        Item item = nearbyWorldItem.getItem();
+        String prompt;
+        if (nearbyWorldItem.isStoreItem()) {
+            prompt = "Press E to buy " + item.getName() + " ($" + item.getPrice() + ")";
+        } else {
+            prompt = "Press E to pick up " + item.getName();
+        }
+
+        g.setFont(new Font("Arial", Font.BOLD, 28));
+        int promptWidth = g.getFontMetrics().stringWidth(prompt);
+        int x = (VIRTUAL_WIDTH - promptWidth) / 2;
+        int y = VIRTUAL_HEIGHT - 180;
+
+        // Semi-transparent black background
+        g.setColor(new Color(0, 0, 0, 180));
+        g.fillRect(x - 20, y - 30, promptWidth + 40, 50);
+
+        // White text
+        g.setColor(Color.WHITE);
+        g.drawString(prompt, x, y);
+    }
+
+    /**
+     * Draws the inventory UI at the bottom center of the screen.
+     * @param g the Graphics2D context
+     */
+    private void drawInventory(Graphics2D g) {
+        Player player = playerMovementUseCase.getPlayer();
+        Map<Integer, Item> inventory = player.getInventory();
+
+        // Calculate inventory bar position
+        int totalWidth = INVENTORY_SLOTS * INVENTORY_SLOT_SIZE + (INVENTORY_SLOTS - 1) * INVENTORY_SLOT_GAP;
+        int startX = (VIRTUAL_WIDTH - totalWidth) / 2;
+        int startY = VIRTUAL_HEIGHT - INVENTORY_SLOT_SIZE - 20;
+
+        for (int i = 0; i < INVENTORY_SLOTS; i++) {
+            int slotX = startX + i * (INVENTORY_SLOT_SIZE + INVENTORY_SLOT_GAP);
+            int slotY = startY;
+            int slotKey = i + 1;  // Inventory uses 1-5, not 0-4
+            Item item = inventory.get(slotKey);
+
+            // Draw slot background
+            if (i == selectedInventorySlot) {
+                g.setColor(new Color(100, 150, 255, 150));  // Highlighted
+            } else {
+                g.setColor(new Color(50, 50, 50, 180));  // Normal
+            }
+            g.fillRect(slotX, slotY, INVENTORY_SLOT_SIZE, INVENTORY_SLOT_SIZE);
+
+            // Draw slot border
+            if (i == selectedInventorySlot) {
+                g.setColor(new Color(100, 150, 255));
+                g.setStroke(new BasicStroke(4));
+            } else {
+                g.setColor(Color.GRAY);
+                g.setStroke(new BasicStroke(2));
+            }
+            g.drawRect(slotX, slotY, INVENTORY_SLOT_SIZE, INVENTORY_SLOT_SIZE);
+
+            // Draw slot number
+            g.setColor(Color.WHITE);
+            g.setFont(new Font("Arial", Font.BOLD, 16));
+            g.drawString(String.valueOf(slotKey), slotX + 5, slotY + 18);
+
+            // Draw item if present
+            if (item != null) {
+                int itemSize = INVENTORY_SLOT_SIZE - 20;
+                int itemX = slotX + 10;
+                int itemY = slotY + 10;
+
+                // Try to load and draw sprite
+                BufferedImage sprite = loadItemSprite(item.getName());
+                if (sprite != null) {
+                    // Draw sprite scaled to fit inventory slot
+                    g.drawImage(sprite, itemX, itemY, itemSize, itemSize, null);
+                } else {
+                    // Fallback: draw colored square if no sprite available
+                    Color itemColor = getItemColor(item.getType());
+                    g.setColor(itemColor);
+                    g.fillRect(itemX, itemY, itemSize, itemSize);
+                    g.setColor(Color.BLACK);
+                    g.setStroke(new BasicStroke(1));
+                    g.drawRect(itemX, itemY, itemSize, itemSize);
+                }
+
+                // Draw item name (abbreviated)
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.PLAIN, 12));
+                String name = item.getName();
+                if (name.length() > 8) {
+                    name = name.substring(0, 7) + "..";
+                }
+                int nameWidth = g.getFontMetrics().stringWidth(name);
+                g.drawString(name, slotX + (INVENTORY_SLOT_SIZE - nameWidth) / 2, slotY + INVENTORY_SLOT_SIZE - 5);
+            }
+        }
+
+        // Draw "use item" prompt if slot is selected and has item
+        if (selectedInventorySlot >= 0 && selectedInventorySlot < INVENTORY_SLOTS) {
+            int slotKey = selectedInventorySlot + 1;
+            Item selectedItem = inventory.get(slotKey);
+            if (selectedItem != null && nearbyNPC == null && nearbyWorldItem == null && !inSleepZone && !inStockTradingZone) {
+                g.setColor(Color.WHITE);
+                g.setFont(new Font("Arial", Font.BOLD, 20));
+                String usePrompt = "Press E to use " + selectedItem.getName();
+                int promptWidth = g.getFontMetrics().stringWidth(usePrompt);
+                g.drawString(usePrompt, (VIRTUAL_WIDTH - promptWidth) / 2, startY - 15);
+            }
+        }
     }
 
     /**

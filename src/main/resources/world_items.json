@@ -1,0 +1,21 @@
+[
+  {
+    "mapItems": [
+      {"itemName": "Lucky Coin", "zone": "Street 1", "x": 500, "y": 400},
+      {"itemName": "Old Book", "zone": "Street 2", "x": 1200, "y": 600},
+      {"itemName": "Apple", "zone": "Street 3", "x": 800, "y": 500},
+      {"itemName": "Cat Toy", "zone": "Street 1", "x": 1400, "y": 800},
+      {"itemName": "Soda", "zone": "Office Lobby", "x": 600, "y": 400}
+    ],
+    "storeItems": [
+      {"itemName": "Coffee", "x": 461, "y": 500},
+      {"itemName": "Steak", "x": 673, "y": 500},
+      {"itemName": "Energy Drink", "x": 884, "y": 500},
+      {"itemName": "Focus Pill", "x": 1097, "y": 500},
+      {"itemName": "Sandwich", "x": 1308, "y": 500},
+      {"itemName": "Apple", "x": 1521, "y": 500},
+      {"itemName": "Soda", "x": 461, "y": 700},
+      {"itemName": "Chocolate Bar", "x": 674, "y": 700}
+    ]
+  }
+]

@@ -29,7 +29,7 @@ public class SleepDataAccessObject implements SleepDataAccessInterface {
     
     /**
      * Creates a day summary from the given information.
-     * 
+     *
      * @param day the day that was completed
      * @param earnings the total earnings for the day
      * @param spending the total spending for the day
@@ -39,5 +39,20 @@ public class SleepDataAccessObject implements SleepDataAccessInterface {
     @Override
     public DaySummary createDaySummary(Day day, double earnings, double spending, double newBalance) {
         return new DaySummary(day, earnings, spending, newBalance);
+    }
+
+    /**
+     * Creates a day summary from the given information including stock trading profit/loss.
+     *
+     * @param day the day that was completed
+     * @param earnings the total earnings for the day
+     * @param spending the total spending for the day
+     * @param stockProfitLoss profit or loss from stock trading
+     * @param newBalance the player's new balance
+     * @return a DaySummary object
+     */
+    @Override
+    public DaySummary createDaySummary(Day day, double earnings, double spending, double stockProfitLoss, double newBalance) {
+        return new DaySummary(day, earnings, spending, stockProfitLoss, newBalance);
     }
 }

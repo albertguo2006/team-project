@@ -1,15 +1,12 @@
-package Sleep;
+package use_case.sleep;
 
+import data_access.InMemoryPaybillDataAccessObject;
 import data_access.InMemorySleepDataAccessObject;
 import entity.Day;
 import entity.DaySummary;
 import entity.GameEnding;
 import entity.Player;
 import org.junit.jupiter.api.BeforeEach;
-import use_case.sleep.SleepInputData;
-import use_case.sleep.SleepInteractor;
-import use_case.sleep.SleepOutputBoundary;
-import use_case.sleep.SleepOutputData;
 
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
@@ -18,6 +15,7 @@ public class SleepInteractorTest {
 
     private Player player;
     private InMemorySleepDataAccessObject inMemorySleepDataAccessObject;
+    private InMemoryPaybillDataAccessObject inMemoryPaybillDataAccessObject;
     private SleepInteractor sleepInteractor;
     private SleepOutputBoundary testPresenter;
 
@@ -25,12 +23,15 @@ public class SleepInteractorTest {
     public void setUp(){
         player = new Player("TestPlayer");
         inMemorySleepDataAccessObject = new InMemorySleepDataAccessObject();
+        inMemoryPaybillDataAccessObject = new InMemoryPaybillDataAccessObject();
     }
 
     @Test
     void successSleepNormalDayTest(){
         player.setCurrentDay(Day.MONDAY);
-        player.setBalance(1000.0);
+        // Balance already reflects all transactions that happened during the day
+        // The daily earnings/spending are just for display on the day summary
+        player.setBalance(1150.0);  // Started at 1000, earned 200, spent 50 = 1150
         player.setHealth(50);
         player.addDailyEarnings(200.0);
         player.addDailySpending(50.0);
@@ -64,7 +65,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -81,7 +82,8 @@ public class SleepInteractorTest {
     void successSleepFridayWeekCompleteTest(){
         // Setup - Friday with enough money for COMFORTABLE ending
         player.setCurrentDay(Day.FRIDAY);
-        player.setBalance(3000.0);
+        // Balance already reflects all transactions that happened during the day
+        player.setBalance(3400.0);  // Started at 3000, earned 500, spent 100 = 3400
         player.setHealth(30);
         player.addDailyEarnings(500.0);
         player.addDailySpending(100.0);
@@ -92,7 +94,7 @@ public class SleepInteractorTest {
 
             @Override
             public void presentDaySummary(SleepOutputData outputData) {
-                fail("Should not present game ending for normal day");
+                fail("Should not present day summary for Friday (week complete)");
             }
 
             @Override
@@ -110,7 +112,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -148,7 +150,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -192,7 +194,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor =  new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor =  new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
     }
@@ -201,7 +203,8 @@ public class SleepInteractorTest {
     void successFinancialTrackingResetTest(){
         // Test that daily financials reset after sleep
         player.setCurrentDay(Day.TUESDAY);
-        player.setBalance(2000.0);
+        // Balance already reflects all transactions that happened during the day
+        player.setBalance(2150.0);  // Started at 2000, earned 300, spent 150 = 2150
         player.addDailyEarnings(300.0);
         player.addDailySpending(150.0);
         player.setHasSleptToday(false);
@@ -221,7 +224,7 @@ public class SleepInteractorTest {
 
             @Override
             public void presentGameEnding(GameEnding ending) {
-                fail("Should not present game ending for Thursday");
+                fail("Should not present game ending for Tuesday");
             }
 
             @Override
@@ -230,7 +233,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -273,7 +276,7 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(player);
         sleepInteractor.execute(inputData);
 
@@ -303,11 +306,60 @@ public class SleepInteractorTest {
             }
         };
 
-        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject);
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
         SleepInputData inputData = new SleepInputData(null);
 
         // Should not throw exception, should handle gracefully
         assertDoesNotThrow(() -> sleepInteractor.execute(inputData));
+    }
+
+    @Test
+    void failureDayAdvancementTest() {
+        // Setup - Create a scenario where advanceDay() returns false unexpectedly
+        Player player = new Player("TestPlayer");
+        player.setCurrentDay(Day.WEDNESDAY); // Not Friday, so should advance
+        player.setHasSleptToday(false);
+        player.setHealth(50);
+
+        // Create a mock player that always fails to advance
+        Player failingPlayer = new Player("FailingPlayer") {
+            @Override
+            public boolean advanceDay() {
+                return false; // Simulate advancement failure
+            }
+        };
+        failingPlayer.setCurrentDay(Day.WEDNESDAY);
+        failingPlayer.setHasSleptToday(false);
+        failingPlayer.setHealth(50);
+
+        // Create failure presenter
+        testPresenter = new SleepOutputBoundary() {
+            @Override
+            public void presentDaySummary(SleepOutputData outputData) {
+                fail("Should not present day summary when day advancement fails");
+            }
+
+            @Override
+            public void presentGameEnding(GameEnding ending) {
+                fail("Should not present game ending for Wednesday sleep");
+            }
+
+            @Override
+            public void presentSleepError(String errorMessage) {
+                // This is the expected path
+                assertNotNull(errorMessage);
+                assertTrue(errorMessage.contains("Unable to advance to next day"));
+            }
+        };
+
+        sleepInteractor = new SleepInteractor(testPresenter, inMemorySleepDataAccessObject, inMemoryPaybillDataAccessObject);
+        SleepInputData inputData = new SleepInputData(failingPlayer);
+        sleepInteractor.execute(inputData);
+
+        // Verify player state - should still have slept but day not advanced
+        assertTrue(failingPlayer.hasSleptToday()); // Sleep was processed
+        assertEquals(Day.WEDNESDAY, failingPlayer.getCurrentDay()); // Day didn't advance
+        assertEquals(100, failingPlayer.getHealth()); // Health still restored
     }
 }
 

@@ -1,0 +1,109 @@
+{
+  "stocks" : {
+    "MARA" : {
+      "name" : "Marathon Digital",
+      "riskLevel" : "HIGH",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "NVDA" : {
+      "name" : "NVIDIA",
+      "riskLevel" : "LOW",
+      "volatility" : 2.1001390850279966,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day1-5" ]
+    },
+    "AAPL" : {
+      "name" : "Apple",
+      "riskLevel" : "MEDIUM",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "KO" : {
+      "name" : "Coca-Cola",
+      "riskLevel" : "LOW",
+      "volatility" : 0.9712996224105298,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day8-12" ]
+    },
+    "JPM" : {
+      "name" : "JPMorgan Chase",
+      "riskLevel" : "MEDIUM",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "JNJ" : {
+      "name" : "Johnson & Johnson",
+      "riskLevel" : "LOW",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "VTI" : {
+      "name" : "Vanguard Total Stock Market ETF",
+      "riskLevel" : "LOW",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "COIN" : {
+      "name" : "Coinbase",
+      "riskLevel" : "HIGH",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "DIS" : {
+      "name" : "Disney",
+      "riskLevel" : "MEDIUM",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "MSFT" : {
+      "name" : "Microsoft",
+      "riskLevel" : "LOW",
+      "volatility" : 1.1201075816031554,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day36-40" ]
+    },
+    "TSLA" : {
+      "name" : "Tesla",
+      "riskLevel" : "HIGH",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "VOO" : {
+      "name" : "Vanguard S&P 500 ETF",
+      "riskLevel" : "LOW",
+      "volatility" : 0.711877736708061,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day53-57" ]
+    },
+    "AMD" : {
+      "name" : "AMD",
+      "riskLevel" : "LOW",
+      "volatility" : 3.906034297048576,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day46-50" ]
+    },
+    "BND" : {
+      "name" : "Vanguard Total Bond Market ETF",
+      "riskLevel" : "LOW",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    },
+    "WMT" : {
+      "name" : "Walmart",
+      "riskLevel" : "MEDIUM",
+      "volatility" : 0.0,
+      "availableMonths" : [ ],
+      "playedPeriods" : [ ]
+    }
+  }
+}

@@ -1,7 +1,7 @@
 [
     {
         "xLocation": 960,
-        "balance": 1000,
+        "balance": 10000,
         "currentDay": "MONDAY",
         "stats": {
             "Hunger": 100,

@@ -21,8 +21,15 @@ public class ItemDataAccessObject implements ItemDataAccessInterface {
             HashMap<String, Item> items = new HashMap<>();
             for (int i = 0; i < data.length(); i++) {
                 JSONObject itemData = data.getJSONObject(i);
-                Item item = new Item(itemData.getString("name"), itemData.getString("description"),
-                        itemData.getString("type"), itemData.getInt("score"));
+                String name = itemData.getString("name");
+                String description = itemData.getString("description");
+                String type = itemData.getString("type");
+                int score = itemData.getInt("score");
+                int price = itemData.optInt("price", 0);
+                boolean isConsumable = itemData.optBoolean("isConsumable", true);
+                String buffType = itemData.isNull("buffType") ? null : itemData.optString("buffType", null);
+
+                Item item = new Item(name, description, type, score, price, isConsumable, buffType);
                 items.put(item.getName(), item);
             }
             return items;

@@ -8,6 +8,8 @@ public class NPC {
     private String location;
     private double cashBalance;
     private final int defaultScore;
+    private double x;
+    private double y;
 
     public NPC(String name, String dialoguePrompt, String location, double cashBalance, int defaultScore) {
         this.name = name;
@@ -51,6 +53,22 @@ public class NPC {
     // added a default score just in case certain NPCs start out with different default relationship
     // scores (for example, some NPCs may start out friendlier than others, thus having higher starting scores).
     // this can be deleted if we decide against this.
+
+    public double getX() {
+        return x;
+    }
+
+    public void setX(double x) {
+        this.x = x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public void setY(double y) {
+        this.y = y;
+    }
 
     @Override
     public boolean equals(Object obj) {

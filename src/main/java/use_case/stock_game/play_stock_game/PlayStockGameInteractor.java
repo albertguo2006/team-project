@@ -1,11 +1,13 @@
 package use_case.stock_game.play_stock_game;
 
-import entity.Portfolio;
-import entity.Stock;
-
-import javax.swing.*;
 import java.util.List;
 import java.util.Random;
+
+import javax.swing.Timer;
+
+import entity.Player;
+import entity.Portfolio;
+import entity.Stock;
 
 /**
  * The PLAY stock game use case interactor.
@@ -33,7 +35,25 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
     public void execute(PlayStockGameInputData inputData) {
 
         try {   // get the list of prices for that symbol and the corresponding day
-            List<Double> realPrices = dataAccess.getIntradayPrices(inputData.symbol, inputData.days);
+            List<Double> realPrices;
+
+            // Use new method if month and startDayIndex are provided
+            if (inputData.month != null) {
+                var fiveDayPrices = dataAccess.getFiveDayPrices(
+                        inputData.symbol,
+                        inputData.month,
+                        inputData.startDayIndex
+                );
+
+                // Concatenate all 5 days of prices into a single list
+                realPrices = new java.util.ArrayList<>();
+                for (int day = 1; day <= 5; day++) {
+                    realPrices.addAll(fiveDayPrices.get(day));
+                }
+            } else {
+                // Fall back to legacy method
+                realPrices = dataAccess.getIntradayPrices(inputData.symbol, inputData.days);
+            }
 
             Portfolio portfolio = new Portfolio(); // make new portfolio
             double startingPrice = realPrices.get(0); // get first stock price
@@ -43,13 +63,15 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             portfolio.setCash(inputData.startAmount); // set portfolio cash to starting amount (at the very start)
 
             double[] lastPrice = {startingPrice};
-            int[] ticks = {0}; // counter to eevntaulyl end game
+            int[] ticks = {0}; // counter to eventually end game
+            final int MAX_TICKS = 120; // 120 ticks * 250ms = 30 seconds
 
-            Timer timer = new Timer(250, e -> {
+            int timerInterval = inputData.timerIntervalMs > 0 ? inputData.timerIntervalMs : 250;
+            Timer timer = new Timer(timerInterval, e -> {
                 ticks[0]++;
 
-                // check to make sure it is not game over yet
-                if (ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
+                // check to make sure it is not game over yet (limit to ~30 seconds or 120 ticks)
+                if (ticks[0] >= MAX_TICKS || ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
                     ((Timer) e.getSource()).stop();
 
                     // present game-over view

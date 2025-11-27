@@ -1,0 +1,112 @@
+{
+  "subscription_2_4_1764264992524": {
+    "id": "subscription_2_4_1764264992524",
+    "originalAmount": 18.6,
+    "currentAmount": 18.972,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 4, 2025, 12:36:32 PM",
+    "createdDate": "Nov 27, 2025, 12:36:32 PM",
+    "isPaid": false,
+    "type": "SUBSCRIPTION",
+    "daysOverdue": 1
+  },
+  "subscription_1_2_1764264894984": {
+    "id": "subscription_1_2_1764264894984",
+    "originalAmount": 17.42,
+    "currentAmount": 18.123768000000002,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 4, 2025, 12:34:54 PM",
+    "createdDate": "Nov 27, 2025, 12:34:54 PM",
+    "isPaid": false,
+    "type": "SUBSCRIPTION",
+    "daysOverdue": 2
+  },
+  "credit_card_2_5_1764264992524": {
+    "id": "credit_card_2_5_1764264992524",
+    "originalAmount": 774.43,
+    "currentAmount": 789.9186,
+    "name": "Credit Card Payment",
+    "dueDate": "Dec 4, 2025, 12:36:32 PM",
+    "createdDate": "Nov 27, 2025, 12:36:32 PM",
+    "isPaid": false,
+    "type": "CREDIT_CARD",
+    "daysOverdue": 1
+  },
+  "gas_1_3_1764264894984": {
+    "id": "gas_1_3_1764264894984",
+    "originalAmount": 53.2,
+    "currentAmount": 55.34928,
+    "name": "Gas Bill",
+    "dueDate": "Dec 4, 2025, 12:34:54 PM",
+    "createdDate": "Nov 27, 2025, 12:34:54 PM",
+    "isPaid": false,
+    "type": "GAS",
+    "daysOverdue": 2
+  },
+  "mortgage_2_0_1764264992523": {
+    "id": "mortgage_2_0_1764264992523",
+    "originalAmount": 2021.41,
+    "currentAmount": 2061.8382,
+    "name": "Mortgage Payment",
+    "dueDate": "Dec 4, 2025, 12:36:32 PM",
+    "createdDate": "Nov 27, 2025, 12:36:32 PM",
+    "isPaid": false,
+    "type": "MORTGAGE",
+    "daysOverdue": 1
+  },
+  "electricity_2_1_1764264992523": {
+    "id": "electricity_2_1_1764264992523",
+    "originalAmount": 157.63,
+    "currentAmount": 160.7826,
+    "name": "Electricity Bill",
+    "dueDate": "Dec 4, 2025, 12:36:32 PM",
+    "createdDate": "Nov 27, 2025, 12:36:32 PM",
+    "isPaid": false,
+    "type": "ELECTRICITY",
+    "daysOverdue": 1
+  },
+  "internet_2_2_1764264992524": {
+    "id": "internet_2_2_1764264992524",
+    "originalAmount": 78.39,
+    "currentAmount": 79.9578,
+    "name": "Internet Service",
+    "dueDate": "Dec 4, 2025, 12:36:32 PM",
+    "createdDate": "Nov 27, 2025, 12:36:32 PM",
+    "isPaid": false,
+    "type": "INTERNET",
+    "daysOverdue": 1
+  },
+  "loan_2_3_1764264992524": {
+    "id": "loan_2_3_1764264992524",
+    "originalAmount": 1042.85,
+    "currentAmount": 1063.7069999999999,
+    "name": "Loan Payment",
+    "dueDate": "Dec 4, 2025, 12:36:32 PM",
+    "createdDate": "Nov 27, 2025, 12:36:32 PM",
+    "isPaid": false,
+    "type": "LOAN",
+    "daysOverdue": 1
+  },
+  "insurance_1_0_1764264894984": {
+    "id": "insurance_1_0_1764264894984",
+    "originalAmount": 268.34,
+    "currentAmount": 279.180936,
+    "name": "Insurance Premium",
+    "dueDate": "Dec 4, 2025, 12:34:54 PM",
+    "createdDate": "Nov 27, 2025, 12:34:54 PM",
+    "isPaid": false,
+    "type": "INSURANCE",
+    "daysOverdue": 2
+  },
+  "loan_1_1_1764264894984": {
+    "id": "loan_1_1_1764264894984",
+    "originalAmount": 1793.03,
+    "currentAmount": 1865.468412,
+    "name": "Loan Payment",
+    "dueDate": "Dec 4, 2025, 12:34:54 PM",
+    "createdDate": "Nov 27, 2025, 12:34:54 PM",
+    "isPaid": false,
+    "type": "LOAN",
+    "daysOverdue": 2
+  }
+}

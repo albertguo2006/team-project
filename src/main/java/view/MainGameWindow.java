@@ -3,20 +3,34 @@ package view;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
 import data_access.EventDataAccessObject;
+import data_access.ItemDataAccessObject;
 import data_access.LoadFileUserDataAccessObject;
+import data_access.NPCDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
+import data_access.QuestDataAccessObject;
 import data_access.SaveFileUserDataObject;
 import data_access.SleepDataAccessObject;
+import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
 import entity.GameSettings;
+import entity.Item;
+import entity.NPC;
 import entity.Player;
+import entity.Quest;
+import entity.WorldItem;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.*;
 import interface_adapter.load_progress.LoadProgressPresenter;
@@ -103,7 +117,11 @@ public class MainGameWindow extends JFrame {
     // Save/Load system components
     private SaveProgressInteractor saveProgressInteractor;
     private LoadProgressInteractor loadProgressInteractor;
-    private static final String SAVE_FILE = "savegame.json";
+    private static final String SAVE_FILE = "src/main/resources/saveFile.json";
+
+    // Quest system components
+    private QuestDataAccessObject questDataAccess;
+    private ItemDataAccessObject itemDataAccess;
 
     // Card names for CardLayout
     private static final String LOADING_CARD = "loading";
@@ -211,9 +229,6 @@ public class MainGameWindow extends JFrame {
             inGameMenuPanel.addSaveListener(e -> saveGame());
             inGameMenuPanel.addSettingsListener(e -> showSettingsFromGame());
             inGameMenuPanel.addSaveAndExitListener(e -> saveAndExit());
-            inGameMenuPanel.addPayBillsListener(e -> {
-                showPaybillView();
-            });
         }
     }
     
@@ -321,10 +336,13 @@ public class MainGameWindow extends JFrame {
         
         // Set up pause menu listener
         playerInputController.setPauseMenuListener(() -> showInGameMenu());
-        
+
+        // Create NPC data access
+        NPCDataAccessObject npcDataAccess = new NPCDataAccessObject();
+
         // Create game panel
-        this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController, gameMap);
-        
+        this.gamePanel = new GamePanel(playerMovementUseCase, playerInputController, gameMap, npcDataAccess);
+
         // Set up sleep system callbacks
         playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
         playerInputController.setSleepActionListener(() -> sleepController.sleep(player));
@@ -339,6 +357,100 @@ public class MainGameWindow extends JFrame {
         // Set up Event system
         initializeEventSystem();
         
+        // Set up mailbox system callbacks
+        playerInputController.setMailboxZoneChecker(() -> gamePanel.isInMailboxZone());
+        playerInputController.setMailboxActionListener(() -> {
+            gamePanel.pauseGame();  // Pause main game while viewing bills
+            showPaybillView();
+        });
+
+        // Set up NPC interaction callbacks
+        playerInputController.setNPCInteractionChecker(() -> gamePanel.getNearbyNPC());
+        playerInputController.setNPCInteractionListener((NPC npc) -> {
+            gamePanel.pauseGame();
+            showNPCDialog(npc, npcDataAccess);
+        });
+
+        // Set up inventory and world item system
+        this.itemDataAccess = new ItemDataAccessObject();
+        WorldItemDataAccessObject worldItemDataAccess = new WorldItemDataAccessObject(itemDataAccess.getItemMap());
+        gamePanel.setWorldItemDataAccess(worldItemDataAccess);
+
+        // Set up quest system
+        this.questDataAccess = new QuestDataAccessObject(itemDataAccess.getItemMap());
+
+        // Set up inventory slot selection callbacks
+        playerInputController.setInventorySlotSelector(new PlayerInputController.InventorySlotSelector() {
+            @Override
+            public void setSelectedInventorySlot(int slot) {
+                gamePanel.setSelectedInventorySlot(slot);
+            }
+            @Override
+            public int getSelectedInventorySlot() {
+                return gamePanel.getSelectedInventorySlot();
+            }
+        });
+
+        // Set up world item interaction callbacks
+        playerInputController.setWorldItemChecker(() -> gamePanel.getNearbyWorldItem());
+        playerInputController.setWorldItemActionListener((WorldItem worldItem) -> {
+            Item item = worldItem.getItem();
+            if (worldItem.isStoreItem()) {
+                // Handle store purchase
+                if (player.getBalance() >= item.getPrice()) {
+                    if (player.getInventory().size() < 5) {
+                        player.setBalance(player.getBalance() - item.getPrice());
+                        player.addDailySpending(item.getPrice());
+                        player.addInventory(item);
+                        System.out.println("Purchased " + item.getName() + " for $" + item.getPrice());
+                    } else {
+                        System.out.println("Inventory full!");
+                    }
+                } else {
+                    System.out.println("Not enough money to buy " + item.getName());
+                }
+            } else {
+                // Handle free item pickup
+                if (player.getInventory().size() < 5) {
+                    player.addInventory(item);
+                    worldItemDataAccess.collectItem(worldItem);
+                    System.out.println("Picked up " + item.getName());
+                } else {
+                    System.out.println("Inventory full!");
+                }
+            }
+        });
+
+        // Set up inventory item use callback
+        playerInputController.setInventoryUseListener((int slotIndex) -> {
+            int slotKey = slotIndex + 1;  // Convert 0-4 to 1-5
+            Item item = player.getInventory().get(slotKey);
+            if (item != null) {
+                player.itemUsed(slotKey);
+                System.out.println("Used " + item.getName());
+                gamePanel.setSelectedInventorySlot(-1);  // Deselect after use
+            }
+        });
+
+        // Set up inventory item drop callback
+        playerInputController.setInventoryDropListener((int slotIndex) -> {
+            int slotKey = slotIndex + 1;  // Convert 0-4 to 1-5
+            Item item = player.getInventory().get(slotKey);
+            if (item != null) {
+                // Get player's current position and zone
+                double dropX = player.getX();
+                double dropY = player.getY();
+                String currentZone = gamePanel.getGameMap().getCurrentZone().getName();
+
+                // Remove from inventory and place in world
+                player.removeInventory(slotKey);
+                worldItemDataAccess.addDroppedItem(item, currentZone, dropX, dropY);
+
+                System.out.println("Dropped " + item.getName() + " at (" + dropX + ", " + dropY + ") in " + currentZone);
+                gamePanel.setSelectedInventorySlot(-1);  // Deselect after drop
+            }
+        });
+
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
         this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
@@ -361,9 +473,10 @@ public class MainGameWindow extends JFrame {
                 System.out.println("ViewManager: Switching to view: " + viewName);
                 cardLayout.show(cardPanel, viewName);
 
-                // Request focus for the new view
+                // Request focus for the new view and handle state
                 switch (viewName) {
                     case GAME_CARD:
+                        gamePanel.resumeGame();
                         gamePanel.requestFocusInWindow();
                         break;
                     case DAY_SUMMARY_CARD:
@@ -399,9 +512,7 @@ public class MainGameWindow extends JFrame {
         this.paybillController = new PaybillController(paybillInteractor);
 
         // Create Paybill View
-        DefaultTableModel tableModel = new DefaultTableModel();
-        DefaultTableModel tableModel2 = new DefaultTableModel();
-        this.paybillView = new PaybillView(paybillViewModel, paybillController, viewManagerModel);
+        this.paybillView = new PaybillView(paybillViewModel, paybillController, viewManagerModel, paybillDataAccess);
 
         // Add to card panel
         cardPanel.add(paybillView, PAYBILL_CARD);
@@ -412,10 +523,18 @@ public class MainGameWindow extends JFrame {
      */
     private void initializeStockTradingSystem() {
         System.out.println("=== INITIALIZE STOCK TRADING SYSTEM STARTED ===");
-        
+
+        // Get Alpha Vantage API key from environment variable
+        String apiKey = System.getenv("ALPHA_VANTAGE_API_KEY");
+        if (apiKey == null || apiKey.isEmpty()) {
+            System.err.println("WARNING: ALPHA_VANTAGE_API_KEY environment variable not set.");
+            System.err.println("Stock data fetching will not work. Set the environment variable to enable API calls.");
+            apiKey = "DEMO";  // Use demo key as fallback (very limited)
+        }
+
         // Create Stock Game Data Access
         PlayStockGameDataAccessInterface stockDataAccess = new AlphaStockDataAccessObject();
-        
+
         // Create Stock Game View (Presenter)
         this.stockGameView = new StockGameView();
         stockGameView.setPlayer(player);  // Set player reference for balance updates
@@ -426,16 +545,16 @@ public class MainGameWindow extends JFrame {
                 gamePanel.resumeGame();
             }
         });
-        
+
         // Create Stock Game Interactor
         PlayStockGameInputBoundary stockGameInteractor = new PlayStockGameInteractor(
             stockDataAccess,
             stockGameView
         );
-        
-        // Create Stock Trading Controller
-        this.stockTradingController = new StockTradingController(stockGameInteractor);
-        
+
+        // Create Stock Trading Controller with API key
+        this.stockTradingController = new StockTradingController(stockGameInteractor, apiKey);
+
         System.out.println("=== INITIALIZE STOCK TRADING SYSTEM COMPLETED ===");
     }
 
@@ -550,7 +669,179 @@ public class MainGameWindow extends JFrame {
         cardLayout.show(cardPanel, SETTINGS_CARD);
         settingsPanel.requestFocusInWindow();
     }
-    
+
+    /**
+     * Shows the NPC interaction dialog for a specific NPC.
+     *
+     * @param npc The NPC to interact with
+     * @param npcDataAccess The NPC data access object
+     */
+    private void showNPCDialog(NPC npc, NPCDataAccessObject npcDataAccess) {
+        // Create ViewModel
+        interface_adapter.events.npc_interactions.NpcInteractionsViewModel viewModel =
+                new interface_adapter.events.npc_interactions.NpcInteractionsViewModel();
+
+        // Create Presenter
+        interface_adapter.events.npc_interactions.NpcInteractionsPresenter presenter =
+                new interface_adapter.events.npc_interactions.NpcInteractionsPresenter(viewModel);
+
+        // Create Interactor
+        use_case.npc_interactions.NpcInteractionsInteractor interactor =
+                new use_case.npc_interactions.NpcInteractionsInteractor(npcDataAccess, presenter);
+
+        // Create Controller
+        interface_adapter.events.npc_interactions.NpcInteractionsController controller =
+                new interface_adapter.events.npc_interactions.NpcInteractionsController(interactor);
+
+        // Create dialog
+        JFrame frame = new JFrame("Chat with " + npc.getName());
+        frame.setSize(450, 550);
+        frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+
+        JTextArea chatArea = new JTextArea();
+        chatArea.setEditable(false);
+        chatArea.setLineWrap(true);
+        chatArea.setWrapStyleWord(true);
+        JScrollPane scrollPane = new JScrollPane(chatArea);
+
+        JTextField inputField = new JTextField(25);
+        JButton sendBtn = new JButton("Send");
+
+        // Check for active quest
+        Quest activeQuest = questDataAccess != null
+                ? questDataAccess.getActiveQuestForNPC(npc.getName(), player.getInventory())
+                : null;
+
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new java.awt.BorderLayout());
+        inputPanel.add(inputField, java.awt.BorderLayout.CENTER);
+        inputPanel.add(sendBtn, java.awt.BorderLayout.EAST);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.setLayout(new java.awt.BorderLayout());
+        bottomPanel.add(inputPanel, java.awt.BorderLayout.CENTER);
+
+        // Add quest button if there's an active quest
+        if (activeQuest != null) {
+            final Quest quest = activeQuest;
+            JButton giveItemBtn = new JButton("Give " + quest.getRequiredItemName());
+            giveItemBtn.setBackground(new java.awt.Color(100, 200, 100));
+
+            giveItemBtn.addActionListener(e -> {
+                // Find and remove the item from player's inventory
+                java.util.Map<Integer, Item> inventory = player.getInventory();
+                Integer slotToRemove = null;
+                for (java.util.Map.Entry<Integer, Item> entry : inventory.entrySet()) {
+                    if (entry.getValue().getName().equals(quest.getRequiredItemName())) {
+                        slotToRemove = entry.getKey();
+                        break;
+                    }
+                }
+
+                if (slotToRemove != null) {
+                    player.removeInventory(slotToRemove);
+
+                    // Give rewards
+                    if (quest.getMoneyReward() > 0) {
+                        player.setBalance(player.getBalance() + quest.getMoneyReward());
+                        player.addDailyEarnings(quest.getMoneyReward());
+                    }
+
+                    if (quest.getItemReward() != null && itemDataAccess != null) {
+                        Item rewardItem = itemDataAccess.getItemMap().get(quest.getItemReward());
+                        if (rewardItem != null && player.getInventory().size() < 5) {
+                            player.addInventory(rewardItem);
+                        }
+                    }
+
+                    if (quest.getRelationshipReward() > 0) {
+                        player.addNPC(npc);
+                        int currentScore = player.getNPCScore(npc);
+                        player.addNPCScore(npc, currentScore + quest.getRelationshipReward());
+                    }
+
+                    // Mark quest as completed
+                    questDataAccess.completeQuest(quest.getId());
+
+                    // Show reward message in chat
+                    String rewardMsg = "Quest completed! Rewards: " + quest.getRewardDescription();
+                    chatArea.append("\n[SYSTEM] " + rewardMsg + "\n\n");
+
+                    // Disable the button
+                    giveItemBtn.setEnabled(false);
+                    giveItemBtn.setText("Delivered!");
+
+                    System.out.println("Quest completed: " + quest.getId() + " - " + rewardMsg);
+                }
+            });
+
+            // Add quest info panel
+            JPanel questPanel = new JPanel();
+            questPanel.setLayout(new java.awt.BorderLayout());
+            questPanel.setBackground(new java.awt.Color(255, 255, 200));
+            JLabel questLabel = new JLabel("  Quest: " + quest.getDescription());
+            questPanel.add(questLabel, java.awt.BorderLayout.CENTER);
+            questPanel.add(giveItemBtn, java.awt.BorderLayout.EAST);
+
+            bottomPanel.add(questPanel, java.awt.BorderLayout.NORTH);
+        }
+
+        frame.getContentPane().setLayout(new java.awt.BorderLayout());
+        frame.getContentPane().add(scrollPane, java.awt.BorderLayout.CENTER);
+        frame.getContentPane().add(bottomPanel, java.awt.BorderLayout.SOUTH);
+
+        // Set up viewModel listener for updating chat area
+        viewModel.setListener(() -> {
+            simulateTyping(chatArea, viewModel.getNpcName(), viewModel.getAiResponse());
+        });
+
+        // Set up send button action
+        sendBtn.addActionListener(e -> {
+            String message = inputField.getText();
+            if (!message.trim().isEmpty()) {
+                chatArea.append("You: " + message + "\n");
+                inputField.setText("");
+                controller.handleUserMessage(npc.getName(), message);
+            }
+        });
+
+        // Handle window closing to resume game
+        frame.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosing(java.awt.event.WindowEvent e) {
+                gamePanel.resumeGame();
+                frame.dispose();
+            }
+        });
+
+        frame.setVisible(true);
+    }
+
+    /**
+     * Simulates typing effect for NPC responses.
+     *
+     * @param chatArea The text area to display the message
+     * @param speaker The name of the speaker
+     * @param message The message to display
+     */
+    private void simulateTyping(JTextArea chatArea, String speaker, String message) {
+        final String fullMessage = speaker + ": " + message + "\n";
+        Timer timer = new Timer(30, null);
+        final int[] index = {0};
+
+        timer.addActionListener(e -> {
+            if (index[0] < fullMessage.length()) {
+                chatArea.append(String.valueOf(fullMessage.charAt(index[0])));
+                chatArea.setCaretPosition(chatArea.getDocument().getLength());
+                index[0]++;
+            } else {
+                ((Timer) e.getSource()).stop();
+            }
+        });
+
+        timer.start();
+    }
+
     /**
      * Saves and exits to main menu.
      */

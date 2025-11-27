@@ -37,6 +37,16 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
         return (NPC) values[new Random().nextInt(values.length)];
     }
 
+    public java.util.List<NPC> getNPCsInZone(String zoneName) {
+        java.util.List<NPC> npcsInZone = new java.util.ArrayList<>();
+        for (NPC npc : allNpcs.values()) {
+            if (npc.getLocation().equals(zoneName)) {
+                npcsInZone.add(npc);
+            }
+        }
+        return npcsInZone;
+    }
+
     private Map<String, NPC> loadNpcsFromJson(String filePath) {
         Map<String, NPC> npcMap = new HashMap<>();
         try {
@@ -48,14 +58,20 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
                 String name = obj.keys().next(); // get the first (and only) key
                 String dialogue = obj.getString(name);
 
+                // Assign location based on NPC personality
+                String location = assignLocationByNpc(name);
+
                 // Create NPC object
                 NPC npc = new NPC(
                         name,
                         dialogue,
-                        "default location",  // you can change if you have locations
+                        location,
                         0.0,                 // starting cash
                         0                    // default relationship score
                 ); // NPC cash is not implemented and default relationship score is also not implmented (its too complex)
+
+                // Assign position based on NPC name (arbitrary positions)
+                assignNpcPosition(npc, name);
 
                 npcMap.put(name, npc);
             }
@@ -63,6 +79,63 @@ public class NPCDataAccessObject implements NpcInteractionsUserDataAccessInterfa
             e.printStackTrace();
         }
         return npcMap;
+    }
+
+    /**
+     * Assigns a location to an NPC based on their personality and name.
+     * @param npcName The name of the NPC
+     * @return The zone name where the NPC should be located
+     */
+    private String assignLocationByNpc(String npcName) {
+        switch (npcName) {
+            case "Bob":
+                return "Office Lobby"; // Bureaucrat in formal office setting
+            case "Danny":
+                return "Office (Your Cubicle)"; // TA helping with work/code
+            case "Sebestian":
+                return "Subway Station 1"; // Eccentric character in public transit
+            case "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon":
+                return "Grocery Store"; // Aristocrat inspecting goods with disdain
+            case "Sophia":
+                return "Street 2"; // Social learner in a meeting area
+            default:
+                return "Home"; // Default fallback location
+        }
+    }
+
+    /**
+     * Assigns arbitrary x,y positions to NPCs based on their name.
+     * These positions can be adjusted later as needed.
+     * @param npc The NPC to position
+     * @param npcName The name of the NPC
+     */
+    private void assignNpcPosition(NPC npc, String npcName) {
+        switch (npcName) {
+            case "Bob":
+                npc.setX(960);  // Center of lobby area
+                npc.setY(600);
+                break;
+            case "Danny":
+                npc.setX(1100);  // Near desk, avoiding stock trading zone
+                npc.setY(400);
+                break;
+            case "Sebestian":
+                npc.setX(960);  // Center platform
+                npc.setY(700);
+                break;
+            case "Sir Maximilian Alexander Percival Ignatius Thaddeus Montgomery-Worthington III, Esquire of the Grand Order of the Silver Falcon":
+                npc.setX(960);  // Center aisle
+                npc.setY(1100);
+                break;
+            case "Sophia":
+                npc.setX(700);  // Street corner
+                npc.setY(600);
+                break;
+            default:
+                npc.setX(800);  // Default position
+                npc.setY(500);
+                break;
+        }
     }
 
 

@@ -2,19 +2,109 @@
   {
     "name": "Coffee",
     "type": "Speed",
-    "description": "The Coffee item adds +20 speed!",
-    "score": 20
+    "description": "Grants +60 speed for the rest of the day",
+    "score": 60,
+    "price": 50,
+    "isConsumable": true,
+    "buffType": "SpeedBoost"
   },
   {
     "name": "Steak",
     "type": "Hunger",
-    "description": "The Steak item adds +30 hunger!",
-    "score": 30
+    "description": "A hearty meal that restores 30 hunger",
+    "score": 30,
+    "price": 100,
+    "isConsumable": true,
+    "buffType": null
   },
   {
     "name": "Energy Drink",
     "type": "Energy",
-    "description": "The Energy Drink adds +20 energy!",
-    "score": 20
+    "description": "A boost of energy! Restores 20 energy",
+    "score": 20,
+    "price": 30,
+    "isConsumable": true,
+    "buffType": null
+  },
+  {
+    "name": "Focus Pill",
+    "type": "Special",
+    "description": "Slows down the stock trading game for easier trading",
+    "score": 0,
+    "price": 200,
+    "isConsumable": true,
+    "buffType": "StockSlowdown"
+  },
+  {
+    "name": "Apple",
+    "type": "Hunger",
+    "description": "A healthy snack that restores 10 hunger",
+    "score": 10,
+    "price": 15,
+    "isConsumable": true,
+    "buffType": null
+  },
+  {
+    "name": "Sandwich",
+    "type": "Hunger",
+    "description": "A filling meal that restores 25 hunger",
+    "score": 25,
+    "price": 40,
+    "isConsumable": true,
+    "buffType": null
+  },
+  {
+    "name": "Soda",
+    "type": "Mood",
+    "description": "A refreshing drink that boosts mood by 15",
+    "score": 15,
+    "price": 10,
+    "isConsumable": true,
+    "buffType": null
+  },
+  {
+    "name": "Chocolate Bar",
+    "type": "Mood",
+    "description": "Sweet treat that boosts mood by 20",
+    "score": 20,
+    "price": 25,
+    "isConsumable": true,
+    "buffType": null
+  },
+  {
+    "name": "Mystery Box",
+    "type": "Quest",
+    "description": "A mysterious box... someone might want this",
+    "score": 0,
+    "price": 0,
+    "isConsumable": false,
+    "buffType": null
+  },
+  {
+    "name": "Old Book",
+    "type": "Quest",
+    "description": "A dusty book found on the streets. A scholar might be interested",
+    "score": 0,
+    "price": 0,
+    "isConsumable": false,
+    "buffType": null
+  },
+  {
+    "name": "Lucky Coin",
+    "type": "Quest",
+    "description": "A shiny coin found on the ground. Looks valuable to a collector",
+    "score": 0,
+    "price": 0,
+    "isConsumable": false,
+    "buffType": null
+  },
+  {
+    "name": "Cat Toy",
+    "type": "Quest",
+    "description": "A small toy with a bell. Someone eccentric might like this",
+    "score": 0,
+    "price": 0,
+    "isConsumable": false,
+    "buffType": null
   }
 ]
