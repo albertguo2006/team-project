@@ -8,22 +8,37 @@ public class DaySummary {
     private final Day completedDay;
     private final double earnings;
     private final double spending;
+    private final double stockProfitLoss;
     private final double netChange;
     private final double newBalance;
-    
+
     /**
      * Constructs a DaySummary for a completed day.
-     * 
+     *
      * @param completedDay the day that just ended
      * @param earnings total money earned during the day
      * @param spending total money spent during the day
      * @param newBalance the player's balance after the day
      */
     public DaySummary(Day completedDay, double earnings, double spending, double newBalance) {
+        this(completedDay, earnings, spending, 0.0, newBalance);
+    }
+
+    /**
+     * Constructs a DaySummary for a completed day with stock trading profit/loss.
+     *
+     * @param completedDay the day that just ended
+     * @param earnings total money earned during the day
+     * @param spending total money spent during the day
+     * @param stockProfitLoss profit or loss from stock trading (positive for profit, negative for loss)
+     * @param newBalance the player's balance after the day
+     */
+    public DaySummary(Day completedDay, double earnings, double spending, double stockProfitLoss, double newBalance) {
         this.completedDay = completedDay;
         this.earnings = earnings;
         this.spending = spending;
-        this.netChange = earnings - spending;
+        this.stockProfitLoss = stockProfitLoss;
+        this.netChange = earnings - spending + stockProfitLoss;
         this.newBalance = newBalance;
     }
     
@@ -50,9 +65,17 @@ public class DaySummary {
     public double getSpending() {
         return spending;
     }
-    
+
     /**
-     * Gets the net change in balance (earnings - spending).
+     * Gets the stock trading profit/loss for the day.
+     * @return stock profit/loss (positive for profit, negative for loss)
+     */
+    public double getStockProfitLoss() {
+        return stockProfitLoss;
+    }
+
+    /**
+     * Gets the net change in balance (earnings - spending + stockProfitLoss).
      * @return net change (positive or negative)
      */
     public double getNetChange() {
@@ -69,7 +92,7 @@ public class DaySummary {
     
     @Override
     public String toString() {
-        return String.format("DaySummary[day=%s, earnings=$%.2f, spending=$%.2f, net=$%.2f, balance=$%.2f]",
-                           completedDay.getDisplayName(), earnings, spending, netChange, newBalance);
+        return String.format("DaySummary[day=%s, earnings=$%.2f, spending=$%.2f, stockProfitLoss=$%.2f, net=$%.2f, balance=$%.2f]",
+                           completedDay.getDisplayName(), earnings, spending, stockProfitLoss, netChange, newBalance);
     }
 }

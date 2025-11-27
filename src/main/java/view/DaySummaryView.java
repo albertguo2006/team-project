@@ -175,9 +175,26 @@ public class DaySummaryView extends JPanel implements PropertyChangeListener {
         String spending = String.format("Spending: $%.2f", summary.getSpending());
         int spendingWidth = g2d.getFontMetrics().stringWidth(spending);
         g2d.drawString(spending, centerX - spendingWidth / 2, centerY - 20);
-        
+
+        // Stock Trading Profit/Loss (only show if non-zero)
+        double stockProfitLoss = summary.getStockProfitLoss();
+        if (stockProfitLoss != 0) {
+            if (stockProfitLoss >= 0) {
+                g2d.setColor(new Color(100, 200, 255, alpha));  // Light blue for stock profit
+                String stockText = String.format("Stock Trading Profit: +$%.2f", stockProfitLoss);
+                int stockWidth = g2d.getFontMetrics().stringWidth(stockText);
+                g2d.drawString(stockText, centerX - stockWidth / 2, centerY + 40);
+            } else {
+                g2d.setColor(new Color(255, 150, 100, alpha));  // Orange for stock loss
+                String stockText = String.format("Stock Trading Loss: -$%.2f", Math.abs(stockProfitLoss));
+                int stockWidth = g2d.getFontMetrics().stringWidth(stockText);
+                g2d.drawString(stockText, centerX - stockWidth / 2, centerY + 40);
+            }
+        }
+
         // Net change (color depends on positive/negative)
         double netChange = summary.getNetChange();
+        int netY = stockProfitLoss != 0 ? centerY + 100 : centerY + 40;
         if (netChange >= 0) {
             g2d.setColor(new Color(0, 255, 0, alpha));
         } else {
@@ -185,22 +202,24 @@ public class DaySummaryView extends JPanel implements PropertyChangeListener {
         }
         String net = String.format("Net Change: %s$%.2f", netChange >= 0 ? "+" : "", netChange);
         int netWidth = g2d.getFontMetrics().stringWidth(net);
-        g2d.drawString(net, centerX - netWidth / 2, centerY + 40);
-        
+        g2d.drawString(net, centerX - netWidth / 2, netY);
+
         // New balance
+        int balanceY = stockProfitLoss != 0 ? centerY + 160 : centerY + 100;
         g2d.setColor(new Color(255, 255, 255, alpha));
         String balance = String.format("New Balance: $%.2f", summary.getNewBalance());
         int balanceWidth = g2d.getFontMetrics().stringWidth(balance);
-        g2d.drawString(balance, centerX - balanceWidth / 2, centerY + 100);
+        g2d.drawString(balance, centerX - balanceWidth / 2, balanceY);
         
         // Continue prompt (only show when fully faded in)
         if (fadeAlpha >= 1.0f && fadingIn) {
             g2d.setFont(new Font("Arial", Font.BOLD, 36));
-            String nextDay = sleepViewModel.getNewDay() != null ? 
+            String nextDay = sleepViewModel.getNewDay() != null ?
                            sleepViewModel.getNewDay().getDisplayName() : "Next Day";
             String prompt = "Press ENTER to continue to " + nextDay;
             int promptWidth = g2d.getFontMetrics().stringWidth(prompt);
-            g2d.drawString(prompt, centerX - promptWidth / 2, centerY + 200);
+            int promptY = stockProfitLoss != 0 ? centerY + 240 : centerY + 200;
+            g2d.drawString(prompt, centerX - promptWidth / 2, promptY);
         }
     }
     

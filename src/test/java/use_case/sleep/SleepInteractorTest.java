@@ -29,7 +29,9 @@ public class SleepInteractorTest {
     @Test
     void successSleepNormalDayTest(){
         player.setCurrentDay(Day.MONDAY);
-        player.setBalance(1000.0);
+        // Balance already reflects all transactions that happened during the day
+        // The daily earnings/spending are just for display on the day summary
+        player.setBalance(1150.0);  // Started at 1000, earned 200, spent 50 = 1150
         player.setHealth(50);
         player.addDailyEarnings(200.0);
         player.addDailySpending(50.0);
@@ -80,7 +82,8 @@ public class SleepInteractorTest {
     void successSleepFridayWeekCompleteTest(){
         // Setup - Friday with enough money for COMFORTABLE ending
         player.setCurrentDay(Day.FRIDAY);
-        player.setBalance(3000.0);
+        // Balance already reflects all transactions that happened during the day
+        player.setBalance(3400.0);  // Started at 3000, earned 500, spent 100 = 3400
         player.setHealth(30);
         player.addDailyEarnings(500.0);
         player.addDailySpending(100.0);
@@ -91,7 +94,7 @@ public class SleepInteractorTest {
 
             @Override
             public void presentDaySummary(SleepOutputData outputData) {
-                fail("Should not present game ending for normal day");
+                fail("Should not present day summary for Friday (week complete)");
             }
 
             @Override
@@ -200,7 +203,8 @@ public class SleepInteractorTest {
     void successFinancialTrackingResetTest(){
         // Test that daily financials reset after sleep
         player.setCurrentDay(Day.TUESDAY);
-        player.setBalance(2000.0);
+        // Balance already reflects all transactions that happened during the day
+        player.setBalance(2150.0);  // Started at 2000, earned 300, spent 150 = 2150
         player.addDailyEarnings(300.0);
         player.addDailySpending(150.0);
         player.setHasSleptToday(false);
@@ -220,7 +224,7 @@ public class SleepInteractorTest {
 
             @Override
             public void presentGameEnding(GameEnding ending) {
-                fail("Should not present game ending for Thursday");
+                fail("Should not present game ending for Tuesday");
             }
 
             @Override

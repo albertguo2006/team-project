@@ -137,9 +137,13 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         // Credit player balance with final equity
         if (player != null) {
             player.setBalance(player.getBalance() + finalEquity);
-            
+
             // Calculate profit/loss
             double profitLoss = finalEquity - initialInvestment;
+
+            // Track profit/loss separately for stock trading
+            player.addDailyStockProfitLoss(profitLoss);
+
             String profitLossText = profitLoss >= 0 ?
                 "Profit: $" + String.format("%.2f", profitLoss) :
                 "Loss: $" + String.format("%.2f", Math.abs(profitLoss));

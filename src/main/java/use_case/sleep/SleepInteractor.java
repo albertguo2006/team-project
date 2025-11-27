@@ -70,11 +70,9 @@ public class SleepInteractor implements SleepInputBoundary {
         // Get current day before advancing
         Day completedDay = player.getCurrentDay();
 
-        // Calculate new balance
-        double currentBalance = player.getBalance();
-        double dailyEarnings = player.getDailyEarnings();
-        double dailySpendings = player.getDailySpending();
-        double newBalance = currentBalance + dailyEarnings - dailySpendings;
+        // The player's balance already reflects all daily transactions (earnings, spending, stock trades)
+        // Daily earnings/spending/stockProfitLoss are tracked separately for display purposes only
+        double newBalance = player.getBalance();
         
         // Restore health to 100
         player.setHealth(100);
@@ -87,12 +85,10 @@ public class SleepInteractor implements SleepInputBoundary {
             completedDay,
             player.getDailyEarnings(),
             player.getDailySpending(),
+            player.getDailyStockProfitLoss(),
             newBalance
         );
 
-        // Set player's balance
-        player.setBalance(newBalance);
-        
         // Check if this was Friday (end of week)
         if (completedDay.isLastDay()) {
             // Calculate total unpaid debt with interest
