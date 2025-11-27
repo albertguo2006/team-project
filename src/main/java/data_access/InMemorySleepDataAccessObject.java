@@ -25,6 +25,13 @@ public class InMemorySleepDataAccessObject implements SleepDataAccessInterface {
         return summary;
     }
 
+    @Override
+    public DaySummary createDaySummary(Day day, double earnings, double spending, double stockProfitLoss, double newBalance) {
+        DaySummary summary = new DaySummary(day, earnings, spending, stockProfitLoss, newBalance);
+        createdSummaries.add(summary);
+        return summary;
+    }
+
     // Test helper methods
     public Player getSavedPlayer() {
         return savedPlayer;

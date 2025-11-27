@@ -80,9 +80,9 @@
     "VOO" : {
       "name" : "Vanguard S&P 500 ETF",
       "riskLevel" : "LOW",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "volatility" : 0.711877736708061,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day53-57" ]
     },
     "AMD" : {
       "name" : "AMD",

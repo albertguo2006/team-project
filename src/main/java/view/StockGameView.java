@@ -141,12 +141,8 @@ public class StockGameView implements PlayStockGameOutputBoundary {
             // Calculate profit/loss
             double profitLoss = finalEquity - initialInvestment;
 
-            // Track profit/loss in daily financials
-            if (profitLoss >= 0) {
-                player.addDailyEarnings(profitLoss);
-            } else {
-                player.addDailySpending(Math.abs(profitLoss));
-            }
+            // Track profit/loss separately for stock trading
+            player.addDailyStockProfitLoss(profitLoss);
 
             String profitLossText = profitLoss >= 0 ?
                 "Profit: $" + String.format("%.2f", profitLoss) :

@@ -87,6 +87,7 @@ public class SleepInteractor implements SleepInputBoundary {
             completedDay,
             player.getDailyEarnings(),
             player.getDailySpending(),
+            player.getDailyStockProfitLoss(),
             newBalance
         );
 

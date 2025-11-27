@@ -31,6 +31,7 @@ public class Player {
     private int health;
     private double dailyEarnings;
     private double dailySpending;
+    private double dailyStockProfitLoss;
 
     public Player(String name) {
         this.name = name;
@@ -50,6 +51,7 @@ public class Player {
         this.health = 100;
         this.dailyEarnings = 0.0;
         this.dailySpending = 0.0;
+        this.dailyStockProfitLoss = 0.0;
     }
 
     public Player (String name, double balance, double x, double y, Map<String, Integer> stats) {
@@ -67,6 +69,7 @@ public class Player {
         this.health = 100;
         this.dailyEarnings = 0.0;
         this.dailySpending = 0.0;
+        this.dailyStockProfitLoss = 0.0;
     }
 
     public void setName(String name) {
@@ -328,12 +331,29 @@ public class Player {
     }
 
     /**
+     * Gets the daily stock trading profit/loss.
+     * @return daily stock profit/loss (positive for profit, negative for loss)
+     */
+    public double getDailyStockProfitLoss() {
+        return dailyStockProfitLoss;
+    }
+
+    /**
+     * Adds to the daily stock profit/loss.
+     * @param amount the amount to add (positive for profit, negative for loss)
+     */
+    public void addDailyStockProfitLoss(double amount) {
+        this.dailyStockProfitLoss += amount;
+    }
+
+    /**
      * Resets daily financial tracking.
      * Called at the start of a new day.
      */
     public void resetDailyFinancials() {
         this.dailyEarnings = 0.0;
         this.dailySpending = 0.0;
+        this.dailyStockProfitLoss = 0.0;
     }
 
     /**
@@ -365,6 +385,7 @@ public class Player {
                health == player.health &&
                Double.compare(player.dailyEarnings, dailyEarnings) == 0 &&
                Double.compare(player.dailySpending, dailySpending) == 0 &&
+               Double.compare(player.dailyStockProfitLoss, dailyStockProfitLoss) == 0 &&
                Objects.equals(name, player.name) &&
                Objects.equals(stats, player.stats) &&
                Objects.equals(relationships, player.relationships) &&
@@ -378,7 +399,7 @@ public class Player {
     public int hashCode() {
         return Objects.hash(name, balance, stats, relationships, events, portfolio,
                            inventory, x, y, speed, currentDay, hasSleptToday,
-                           health, dailyEarnings, dailySpending);
+                           health, dailyEarnings, dailySpending, dailyStockProfitLoss);
     }
 
 }
