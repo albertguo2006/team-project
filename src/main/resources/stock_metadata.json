@@ -82,7 +82,7 @@
       "riskLevel" : "LOW",
       "volatility" : 0.711877736708061,
       "availableMonths" : [ "recent" ],
-      "playedPeriods" : [ "recent_day53-57" ]
+      "playedPeriods" : [ "recent_day53-57", "recent_day42-46" ]
     },
     "AMD" : {
       "name" : "AMD",
