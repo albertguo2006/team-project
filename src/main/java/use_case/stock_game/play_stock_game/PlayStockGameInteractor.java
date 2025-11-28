@@ -23,8 +23,6 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
         this.presenter = presenter;
     }
 
-    // TODO: subtract start amount from player balance, and then add total equity once done playing
-
     /**
      * play the game! until it ends
      * @param inputData
@@ -43,7 +41,7 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             portfolio.setCash(inputData.startAmount); // set portfolio cash to starting amount (at the very start)
 
             double[] lastPrice = {startingPrice};
-            int[] ticks = {0}; // counter to eevntaulyl end game
+            int[] ticks = {0}; // counter to eventually end game
 
             Timer timer = new Timer(250, e -> {
                 ticks[0]++;
