@@ -33,21 +33,12 @@ public class AlphaStockDataBase implements StockDataBase {
     }
 
     /**
-     * get stock prices from the alphavantage, store it in a json file
-     * @param symbol the symbol of the stock
-     * @throws Exception if something goes wrong (api call doesn't work)
-     */
-    @Override
-    public void getStockPrices(String symbol) throws Exception {
-        getStockPrices(symbol, null);
-    }
-
-    /**
      * get stock prices from the alphavantage for a specific month, store it in a json file
      * @param symbol the symbol of the stock
      * @param month the month in YYYY-MM format (e.g., "2024-11"), or null for recent data
      * @throws Exception if something goes wrong (api call doesn't work)
      */
+    @Override
     public void getStockPrices(String symbol, String month) throws Exception {
         // For free tier, use TIME_SERIES_DAILY which gives 100 days of data with compact
         // This is much more useful than 100 5-minute data points
@@ -204,7 +195,7 @@ public class AlphaStockDataBase implements StockDataBase {
                 }
             });
 
-            Collections.reverse(prices);
+            Collections.sort(prices);
             return prices;
         }
     }
@@ -220,6 +211,9 @@ public class AlphaStockDataBase implements StockDataBase {
      */
     public static Map<Integer, List<Double>> getFiveDayPrices(String symbol, String month, int startDayIndex) throws Exception {
         Map<Integer, List<Double>> gameDayPrices = new HashMap<>();
+        // only 5 days in the game (for now)
+        if (4 < startDayIndex || startDayIndex < 0)
+            throw new IllegalArgumentException("Invalid day of game: " + startDayIndex);
 
         for (int i = 0; i < 5; i++) {
             int dayIndex = startDayIndex + i;
@@ -340,27 +334,4 @@ public class AlphaStockDataBase implements StockDataBase {
             return prices;
         }
     }
-
-/**
-    public static void main(String[] args) throws Exception {
-        AlphaStockDataBase db = new AlphaStockDataBase("YOUR_API_KEY");
-
-        // db.getStockPrices("VOO");
-
-        System.out.println("Saved prices to VOO.json");
-
-        // gameday 1 = fifth most recent
-        List<Double> mostRecent = getIntradayOpensForGameDay("VOO", 1);
-        System.out.println("5th most recent prices for VOO: " + mostRecent);
-
-        // gameday 2 = fourth most recent
-        List<Double> secondMostRecent = getIntradayOpensForGameDay("VOO", 2);
-        System.out.println("4th most recent prices for VOO: " + secondMostRecent);
-
-        // gameday 5 = MOST recent day
-        List<Double> fifthMostRecent = getIntradayOpensForGameDay("VOO", 5);
-        System.out.println("MOST recent prices for VOO: " + fifthMostRecent);
-
-    }
- **/
 }

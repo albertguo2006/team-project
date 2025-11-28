@@ -25,8 +25,6 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
         this.presenter = presenter;
     }
 
-    // TODO: subtract start amount from player balance, and then add total equity once done playing
-
     /**
      * play the game! until it ends
      * @param inputData

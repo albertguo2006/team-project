@@ -51,10 +51,10 @@
     },
     "COIN" : {
       "name" : "Coinbase",
-      "riskLevel" : "HIGH",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "riskLevel" : "LOW",
+      "volatility" : 4.047316329053576,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day61-65" ]
     },
     "DIS" : {
       "name" : "Disney",

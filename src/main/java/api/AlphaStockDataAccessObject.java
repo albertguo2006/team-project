@@ -5,7 +5,7 @@ import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
 import java.util.List;
 import java.util.Map;
 
-// data accss object to get data from alpha vantage stock api
+// data access object to get data from alpha vantage stock api
 public class AlphaStockDataAccessObject implements PlayStockGameDataAccessInterface {
 
     /**
