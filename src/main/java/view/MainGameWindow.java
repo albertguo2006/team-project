@@ -12,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Timer;
-import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
 import data_access.EventDataAccessObject;
@@ -64,9 +63,9 @@ import use_case.save_progress.SaveProgressInteractor;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
 import use_case.sleep.SleepInteractor;
-import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
-import use_case.stock_game.play_stock_game.PlayStockGameInputBoundary;
-import use_case.stock_game.play_stock_game.PlayStockGameInteractor;
+import use_case.stock_game.PlayStockGameDataAccessInterface;
+import use_case.stock_game.PlayStockGameInputBoundary;
+import use_case.stock_game.PlayStockGameInteractor;
 
 /**
  * MainGameWindow is the top-level JFrame for the application.

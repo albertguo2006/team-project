@@ -22,8 +22,8 @@ import org.knowm.xchart.style.Styler;
 
 import entity.Portfolio;
 import entity.Stock;
-import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
-import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
+import use_case.stock_game.PlayStockGameOutputBoundary;
+import use_case.stock_game.PlayStockGameOutputData;
 
 /**
  * view for the stock game
@@ -178,12 +178,6 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     public void prepareSuccessView(PlayStockGameOutputData outputData) {
         // Present success view for valid investment
         presentPriceUpdate(outputData);
-    }
-
-    @Override
-    public void prepareFailView(String errorMessage) {
-        // Present failure view for invalid investment
-        presentError(errorMessage);
     }
 
     // details for making the panels, buttons etc.

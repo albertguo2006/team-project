@@ -1,4 +1,4 @@
-package use_case.stock_game.play_stock_game;
+package use_case.stock_game;
 
 /**
  * input Boundary for the PLAY stock game use case.

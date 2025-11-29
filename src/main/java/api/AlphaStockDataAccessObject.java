@@ -1,6 +1,6 @@
 package api;
 
-import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
+import use_case.stock_game.PlayStockGameDataAccessInterface;
 
 import java.util.List;
 import java.util.Map;
