@@ -49,11 +49,19 @@ public class PlayerMovementUseCase {
      * @param isMoving true to start moving in that direction, false to stop
      */
     public void setMovementState(Direction direction, boolean isMoving) {
-        switch (direction) {
-            case UP -> movingUp = isMoving;
-            case DOWN -> movingDown = isMoving;
-            case LEFT -> movingLeft = isMoving;
-            case RIGHT -> movingRight = isMoving;
+        if (direction == null) {
+            throw new IllegalArgumentException("Direction cannot be null");
+        }
+        if (direction == Direction.UP) {
+            movingUp = isMoving;
+        } else if (direction == Direction.DOWN) {
+            movingDown = isMoving;
+        } else if (direction == Direction.LEFT) {
+            movingLeft = isMoving;
+        } else if (direction == Direction.RIGHT) {
+            movingRight = isMoving;
+        } else {
+            throw new IllegalArgumentException("Unknown direction: " + direction);
         }
     }
     
