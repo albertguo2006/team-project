@@ -237,4 +237,28 @@ class PlayerMovementUseCaseTest {
         // Y should not change (movements cancel out)
         assertEquals(initialY, player.getY(), 0.01);
     }
+
+    @Test
+    void testStopMovementMethod() {
+        // Start moving in all directions
+        movementUseCase.setMovementState(Direction.UP, true);
+        movementUseCase.setMovementState(Direction.DOWN, true);
+        movementUseCase.setMovementState(Direction.LEFT, true);
+        movementUseCase.setMovementState(Direction.RIGHT, true);
+        assertTrue(movementUseCase.isMoving());
+
+        // Call stopMovement() to stop all movement
+        movementUseCase.stopMovement();
+
+        // Verify all movement has stopped
+        assertFalse(movementUseCase.isMoving());
+        assertNull(movementUseCase.getCurrentDirection());
+
+        // Verify position doesn't change after stopping
+        double initialX = player.getX();
+        double initialY = player.getY();
+        movementUseCase.updatePosition(0.1);
+        assertEquals(initialX, player.getX(), 0.01);
+        assertEquals(initialY, player.getY(), 0.01);
+    }
 }
