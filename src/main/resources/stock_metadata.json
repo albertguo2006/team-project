@@ -94,9 +94,9 @@
     "BND" : {
       "name" : "Vanguard Total Bond Market ETF",
       "riskLevel" : "LOW",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "volatility" : 0.22182574528904273,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day69-73", "recent_day75-79" ]
     },
     "WMT" : {
       "name" : "Walmart",

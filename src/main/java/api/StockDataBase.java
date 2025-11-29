@@ -11,11 +11,11 @@ public interface StockDataBase {
      * A method that saves the stock prices in a JSON file named after the stock
      *
      * @param stockSymbol is the symbol of the stock.
-     * @return the grade of the student in the course.
+     * @param month the month of the data
      * @throws JSONException if there is an error (if stock symbol DNE)
      */
 
-    void getStockPrices(String stockSymbol) throws Exception;
+    void getStockPrices(String stockSymbol, String month) throws Exception;
 
     void saveToFile(String json, String symbol);
 

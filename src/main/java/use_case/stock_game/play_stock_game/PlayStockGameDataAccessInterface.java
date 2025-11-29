@@ -16,7 +16,6 @@ public interface PlayStockGameDataAccessInterface {
      * @return list of the prices for the respective stock and day
      * @throws Exception if there is an error  (like day is not in 1-5, or symbol DNE)
      */
-    @Deprecated
     List<Double> getIntradayPrices(String symbol, int day) throws Exception;
 
     /**
