@@ -34,6 +34,7 @@ import entity.WorldItem;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.*;
 import interface_adapter.load_progress.LoadProgressPresenter;
+import interface_adapter.load_progress.LoadProgressViewModel;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
@@ -159,7 +160,8 @@ public class MainGameWindow extends JFrame {
         this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess, savePresenter);
 
         LoadProgressDataAccessInterface loadDataAccess = new LoadFileUserDataAccessObject();
-        LoadProgressPresenter loadPresenter = new LoadProgressPresenter();
+        LoadProgressViewModel loadProgressViewModel = new LoadProgressViewModel();
+        LoadProgressPresenter loadPresenter = new LoadProgressPresenter(loadProgressViewModel);
         this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess, loadPresenter);
 
         // Set up CardLayout for switching between views
