@@ -1,7 +1,7 @@
 package api;
 
 import org.junit.jupiter.api.*;
-import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
+import use_case.stock_game.PlayStockGameDataAccessInterface;
 
 import java.nio.file.*;
 import java.util.List;
