@@ -106,6 +106,7 @@ public class MainGameWindow extends JFrame {
     private PaybillView paybillView;
     private PaybillViewModel paybillViewModel;
     PaybillController paybillController;
+    private PaybillDataAccessInterface paybillDataAccess;
     private EventView eventView;
     private EventViewModel eventViewModel;
     private StartEventController startEventController;
@@ -285,6 +286,13 @@ public class MainGameWindow extends JFrame {
             cardPanel.remove(paybillView);
         }
 
+        // Delete bills.json to ensure fresh bills are generated for new game
+        java.io.File billsFile = new java.io.File("bills.json");
+        if (billsFile.exists()) {
+            billsFile.delete();
+            System.out.println("Deleted bills.json for new game");
+        }
+
         // Always create a fresh game with a new player and map
         initializeGamePanel(new Player("Player"), new GameMap());
 
@@ -319,8 +327,9 @@ public class MainGameWindow extends JFrame {
         // 3. Presenter (output boundary)
         SleepPresenter sleepPresenter = new SleepPresenter(viewManagerModel, sleepViewModel);
         
-        // 4. Interactor (input boundary)
-        SleepInputBoundary sleepInteractor = new SleepInteractor(sleepPresenter, sleepDataAccess);
+        // 4. Interactor (input boundary) - use shared paybillDataAccess for accurate debt calculation
+        SleepInputBoundary sleepInteractor = new SleepInteractor(sleepPresenter, sleepDataAccess,
+                (data_access.Paybill.PaybillDataAccessObject) paybillDataAccess);
         
         // 5. Controller
         this.sleepController = new SleepController(sleepInteractor);
@@ -500,8 +509,8 @@ public class MainGameWindow extends JFrame {
         // Create Paybill ViewModel
         this.paybillViewModel = new PaybillViewModel();
 
-        // Create Paybill Data Access
-        PaybillDataAccessInterface paybillDataAccess = new PaybillDataAccessObject();
+        // Create Paybill Data Access (stored as field for sharing with SleepInteractor)
+        this.paybillDataAccess = new PaybillDataAccessObject();
 
         // Create Paybill Presenter
         PaybillOutputBoundary paybillPresenter = new PaybillPresenter(paybillViewModel, viewManagerModel);

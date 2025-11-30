@@ -89,7 +89,7 @@
       "riskLevel" : "LOW",
       "volatility" : 3.906034297048576,
       "availableMonths" : [ "recent" ],
-      "playedPeriods" : [ "recent_day46-50" ]
+      "playedPeriods" : [ "recent_day46-50", "recent_day36-40", "recent_day14-18", "recent_day95-99", "recent_day72-76" ]
     },
     "BND" : {
       "name" : "Vanguard Total Bond Market ETF",

@@ -3,6 +3,7 @@ package view;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
@@ -19,7 +20,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     private final String viewName = "Event";
     private final EventViewModel eventViewModel;
     private final ViewManagerModel viewManagerModel;
-    private final JButton toOutcome;
 
     private static final Color BACKGROUND_COLOUR = new Color(20, 20, 30);
     private static final Color TITLE_COLOUR = new Color(255, 215, 0);  // Gold
@@ -28,13 +28,14 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
     private EventOutcomeController eventOutcomeController;
 
-    private boolean eventNextState = true;
-
     private final JLabel eventName;
     private final JLabel eventDescription;
+    private final JPanel choicesPanel;
+    private final JButton dismissButton;
+    private final ArrayList<JButton> choiceButtons = new ArrayList<>();
 
-    private final ArrayList<JLabel> outcomeList = new ArrayList<>();
     private GamePanel gamePanel;
+    private boolean showingOutcome = false;  // Track if we're showing outcome vs choices
 
     public EventView(EventViewModel eventviewModel, ViewManagerModel viewManagerModel) {
         this.eventViewModel = eventviewModel;
@@ -45,8 +46,8 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.setBorder(new EmptyBorder(50, 100, 50, 100));
 
-        final JLabel title = new JLabel("Event");
-        title.setFont(new Font("Arial",  Font.PLAIN, 30));
+        final JLabel title = new JLabel("Random Event!");
+        title.setFont(new Font("Arial", Font.PLAIN, 30));
         title.setForeground(TITLE_COLOUR);
         title.setHorizontalAlignment(SwingConstants.CENTER);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -55,110 +56,167 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         this.add(Box.createRigidArea(new Dimension(0, 40)));
 
         eventName = new JLabel();
-        eventName.setFont(new Font("Arial",  Font.BOLD, 60));
-        eventName.setAlignmentX(Component.LEFT_ALIGNMENT);
+        eventName.setFont(new Font("Arial", Font.BOLD, 48));
+        eventName.setAlignmentX(Component.CENTER_ALIGNMENT);
         eventName.setForeground(Color.WHITE);
 
         this.add(eventName);
         this.add(Box.createRigidArea(new Dimension(0, 20)));
 
-
         eventDescription = new JLabel();
-        eventDescription.setFont(new Font("Arial",  Font.PLAIN, 40));
+        eventDescription.setFont(new Font("Arial", Font.PLAIN, 20));
         eventDescription.setForeground(Color.WHITE);
+        eventDescription.setAlignmentX(Component.CENTER_ALIGNMENT);
 
         this.add(eventDescription);
         this.add(Box.createRigidArea(new Dimension(0, 40)));
 
-        final JPanel outcomes = new JPanel();
-        JLabel outcomeOne = new JLabel();
-        outcomeOne.setFont(new Font("Arial", Font.PLAIN, 30));
-        outcomeOne.setForeground(Color.WHITE);
-        JLabel outcomeTwo = new JLabel();
-        outcomeTwo.setFont(new Font("Arial", Font.PLAIN, 30));
-        outcomeTwo.setForeground(Color.WHITE);
-        JLabel outcomeThree = new JLabel();
-        outcomeThree.setFont(new Font("Arial", Font.PLAIN, 30));
-        outcomeThree.setForeground(Color.WHITE);
-        outcomes.setBackground(BACKGROUND_COLOUR);
+        // Panel for choice buttons
+        choicesPanel = new JPanel();
+        choicesPanel.setBackground(BACKGROUND_COLOUR);
+        choicesPanel.setLayout(new BoxLayout(choicesPanel, BoxLayout.Y_AXIS));
+        choicesPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        outcomes.add(outcomeOne);
-        outcomes.add(Box.createRigidArea(new Dimension(0, 20)));
-        outcomes.add(outcomeTwo);
-        outcomes.add(Box.createRigidArea(new Dimension(0, 20)));
-        outcomes.add(outcomeThree);
+        // Create 3 choice buttons (max outcomes)
+        for (int i = 0; i < 3; i++) {
+            JButton choiceButton = createChoiceButton(i);
+            choiceButtons.add(choiceButton);
+            choicesPanel.add(choiceButton);
+            choicesPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        }
 
-        outcomeList.add(outcomeOne);
-        outcomeList.add(outcomeTwo);
-        outcomeList.add(outcomeThree);
+        this.add(choicesPanel);
+        this.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        this.add(outcomes);
-        this.add(Box.createRigidArea(new Dimension(0, 80)));
-        outcomes.setLayout(new BoxLayout(outcomes, BoxLayout.Y_AXIS));
+        // Dismiss button (hidden initially, shown after outcome)
+        dismissButton = new JButton("Continue");
+        dismissButton.setFont(new Font("Arial", Font.BOLD, 20));
+        dismissButton.setForeground(Color.WHITE);
+        dismissButton.setBackground(BUTTON_COLOUR);
+        dismissButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        dismissButton.setMaximumSize(new Dimension(200, 50));
+        dismissButton.setVisible(false);
 
-        final JPanel eventNext = new JPanel();
-        toOutcome = new JButton("Next");
-        toOutcome.setFont(new Font("Arial", Font.BOLD, 20));
-        toOutcome.setForeground(Color.BLUE);
-        toOutcome.setBackground(BUTTON_COLOUR);
-
-        toOutcome.addMouseListener(new java.awt.event.MouseAdapter() {
+        dismissButton.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                toOutcome.setBackground(BUTTON_HOVER_COLOUR);
+                dismissButton.setBackground(BUTTON_HOVER_COLOUR);
             }
             @Override
-            public void mouseExited(java.awt.event.MouseEvent evt){
-                toOutcome.setBackground(BUTTON_COLOUR);
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                dismissButton.setBackground(BUTTON_COLOUR);
             }
-        }
-        );
+        });
 
-        eventNext.add(toOutcome);
-        toOutcome.addActionListener(this);
-        eventNext.setBackground(BACKGROUND_COLOUR);
-        this.add(eventNext);
+        dismissButton.addActionListener(e -> {
+            clearAll();
+            returnToGame();
+        });
 
+        this.add(dismissButton);
+
+        // Add escape key binding to exit the event
+        InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "exitEvent");
+
+        ActionMap actionMap = this.getActionMap();
+        actionMap.put("exitEvent", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                exitEvent();
+            }
+        });
     }
-    public void actionPerformed(ActionEvent evt) {
-            if (evt.getSource().equals(toOutcome)) {
-                if (eventNextState) {
-                    final EventState state = eventViewModel.getState();
-                    eventOutcomeController.execute(state.getOutcomes());
-                    eventNextState = false;
+
+    private JButton createChoiceButton(int index) {
+        JButton button = new JButton();
+        button.setFont(new Font("Arial", Font.PLAIN, 18));
+        button.setForeground(Color.WHITE);
+        button.setBackground(BUTTON_COLOUR);
+        button.setAlignmentX(Component.CENTER_ALIGNMENT);
+        button.setMaximumSize(new Dimension(600, 50));
+        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        button.setVisible(false);
+
+        button.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (button.isVisible() && !showingOutcome) {
+                    button.setBackground(BUTTON_HOVER_COLOUR);
                 }
-                else {
-                    eventNextState = true;
-                    clearAll();
-                    returnToGame();
-                }
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                button.setBackground(BUTTON_COLOUR);
+            }
+        });
+
+        button.addActionListener(e -> {
+            if (!showingOutcome) {
+                selectChoice(index);
+            }
+        });
+
+        return button;
+    }
+
+    private void selectChoice(int index) {
+        // Hide all choice buttons
+        for (JButton button : choiceButtons) {
+            button.setVisible(false);
         }
+
+        // Execute the outcome for this choice
+        final EventState state = eventViewModel.getState();
+        eventOutcomeController.execute(state.getOutcomes(), index);
+
+        showingOutcome = true;
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent evt) {
+        // Not used anymore - buttons have their own listeners
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         if (evt.getPropertyName().equals("Event")) {
-            // Pauses the game and stops movement to prevent the player from moving while the event is open
+            // Pauses the game and stops movement
             gamePanel.pauseGame();
             gamePanel.stopMovement();
+
             final EventState state = (EventState) evt.getNewValue();
             eventName.setText(state.getName());
             eventDescription.setText(state.getDescription());
-            for (int i = 0; i < state.getOutcomeCount(); i++){
-                outcomeList.get(i).setText(state.getOutcomeName(i));
-            }
 
+            // Show choice buttons based on number of outcomes
+            showingOutcome = false;
+            dismissButton.setVisible(false);
+
+            for (int i = 0; i < choiceButtons.size(); i++) {
+                if (i < state.getOutcomeCount()) {
+                    choiceButtons.get(i).setText(state.getOutcomeName(i));
+                    choiceButtons.get(i).setVisible(true);
+                } else {
+                    choiceButtons.get(i).setVisible(false);
+                }
+            }
         }
         else if (evt.getPropertyName().equals("Outcome")) {
+            // Outcome has been applied - show the result
             final EventState state = (EventState) evt.getNewValue();
             eventDescription.setText(state.getDescription());
-            outcomeList.get(state.getIndex()).setBorder(BorderFactory.createEtchedBorder());
+
+            // Show dismiss button
+            dismissButton.setVisible(true);
         }
-
     }
-    public String getViewName(){return viewName;}
 
-    public void setActivateRandomOutcomeController(EventOutcomeController eventOutcomeController){
+    public String getViewName() {
+        return viewName;
+    }
+
+    public void setActivateRandomOutcomeController(EventOutcomeController eventOutcomeController) {
         this.eventOutcomeController = eventOutcomeController;
     }
 
@@ -167,45 +225,25 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         viewManagerModel.firePropertyChange();
         gamePanel.resumeGame();
     }
+
+    private void exitEvent() {
+        clearAll();
+        returnToGame();
+    }
+
     private void clearAll() {
-        for (JLabel jLabel : outcomeList) {
-            jLabel.setBorder(null);
-            jLabel.setText(null);
+        for (JButton button : choiceButtons) {
+            button.setText("");
+            button.setVisible(false);
+            button.setBackground(BUTTON_COLOUR);
         }
         eventName.setText(null);
         eventDescription.setText(null);
+        dismissButton.setVisible(false);
+        showingOutcome = false;
     }
-    public void setGamePanel(GamePanel gamePanel){
+
+    public void setGamePanel(GamePanel gamePanel) {
         this.gamePanel = gamePanel;
     }
- }
-
-// Code for testing
-//    public static void main(String[] args) {
-//        JFrame frame = new JFrame();
-//        EventViewModel eventViewModel = new EventViewModel("Event");
-//        ViewManagerModel viewManagerModel = new ViewManagerModel();
-//        EventView eventView = new EventView(eventViewModel, viewManagerModel);
-//        Player player = new Player("Test");
-//        EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
-//        eventDataAccessObject.setPlayer(player);
-//
-//        ActivateOutcomePresenter activateOutcomePresenter = new ActivateOutcomePresenter(eventViewModel);
-//        ActivateRandomOutcomeInteractor activateRandomOutcomeInteractor = new ActivateRandomOutcomeInteractor(eventDataAccessObject, activateOutcomePresenter);
-//        EventOutcomeController eventOutcomeController = new EventOutcomeController(activateRandomOutcomeInteractor);
-//        eventView.setActivateRandomOutcomeController(eventOutcomeController);
-//
-//        StartEventController startEventController = getStartEventController(eventViewModel, viewManagerModel, eventDataAccessObject);
-//        startEventController.execute();
-//        frame.add(eventView);
-//        frame.setVisible(true);
-//    }
-//
-//    private static StartEventController getStartEventController(EventViewModel eventViewModel, ViewManagerModel viewManagerModel, EventDataAccessObject eventDataAccessObject) {
-//        eventDataAccessObject.createEventList();
-//        StartEventPresenter startEventPresenter = new StartEventPresenter(eventViewModel, viewManagerModel);
-//        StartRandomEventInputBoundary startRandomEventInputBoundary = new StartRandomEventInteractor(
-//                eventDataAccessObject, startEventPresenter, 200);
-//        return new StartEventController(startRandomEventInputBoundary);
-//    }
-
+}
