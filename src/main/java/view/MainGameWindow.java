@@ -283,6 +283,13 @@ public class MainGameWindow extends JFrame {
             cardPanel.remove(paybillView);
         }
 
+        // Delete bills.json to ensure fresh bills are generated for new game
+        java.io.File billsFile = new java.io.File("bills.json");
+        if (billsFile.exists()) {
+            billsFile.delete();
+            System.out.println("Deleted bills.json for new game");
+        }
+
         // Always create a fresh game with a new player and map
         initializeGamePanel(new Player("Player"), new GameMap());
 
