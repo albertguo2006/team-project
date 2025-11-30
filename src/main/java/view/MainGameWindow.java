@@ -453,17 +453,17 @@ public class MainGameWindow extends JFrame {
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
         this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
-        
+
         // Create in-game menu panel
         this.inGameMenuPanel = new InGameMenuPanel();
         setupInGameMenuListeners();
-        
+
         // Add to card panel
         cardPanel.add(gamePanel, GAME_CARD);
         cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
         cardPanel.add(daySummaryView, DAY_SUMMARY_CARD);
         cardPanel.add(endGameView, END_GAME_CARD);
-        cardPanel.add(paybillView, PAYBILL_CARD);
+        // Note: paybillView is already added in initializePaybillSystem()
 
         // Connect ViewManagerModel to CardLayout
         viewManagerModel.addPropertyChangeListener(evt -> {
@@ -866,11 +866,9 @@ public class MainGameWindow extends JFrame {
      */
     public void showPaybillView(){
         if (paybillView != null) {
-            cardLayout.show(cardPanel, PAYBILL_CARD);
-            paybillView.requestFocusInWindow();
-
-            // Refresh bills data
-            paybillView.loadInitialBills();
+            // Update view manager state so ESC can properly switch back to game
+            viewManagerModel.setState(PAYBILL_CARD);
+            viewManagerModel.firePropertyChange();
         }
     }
 
