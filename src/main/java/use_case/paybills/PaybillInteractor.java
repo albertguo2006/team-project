@@ -25,16 +25,13 @@ public class PaybillInteractor implements PaybillInputBoundary {
         if (player.getBalance() >= totalDue) {
             // Deduct money first
             player.setBalance(player.getBalance() - totalDue);
-            System.out.println("PaybillInteractor: Deducted $" + String.format("%.2f", totalDue) + " from player balance");
-            System.out.println("PaybillInteractor: New balance: $" + String.format("%.2f", player.getBalance()));
-            
+
             // Mark bills as paid and save
             for (Bill bill : unpaidBills) {
                 bill.setIsPaid(true);
                 paybillDataAccess.saveBill(bill);
-                System.out.println("PaybillInteractor: Paid bill: " + bill.getName());
             }
-            
+
             PaybillOutputData outputData = new PaybillOutputData(true, "All bills paid successfully!", totalDue);
             paybillPresenter.prepareSuccessView(outputData);
         }
@@ -76,14 +73,11 @@ public class PaybillInteractor implements PaybillInputBoundary {
         // Deduct money first
         double amount = billToPay.getAmount();
         player.setBalance(player.getBalance() - amount);
-        System.out.println("PaybillInteractor: Deducted $" + String.format("%.2f", amount) + " from player balance");
-        System.out.println("PaybillInteractor: New balance: $" + String.format("%.2f", player.getBalance()));
-        
+
         // Mark bill as paid and save
         billToPay.setIsPaid(true);
         paybillDataAccess.saveBill(billToPay);
-        System.out.println("PaybillInteractor: Paid bill: " + billToPay.getName());
-        
+
         PaybillOutputData outputData = new PaybillOutputData(true, "Paid: " + billToPay.getName(), amount);
         paybillPresenter.prepareSuccessView(outputData);
     }

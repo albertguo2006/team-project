@@ -36,18 +36,18 @@ public class PaybillDataAccessObject implements PaybillDataAccessInterface {
 
     //Amount ranges for each bill type (min, max)
     private final Map<Bill.BillType, double[]> amountRange = Map.ofEntries(
-            Map.entry(Bill.BillType.RENT, new double[]{1300.0, 1300.0}),
-            Map.entry(Bill.BillType.CREDIT_CARD, new double[]{50.0, 2000.0}),
-            Map.entry(Bill.BillType.INSURANCE, new double[]{150.0, 300.0}),
-            Map.entry(Bill.BillType.TAX, new double[]{300.0, 800.0}),
-            Map.entry(Bill.BillType.SUBSCRIPTION, new double[]{10.0, 20.0}),
-            Map.entry(Bill.BillType.MORTGAGE, new double[]{1500.0, 2500.0}),
-            Map.entry(Bill.BillType.ELECTRICITY, new double[]{80.0, 200.0}),
-            Map.entry(Bill.BillType.INTERNET, new double[]{60.0, 100.0}),
-            Map.entry(Bill.BillType.CELLPHONE, new double[]{40.0, 100.0}),
-            Map.entry(Bill.BillType.WATER, new double[]{30.0, 80.0}),
-            Map.entry(Bill.BillType.GAS, new double[]{50.0, 120.0}),
-            Map.entry(Bill.BillType.LOAN, new double[]{400.0, 2000.0}
+            Map.entry(Bill.BillType.RENT, new double[]{650.0, 650.0}),
+            Map.entry(Bill.BillType.CREDIT_CARD, new double[]{25.0, 1000.0}),
+            Map.entry(Bill.BillType.INSURANCE, new double[]{75.0, 150.0}),
+            Map.entry(Bill.BillType.TAX, new double[]{150.0, 400.0}),
+            Map.entry(Bill.BillType.SUBSCRIPTION, new double[]{5.0, 10.0}),
+            Map.entry(Bill.BillType.MORTGAGE, new double[]{750.0, 1250.0}),
+            Map.entry(Bill.BillType.ELECTRICITY, new double[]{40.0, 100.0}),
+            Map.entry(Bill.BillType.INTERNET, new double[]{30.0, 50.0}),
+            Map.entry(Bill.BillType.CELLPHONE, new double[]{20.0, 50.0}),
+            Map.entry(Bill.BillType.WATER, new double[]{15.0, 40.0}),
+            Map.entry(Bill.BillType.GAS, new double[]{25.0, 60.0}),
+            Map.entry(Bill.BillType.LOAN, new double[]{200.0, 1000.0}
     ));
 
     public PaybillDataAccessObject() {
