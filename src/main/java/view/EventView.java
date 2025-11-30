@@ -56,6 +56,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         eventName = new JLabel();
         eventName.setFont(new Font("Arial", Font.BOLD, 48));
         eventName.setAlignmentX(Component.CENTER_ALIGNMENT);
+        eventName.setHorizontalAlignment(SwingConstants.CENTER);
         eventName.setForeground(Color.WHITE);
 
         this.add(eventName);
@@ -65,6 +66,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         eventDescription.setFont(new Font("Arial", Font.PLAIN, 20));
         eventDescription.setForeground(Color.WHITE);
         eventDescription.setAlignmentX(Component.CENTER_ALIGNMENT);
+        eventDescription.setHorizontalAlignment(SwingConstants.CENTER);
 
         this.add(eventDescription);
         this.add(Box.createRigidArea(new Dimension(0, 40)));
@@ -166,7 +168,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
             final EventState state = (EventState) evt.getNewValue();
             eventName.setText(state.getName());
-            eventDescription.setText(state.getDescription());
+            eventDescription.setText(centerHtmlText(state.getDescription()));
 
             // Show the next button to proceed
             showingOutcome = false;
@@ -176,12 +178,21 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         else if (evt.getPropertyName().equals("Outcome")) {
             // Outcome has been applied - show the result
             final EventState state = (EventState) evt.getNewValue();
-            eventDescription.setText(state.getDescription());
+            eventDescription.setText(centerHtmlText(state.getDescription()));
 
             // Hide next button, show dismiss button
             nextButton.setVisible(false);
             dismissButton.setVisible(true);
         }
+    }
+
+    private String centerHtmlText(String htmlText) {
+        if (htmlText == null) {
+            return null;
+        }
+        // Add centering style to HTML content
+        return htmlText.replace("<html>", "<html><div style='text-align:center;'>")
+                       .replace("</html>", "</div></html>");
     }
 
     public String getViewName() {
