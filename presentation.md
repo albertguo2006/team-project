@@ -137,7 +137,7 @@
   - [`SaveProgressInteractor.java`](src/main/java/use_case/save_progress/SaveProgressInteractor.java) - Save logic
   - [`LoadProgressInteractor.java`](src/main/java/use_case/load_progress/LoadProgressInteractor.java) - Load logic
   - [`SaveFileUserDataObject.java`](src/main/java/data_access/SaveFileUserDataObject.java) - File management
-  - [`saveFile.json`](src/main/resources/saveFile.json) - Save file format
+  - [`saveFile.json`](src/main/resources/test_JSON_files/saveFile.json) - Save file format
 - **Current Status:** Backend complete, frontend UI stubbed
 - **Data Integrity:** Validation on load, backup saves, error handling
 
