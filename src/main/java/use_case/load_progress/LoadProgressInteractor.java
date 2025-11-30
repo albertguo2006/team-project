@@ -2,6 +2,7 @@ package use_case.load_progress;
 
 import entity.Player;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class LoadProgressInteractor implements LoadProgressInputBoundary{
@@ -19,14 +20,14 @@ public class LoadProgressInteractor implements LoadProgressInputBoundary{
         try{
             Player player = loadProgressDataAccessObject.load(loadProgressInputData.getGameMap(),
                     loadProgressInputData.getFileName());
-//          loadProgressPresenter.prepareSuccessView();
+            LoadProgressOutputData outputData = new LoadProgressOutputData(player.getName(),
+                    loadProgressDataAccessObject.getRecentSaveDate());
+            loadProgressPresenter.prepareSuccessView(outputData);
             return player;
         }
         catch (IOException e){
-            loadProgressPresenter.prepareFailView();
-            throw e;
+            throw new FileNotFoundException(e.getMessage());
         }
     }
 
 }
-

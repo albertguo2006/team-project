@@ -15,6 +15,7 @@ import java.util.Map;
 
 
 public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInterface {
+    private String recentSaveDate;
     EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
     ItemDataAccessObject itemDataAccessObject = new ItemDataAccessObject();
     NPCDataAccessObject npcDataAccessObject = new NPCDataAccessObject();
@@ -44,7 +45,14 @@ public class LoadFileUserDataAccessObject implements LoadProgressDataAccessInter
 
         gameMap.setCurrentZone(data.getString(5));
 
+        recentSaveDate = data.getString(6);
+
         return player;
+    }
+
+    @Override
+    public String getRecentSaveDate(){
+        return recentSaveDate;
     }
 
     public Player loadPlayer(JSONArray data) {
