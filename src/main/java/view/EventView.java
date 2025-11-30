@@ -34,7 +34,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     private final ArrayList<JLabel> choiceLabels = new ArrayList<>();
 
     private GamePanel gamePanel;
-    private boolean showingOutcome = false;  // Track if we're showing outcome vs choices
 
     public EventView(EventViewModel eventviewModel, ViewManagerModel viewManagerModel) {
         this.eventViewModel = eventviewModel;
@@ -191,7 +190,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             eventDescription.setText(state.getDescription());
 
             // Show choice buttons based on number of outcomes
-            showingOutcome = false;
             dismissButton.setVisible(false);
             nextButton.setVisible(true);
 
@@ -241,7 +239,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         eventName.setText(null);
         eventDescription.setText(null);
         dismissButton.setVisible(false);
-        showingOutcome = false;
     }
 
     public void setGamePanel(GamePanel gamePanel) {

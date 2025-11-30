@@ -26,7 +26,7 @@ public class ActivateRandomOutcomeInteractor implements ActivateRandomOutcomeInp
             // Fall back to random selection based on weights
             Random random = new Random();
             double totalWeights = 0.0;
-            ArrayList<Double> cumulativeWeights = new ArrayList<Double>();
+            ArrayList<Double> cumulativeWeights = new ArrayList<>();
 
             for (EventOutcome outcome : outcomes.values()) {
                 totalWeights += outcome.getOutcomeChance();
