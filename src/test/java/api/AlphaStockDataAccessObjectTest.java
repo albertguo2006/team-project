@@ -45,7 +45,6 @@ class AlphaStockDataAccessObjectTest {
         }
         """;
 
-
         writeGameDayJson("TESTSTOCK", json);
 
         PlayStockGameDataAccessInterface dao = new AlphaStockDataAccessObject();

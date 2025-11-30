@@ -8,7 +8,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class PlayStockGameDataAccessInterfaceTest {
-    /** A simple concrete implementation to exercise the interface methods */
+    /** testing data interface */
     static class DummyDAO implements PlayStockGameDataAccessInterface {
 
         @Override
