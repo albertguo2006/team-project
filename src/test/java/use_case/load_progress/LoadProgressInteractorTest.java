@@ -21,8 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LoadProgressInteractorTest {
     LoadProgressDataAccessInterface loadFileDAO = new LoadFileUserDataAccessObject();
-    LoadProgressViewModel viewModel = new LoadProgressViewModel();
-    LoadProgressOutputBoundary loadProgressPresenter = new LoadProgressPresenter(viewModel);
+    LoadProgressViewModel loadProgressViewModel = new LoadProgressViewModel();
+    LoadProgressOutputBoundary loadProgressPresenter = new LoadProgressPresenter(loadProgressViewModel);
     LoadProgressInteractor loadProgressInteractor = new LoadProgressInteractor(loadFileDAO, loadProgressPresenter);
     NpcInteractionsUserDataAccessInterface npcDAO = new NPCDataAccessObject();
     EventDataAccessObject eventDAO = new EventDataAccessObject();
@@ -32,11 +32,12 @@ public class LoadProgressInteractorTest {
     HashMap<String, Item> items = itemDAO.getItemMap();
     Map<String, NPC> npcs = npcDAO.getAllNpcs();
 
+    // Test for successful loading in file.
     @Test
     void successLoadProgress() throws IOException {
         GameMap gameMap = new GameMap();
 
-        LoadProgressInputData inputData = new LoadProgressInputData(gameMap, "src/main/resources/testLoadFile.json");
+        LoadProgressInputData inputData = new LoadProgressInputData(gameMap, "src/main/resources/test_JSON_files/testLoadFile.json");
         Player player = loadProgressInteractor.loadGame(inputData);
         HashMap<String, Integer> stats = new HashMap<>();
         stats.put("Hunger", 30);
@@ -46,8 +47,8 @@ public class LoadProgressInteractorTest {
         testPlayer.addNPCScore(npcs.get("Bob"), 5);
         testPlayer.setCurrentDay(Day.TUESDAY);
 
-        testPlayer.addEvent(events.get(0));  // Car Accident (loaded first due to JSON key order)
-        testPlayer.addEvent(events.get(1));  // Test Event A (loaded second)
+        testPlayer.addEvent(events.get(0));
+        testPlayer.addEvent(events.get(1));
 
         testPlayer.addInventory(1, items.get("Coffee"));
         testPlayer.addInventory(3, items.get("Energy Drink"));
@@ -59,16 +60,20 @@ public class LoadProgressInteractorTest {
         investments.put(stock2, 6.32);
 
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
+        List<Event> eventsTest= testPlayer.getEvents();
 
         assert(gameMap.getCurrentZone().getName().equals("Subway Station 1"));
-        assert(player.equals(testPlayer));
+        assert(eventsTest.get(0).getEventName().equals("Found Money!"));
+        assert(eventsTest.get(1).getEventName().equals("Vending Machine Glitch"));
+        assert(loadProgressViewModel.getRecentSaveDate().equals("2025-10-30"));
     }
 
+    // Test for successful loading in file, but the player does not match with the loaded in Player.
     @Test
     void successLoadProgress_PlayerMismatch() throws IOException {
         GameMap gameMap = new GameMap();
 
-        LoadProgressInputData inputData = new LoadProgressInputData(gameMap, "src/main/resources/testLoadFile.json");
+        LoadProgressInputData inputData = new LoadProgressInputData(gameMap, "src/main/resources/test_JSON_files/testLoadFile.json");
         Player player = loadProgressInteractor.loadGame(inputData);
         HashMap<String, Integer> stats = new HashMap<>();
         stats.put("Hunger", 30);
@@ -82,6 +87,7 @@ public class LoadProgressInteractorTest {
         assert(!player.equals(testPlayer));
     }
 
+    // Test for file not found.
     @Test
     void failLoadProgress_FileNotFound() {
         GameMap gameMap = new GameMap();
@@ -90,7 +96,6 @@ public class LoadProgressInteractorTest {
             loadProgressInteractor.loadGame(inputData);
         });
         assert(exception.getMessage().equals("Save File not found! Cannot load progress into Game!"));
-        // Considering making custom exceptions.... but IDK what custom exceptions are actually for....
 
     }
 }
