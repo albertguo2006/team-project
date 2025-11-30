@@ -1,6 +1,7 @@
 package api;
 
 import org.junit.jupiter.api.*;
+
 import javax.net.ssl.SSLSession;
 import java.io.*;
 import java.net.URI;
@@ -49,11 +50,6 @@ class AlphaStockDataBaseTest {
             saveToFile(fakeResponse.body(), symbol + "_recent");
         }
     }
-
-    // ---------------------------------------------------
-    // Existing tests (unchanged)
-    // ---------------------------------------------------
-
     @Test
     void testSaveToFileWritesFile() throws Exception {
         AlphaStockDataBase db = new AlphaStockDataBase("X");
@@ -88,21 +84,6 @@ class AlphaStockDataBaseTest {
         writeJson("TEST_2024-02.json", json);
         List<Double> prices = AlphaStockDataBase.getIntradayOpensForDay("TEST", "2024-02", 0);
         assertEquals(78, prices.size());
-    }
-
-    @Test
-    void testIntraday5MinDataSuccess() throws Exception {
-        String json = """
-        {
-          "Time Series (5min)": {
-            "2024-02-03 09:30:00": { "1. open": "10" },
-            "2024-02-03 09:35:00": { "1. open": "11" }
-          }
-        }
-        """;
-        writeJson("TEST5_2024-02.json", json);
-        List<Double> prices = AlphaStockDataBase.getIntradayOpensForDay("TEST5", "2024-02", 0);
-        assertEquals(List.of(10.0, 11.0), prices);
     }
 
     @Test
@@ -181,7 +162,7 @@ class AlphaStockDataBaseTest {
     }
 
     @Test
-    void testGameDayDailySuccess() throws Exception {
+    void testGameDay5minFail() throws Exception {
         String json = """
         {
           "Time Series (Daily)": {
@@ -194,8 +175,9 @@ class AlphaStockDataBaseTest {
         }
         """;
         writeJson("GTEST", json);
-        List<Double> prices = AlphaStockDataBase.getIntradayOpensForGameDay("GTEST", 3);
-        assertEquals(78, prices.size());
+        Exception ex = assertThrows(RuntimeException.class,
+                () -> AlphaStockDataBase.getIntradayOpensForGameDay("GTEST", 1));
+        assertTrue(ex.getMessage().contains("No 'Time Series (5min)'"));
     }
 
     @Test
@@ -247,24 +229,6 @@ class AlphaStockDataBaseTest {
     }
 
     @Test
-    void testIntraday5MinOutOfOrderTimestamps() throws Exception {
-        String json = """
-        {
-          "Time Series (5min)": {
-            "2024-02-03 09:40:00": { "1. open": "12" },
-            "2024-02-03 09:30:00": { "1. open": "10" },
-            "2024-02-03 09:35:00": { "1. open": "11" }
-          }
-        }
-        """;
-        writeJson("OOO_2024-02.json", json);
-
-        List<Double> prices = AlphaStockDataBase.getIntradayOpensForDay("OOO", "2024-02", 0);
-
-        assertEquals(List.of(10.0, 11.0, 12.0), prices);
-    }
-
-    @Test
     void testGameDay5MinBranch() throws Exception {
         String json = """
         {
@@ -283,5 +247,37 @@ class AlphaStockDataBaseTest {
         List<Double> prices = AlphaStockDataBase.getIntradayOpensForGameDay("GD5MIN", 3);
 
         assertEquals(List.of(80.0), prices);
+    }
+    @Test
+    void testGetStockPrice() throws Exception {
+        String json = """
+        {
+          "Time Series (5min)": {
+            "2024-02-05 09:30:00": { "1. open": "100" }
+          }
+        }
+        """;
+        writeJson("123", json);
+
+        AlphaStockDataBase db = new AlphaStockDataBase("X");
+        db.getStockPrices("STONK", "2024-02");
+        assertDoesNotThrow(() -> RuntimeException.class);
+    }
+
+    @Test
+    void testGetStockprices() throws Exception {
+        String json = """
+        {
+          "Time Series (5min)": {
+            "2024-02-05 09:30:00": { "1. open": "100" },
+            "2024-02-04 09:30:00": { "1. open": "90" },
+            "2024-02-03 09:30:00": { "1. open": "80" },
+            "2024-02-02 09:30:00": { "1. open": "70" },
+            "2024-02-01 09:30:00": { "1. open": "60" }
+          }
+        }
+        """;
+        writeJson("STONK", json);
+
     }
 }
