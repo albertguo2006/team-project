@@ -1,15 +1,15 @@
 [
     {
-        "xLocation": 960,
-        "balance": 10000,
-        "currentDay": "MONDAY",
+        "xLocation": 1035.960000000001,
+        "balance": 8718.197799999998,
+        "currentDay": "TUESDAY",
         "stats": {
             "Hunger": 100,
             "Mood": 100,
             "Energy": 100
         },
         "name": "Player",
-        "yLocation": 600
+        "yLocation": 990.5999999999998
     },
     {},
     {},
@@ -18,5 +18,6 @@
         "totalEquity": 0,
         "investments": {}
     },
-    "Home"
+    "Home",
+    "2025-11-30"
 ]
