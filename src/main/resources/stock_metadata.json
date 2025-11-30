@@ -12,7 +12,7 @@
       "riskLevel" : "LOW",
       "volatility" : 2.1001390850279966,
       "availableMonths" : [ "recent" ],
-      "playedPeriods" : [ "recent_day1-5", "recent_day32-36", "recent_day41-45", "recent_day48-52", "recent_day14-18", "recent_day27-31" ]
+      "playedPeriods" : [ "recent_day1-5", "recent_day32-36", "recent_day41-45", "recent_day48-52", "recent_day14-18", "recent_day12-16" ]
     },
     "AAPL" : {
       "name" : "Apple",
@@ -72,10 +72,10 @@
     },
     "TSLA" : {
       "name" : "Tesla",
-      "riskLevel" : "HIGH",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "riskLevel" : "LOW",
+      "volatility" : 2.9580304353406888,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day92-96" ]
     },
     "VOO" : {
       "name" : "Vanguard S&P 500 ETF",

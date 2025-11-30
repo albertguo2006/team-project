@@ -20,7 +20,7 @@ import data_access.LoadFileUserDataAccessObject;
 import data_access.NPCDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.QuestDataAccessObject;
-import data_access.SaveFileUserDataObject;
+import data_access.SaveFileUserDataAccessObject;
 import data_access.SleepDataAccessObject;
 import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
@@ -33,6 +33,7 @@ import entity.WorldItem;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.*;
 import interface_adapter.load_progress.LoadProgressPresenter;
+import interface_adapter.load_progress.LoadProgressViewModel;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
@@ -153,12 +154,13 @@ public class MainGameWindow extends JFrame {
         this.gameSettings = new GameSettings();
 
         // Initialize save/load system
-        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataObject();
+        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataAccessObject();
         SaveProgressPresenter savePresenter = new SaveProgressPresenter();
         this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess, savePresenter);
 
         LoadProgressDataAccessInterface loadDataAccess = new LoadFileUserDataAccessObject();
-        LoadProgressPresenter loadPresenter = new LoadProgressPresenter();
+        LoadProgressViewModel loadProgressViewModel = new LoadProgressViewModel();
+        LoadProgressPresenter loadPresenter = new LoadProgressPresenter(loadProgressViewModel);
         this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess, loadPresenter);
 
         // Set up CardLayout for switching between views
@@ -453,17 +455,17 @@ public class MainGameWindow extends JFrame {
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
         this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
-        
+
         // Create in-game menu panel
         this.inGameMenuPanel = new InGameMenuPanel();
         setupInGameMenuListeners();
-        
+
         // Add to card panel
         cardPanel.add(gamePanel, GAME_CARD);
         cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
         cardPanel.add(daySummaryView, DAY_SUMMARY_CARD);
         cardPanel.add(endGameView, END_GAME_CARD);
-        cardPanel.add(paybillView, PAYBILL_CARD);
+        // Note: paybillView is already added in initializePaybillSystem()
 
         // Connect ViewManagerModel to CardLayout
         viewManagerModel.addPropertyChangeListener(evt -> {
@@ -866,11 +868,9 @@ public class MainGameWindow extends JFrame {
      */
     public void showPaybillView(){
         if (paybillView != null) {
-            cardLayout.show(cardPanel, PAYBILL_CARD);
-            paybillView.requestFocusInWindow();
-
-            // Refresh bills data
-            paybillView.loadInitialBills();
+            // Update view manager state so ESC can properly switch back to game
+            viewManagerModel.setState(PAYBILL_CARD);
+            viewManagerModel.firePropertyChange();
         }
     }
 
