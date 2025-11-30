@@ -99,7 +99,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         final JPanel eventNext = new JPanel();
         toOutcome = new JButton("Next");
         toOutcome.setFont(new Font("Arial", Font.BOLD, 20));
-        toOutcome.setForeground(Color.WHITE);
+        toOutcome.setForeground(Color.BLUE);
         toOutcome.setBackground(BUTTON_COLOUR);
 
         toOutcome.addMouseListener(new java.awt.event.MouseAdapter() {
