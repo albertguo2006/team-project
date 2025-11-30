@@ -6,7 +6,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -30,12 +29,11 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
     private final JLabel eventName;
     private final JLabel eventDescription;
-    private final JPanel choicesPanel;
+    private final JButton nextButton;
     private final JButton dismissButton;
-    private final ArrayList<JButton> choiceButtons = new ArrayList<>();
 
     private GamePanel gamePanel;
-    private boolean showingOutcome = false;  // Track if we're showing outcome vs choices
+    private boolean showingOutcome = false;  // Track if we're showing outcome vs initial event
 
     public EventView(EventViewModel eventviewModel, ViewManagerModel viewManagerModel) {
         this.eventViewModel = eventviewModel;
@@ -71,21 +69,36 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         this.add(eventDescription);
         this.add(Box.createRigidArea(new Dimension(0, 40)));
 
-        // Panel for choice buttons
-        choicesPanel = new JPanel();
-        choicesPanel.setBackground(BACKGROUND_COLOUR);
-        choicesPanel.setLayout(new BoxLayout(choicesPanel, BoxLayout.Y_AXIS));
-        choicesPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // Next button - shown initially to proceed to outcome
+        nextButton = new JButton("Next");
+        nextButton.setFont(new Font("Arial", Font.BOLD, 20));
+        nextButton.setForeground(Color.WHITE);
+        nextButton.setBackground(BUTTON_COLOUR);
+        nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        nextButton.setMaximumSize(new Dimension(200, 50));
+        nextButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        nextButton.setVisible(false);
 
-        // Create 3 choice buttons (max outcomes)
-        for (int i = 0; i < 3; i++) {
-            JButton choiceButton = createChoiceButton(i);
-            choiceButtons.add(choiceButton);
-            choicesPanel.add(choiceButton);
-            choicesPanel.add(Box.createRigidArea(new Dimension(0, 15)));
-        }
+        nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                if (nextButton.isVisible()) {
+                    nextButton.setBackground(BUTTON_HOVER_COLOUR);
+                }
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                nextButton.setBackground(BUTTON_COLOUR);
+            }
+        });
 
-        this.add(choicesPanel);
+        nextButton.addActionListener(e -> {
+            if (!showingOutcome) {
+                triggerRandomOutcome();
+            }
+        });
+
+        this.add(nextButton);
         this.add(Box.createRigidArea(new Dimension(0, 30)));
 
         // Dismiss button (hidden initially, shown after outcome)
@@ -128,47 +141,13 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         });
     }
 
-    private JButton createChoiceButton(int index) {
-        JButton button = new JButton();
-        button.setFont(new Font("Arial", Font.PLAIN, 18));
-        button.setForeground(Color.WHITE);
-        button.setBackground(BUTTON_COLOUR);
-        button.setAlignmentX(Component.CENTER_ALIGNMENT);
-        button.setMaximumSize(new Dimension(600, 50));
-        button.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        button.setVisible(false);
+    private void triggerRandomOutcome() {
+        // Hide the next button
+        nextButton.setVisible(false);
 
-        button.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (button.isVisible() && !showingOutcome) {
-                    button.setBackground(BUTTON_HOVER_COLOUR);
-                }
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                button.setBackground(BUTTON_COLOUR);
-            }
-        });
-
-        button.addActionListener(e -> {
-            if (!showingOutcome) {
-                selectChoice(index);
-            }
-        });
-
-        return button;
-    }
-
-    private void selectChoice(int index) {
-        // Hide all choice buttons
-        for (JButton button : choiceButtons) {
-            button.setVisible(false);
-        }
-
-        // Execute the outcome for this choice
+        // Execute random outcome selection (no user choice)
         final EventState state = eventViewModel.getState();
-        eventOutcomeController.execute(state.getOutcomes(), index);
+        eventOutcomeController.execute(state.getOutcomes());
 
         showingOutcome = true;
     }
@@ -189,25 +168,18 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             eventName.setText(state.getName());
             eventDescription.setText(state.getDescription());
 
-            // Show choice buttons based on number of outcomes
+            // Show the next button to proceed
             showingOutcome = false;
             dismissButton.setVisible(false);
-
-            for (int i = 0; i < choiceButtons.size(); i++) {
-                if (i < state.getOutcomeCount()) {
-                    choiceButtons.get(i).setText(state.getOutcomeName(i));
-                    choiceButtons.get(i).setVisible(true);
-                } else {
-                    choiceButtons.get(i).setVisible(false);
-                }
-            }
+            nextButton.setVisible(true);
         }
         else if (evt.getPropertyName().equals("Outcome")) {
             // Outcome has been applied - show the result
             final EventState state = (EventState) evt.getNewValue();
             eventDescription.setText(state.getDescription());
 
-            // Show dismiss button
+            // Hide next button, show dismiss button
+            nextButton.setVisible(false);
             dismissButton.setVisible(true);
         }
     }
@@ -232,13 +204,10 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     }
 
     private void clearAll() {
-        for (JButton button : choiceButtons) {
-            button.setText("");
-            button.setVisible(false);
-            button.setBackground(BUTTON_COLOUR);
-        }
         eventName.setText(null);
         eventDescription.setText(null);
+        nextButton.setVisible(false);
+        nextButton.setBackground(BUTTON_COLOUR);
         dismissButton.setVisible(false);
         showingOutcome = false;
     }

@@ -36,9 +36,10 @@ public class EventDataAccessObject implements StartRandomEventDataAccessInterfac
                 int eventID = newEvent.getInt("id");
                 String eventName = newEvent.getString("name");
                 String eventDescription = newEvent.getString("description");
+                double probability = newEvent.optDouble("probability", 1.0);
                 JSONObject eventOutcomes = newEvent.getJSONObject("outcomes");
                 HashMap<Integer, EventOutcome> OutcomeMap = createEventOutcomeList(eventOutcomes);
-                events.add(new Event(eventID, eventName, eventDescription, OutcomeMap));
+                events.add(new Event(eventID, eventName, eventDescription, OutcomeMap, probability));
             }
             this.eventList = events;
             return events;

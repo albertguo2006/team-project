@@ -32,9 +32,8 @@ public class StartRandomEventInteractor implements StartRandomEventInputBoundary
         if (eventPity >= randInt && eventLimit == 0) {
             eventPity = 0;
             eventLimit = 4;
-            /// Selects a random event from the DAO and passes to the presenter
-            int randomIndex = random.nextInt(startRandomEventDataAccessObject.getSize());
-            Event selectedEvent = startRandomEventDataAccessObject.getEvent(randomIndex);
+            /// Selects a random event based on probability weights
+            Event selectedEvent = selectEventByProbability();
             StartRandomEventOutputData reod = new StartRandomEventOutputData(selectedEvent);
             startRandomEventPresenter.prepareSuccessView(reod);
         }
@@ -45,6 +44,26 @@ public class StartRandomEventInteractor implements StartRandomEventInputBoundary
             }
             /// somehow needs to communicate with whatever called the controller that an event was not triggered.
         }
+    }
+
+    private Event selectEventByProbability() {
+        java.util.ArrayList<Event> events = startRandomEventDataAccessObject.getEventList();
+        double totalWeight = 0.0;
+        for (Event event : events) {
+            totalWeight += event.getProbability();
+        }
+
+        double randomValue = random.nextDouble() * totalWeight;
+        double cumulativeWeight = 0.0;
+
+        for (Event event : events) {
+            cumulativeWeight += event.getProbability();
+            if (randomValue < cumulativeWeight) {
+                return event;
+            }
+        }
+        // Fallback to last event if rounding issues occur
+        return events.get(events.size() - 1);
     }
 
 }
