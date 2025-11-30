@@ -8,10 +8,11 @@ import use_case.save_progress.SaveProgressDataAccessInterface;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
-public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
+public class SaveFileUserDataAccessObject implements SaveProgressDataAccessInterface {
     EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
 
     @Override
@@ -82,6 +83,7 @@ public class SaveFileUserDataObject implements SaveProgressDataAccessInterface {
         saveData.put(inventoryData);
         saveData.put(portfolioData);
         saveData.put(currentZone);
+        saveData.put(LocalDate.now().toString());
 
         return saveData;
     }

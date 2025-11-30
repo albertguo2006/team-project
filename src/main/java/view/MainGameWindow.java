@@ -20,7 +20,7 @@ import data_access.LoadFileUserDataAccessObject;
 import data_access.NPCDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.QuestDataAccessObject;
-import data_access.SaveFileUserDataObject;
+import data_access.SaveFileUserDataAccessObject;
 import data_access.SleepDataAccessObject;
 import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
@@ -33,6 +33,7 @@ import entity.WorldItem;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.*;
 import interface_adapter.load_progress.LoadProgressPresenter;
+import interface_adapter.load_progress.LoadProgressViewModel;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
@@ -153,12 +154,13 @@ public class MainGameWindow extends JFrame {
         this.gameSettings = new GameSettings();
 
         // Initialize save/load system
-        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataObject();
+        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataAccessObject();
         SaveProgressPresenter savePresenter = new SaveProgressPresenter();
         this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess, savePresenter);
 
         LoadProgressDataAccessInterface loadDataAccess = new LoadFileUserDataAccessObject();
-        LoadProgressPresenter loadPresenter = new LoadProgressPresenter();
+        LoadProgressViewModel loadProgressViewModel = new LoadProgressViewModel();
+        LoadProgressPresenter loadPresenter = new LoadProgressPresenter(loadProgressViewModel);
         this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess, loadPresenter);
 
         // Set up CardLayout for switching between views

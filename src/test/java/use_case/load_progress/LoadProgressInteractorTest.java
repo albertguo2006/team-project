@@ -6,6 +6,7 @@ import data_access.LoadFileUserDataAccessObject;
 import data_access.NPCDataAccessObject;
 import entity.*;
 import interface_adapter.load_progress.LoadProgressPresenter;
+import interface_adapter.load_progress.LoadProgressViewModel;
 import org.junit.jupiter.api.Test;
 import use_case.inventory.ItemDataAccessInterface;
 import use_case.npc_interactions.NpcInteractionsUserDataAccessInterface;
@@ -20,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LoadProgressInteractorTest {
     LoadProgressDataAccessInterface loadFileDAO = new LoadFileUserDataAccessObject();
-    LoadProgressOutputBoundary loadProgressPresenter = new LoadProgressPresenter();
+    LoadProgressViewModel viewModel = new LoadProgressViewModel();
+    LoadProgressOutputBoundary loadProgressPresenter = new LoadProgressPresenter(viewModel);
     LoadProgressInteractor loadProgressInteractor = new LoadProgressInteractor(loadFileDAO, loadProgressPresenter);
     NpcInteractionsUserDataAccessInterface npcDAO = new NPCDataAccessObject();
     EventDataAccessObject eventDAO = new EventDataAccessObject();
