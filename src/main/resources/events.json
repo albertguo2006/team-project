@@ -5,21 +5,21 @@
     "description": "<html><p>A talented musician is playing guitar in the subway station. Their soulful melody fills the underground space. A small crowd has gathered, and a tip jar sits at their feet.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Give a generous tip ($200)",
+        "name": "Give a generous tip (-$200) | 20%",
         "description": "<html><p>You drop $200 in the tip jar. The musician looks up and gives you a warm smile. 'Thank you so much, friend!' The music seems to get even better as you walk away feeling good about yourself.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": -200
       },
       "1": {
-        "name": "Toss in some change ($50)",
+        "name": "Toss in some change (-$50) | 50%",
         "description": "<html><p>You toss a few dollars into the jar. The musician nods appreciatively and continues their set. You enjoyed the music and feel good about supporting street artists.</p></html>",
-        "chance": 1.0,
+        "chance": 0.5,
         "result": -50
       },
       "2": {
-        "name": "Keep walking",
+        "name": "Keep walking ($0) | 30",
         "description": "<html><p>You're in a hurry and walk past without stopping. The music fades as you head toward your destination. Maybe next time.</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 0
       }
     }
@@ -30,22 +30,22 @@
     "description": "<html><p>An elderly person's grocery bag just ripped open, sending oranges and cans rolling across the sidewalk. They look overwhelmed trying to pick everything up.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Help them out",
+        "name": "Help them out ($150) | 60%",
         "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $150 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
-        "chance": 1.0,
+        "chance": 0.6,
         "result": 150
       },
       "1": {
-        "name": "Pick up a few items nearby",
+        "name": "Pick up a few items nearby ($0) | 30%",
         "description": "<html><p>You grab a couple of rolling oranges and hand them back with a smile. They thank you warmly as you continue on your way.</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 0
       },
       "2": {
-        "name": "You're running late, keep moving",
-        "description": "<html><p>You hurry past, avoiding eye contact. You feel a twinge of guilt but you really can't be late again.</p></html>",
-        "chance": 1.0,
-        "result": 0
+        "name": "You're running late, keep moving (-$50) | 10%",
+        "description": "<html><p>You hurry past, avoiding eye contact. While running, you don't notice $50 falling out of your pocket. Guess this is karma...</p></html>",
+        "chance": 0.1,
+        "result": -50
       }
     }
   },
@@ -55,21 +55,15 @@
     "description": "<html><p>A street magician stops you with a confident grin. 'Pick a card, any card! If I guess wrong, I'll give you $500. If I guess right, you owe me $200. What do you say?'</p></html>",
     "outcomes": {
       "0": {
-        "name": "Accept the challenge",
+        "name": "Accept the challenge (-$200) | 40%",
         "description": "<html><p>'Is THIS your card?' The magician reveals your exact card with a theatrical flourish. The gathering crowd applauds. You grudgingly hand over $200 - fair is fair. At least you were entertained!</p></html>",
-        "chance": 1.0,
+        "chance": 0.4,
         "result": -200
       },
       "1": {
-        "name": "Politely decline",
-        "description": "<html><p>'Maybe another time,' you say. The magician shrugs and moves on to find another participant. You watch the show from a safe distance.</p></html>",
-        "chance": 1.0,
-        "result": 0
-      },
-      "2": {
-        "name": "Watch but don't participate",
-        "description": "<html><p>You stick around to watch. The next person loses the bet too - this guy is good! Glad you didn't risk your money.</p></html>",
-        "chance": 1.0,
+        "name": "Watch but don't participate ($0) | 60%",
+        "description": "<html><p>You turn him down but stick around to watch. The next person loses the bet - this guy is good! Glad you didn't risk your money.</p></html>",
+        "chance": 0.6,
         "result": 0
       }
     }
@@ -80,21 +74,21 @@
     "description": "<html><p>You spot a leather wallet on the ground. Inside there's $2000 cash and an ID card with an address nearby. What do you do?</p></html>",
     "outcomes": {
       "0": {
-        "name": "Return it to the owner",
+        "name": "Return it to the owner ($500) | 50%",
         "description": "<html><p>You track down the owner using the ID. They're incredibly relieved - it was their rent money! They insist you take $500 as a reward. 'You're a lifesaver!'</p></html>",
-        "chance": 1.0,
+        "chance": 0.5,
         "result": 500
       },
       "1": {
-        "name": "Turn it in to the police",
+        "name": "Turn it in to the police ($0) | 30%",
         "description": "<html><p>You drop it off at the nearest police station. The officer thanks you and takes your information in case the owner wants to thank you. You did the right thing.</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 0
       },
       "2": {
-        "name": "Take the cash and leave the wallet",
+        "name": "Take the cash and leave the wallet ($2000) | 20%",
         "description": "<html><p>You pocket the $2000 and leave the wallet where someone else will find it. You feel guilty, but times are tough...</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": 2000
       }
     }
@@ -105,21 +99,21 @@
     "description": "<html><p>A new food truck has a sign: 'Mystery Meal - $150! Could be our $400 wagyu special or a simple sandwich. Feeling lucky?'</p></html>",
     "outcomes": {
       "0": {
-        "name": "Try the mystery meal",
+        "name": "Try the mystery meal (-$150) | 80%",
         "description": "<html><p>You hand over $150 and receive... a basic ham sandwich. The chef shrugs apologetically. 'Can't win em all!' At least it tastes okay.</p></html>",
-        "chance": 1.0,
+        "chance": 0.8,
         "result": -150
       },
       "1": {
-        "name": "Order from the regular menu",
+        "name": "Order from the regular menu (-$120) | 10%",
         "description": "<html><p>You play it safe and order a regular chicken wrap for $120. It's delicious and filling - no regrets!</p></html>",
-        "chance": 1.0,
+        "chance": 0.1,
         "result": -120
       },
       "2": {
-        "name": "You already ate, pass",
+        "name": "You already ate, pass ($0) | 10%",
         "description": "<html><p>The smell is tempting but you're not hungry. You walk past and save your money for later.</p></html>",
-        "chance": 1.0,
+        "chance": 0.1,
         "result": 0
       }
     }
@@ -130,21 +124,21 @@
     "description": "<html><p>You notice a parking officer writing a ticket for your car! You're only 2 minutes over the meter. They haven't put the ticket on the windshield yet...</p></html>",
     "outcomes": {
       "0": {
-        "name": "Run over and plead your case",
+        "name": "Run over and plead your case ($0) | 60%",
         "description": "<html><p>You sprint over apologizing profusely. The officer sighs but tears up the ticket. 'Just this once. Feed your meter next time!' Close call - you saved $750!</p></html>",
-        "chance": 1.0,
+        "chance": 0.6,
         "result": 0
       },
       "1": {
-        "name": "Accept the ticket gracefully",
+        "name": "Accept the ticket gracefully (-$750) | 20%",
         "description": "<html><p>Fair is fair - you were over the time limit. You take the $750 ticket and make a mental note to set a phone alarm next time.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": -750
       },
       "2": {
-        "name": "Pretend it's not your car",
+        "name": "Pretend it's not your car (-$1000) | 20%",
         "description": "<html><p>You walk past casually, but the officer recognizes you from your registration photo. 'Nice try.' The ticket is now $1000 for attempted evasion.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": -1000
       }
     }
@@ -155,21 +149,21 @@
     "description": "<html><p>Someone's passing around a card and collection envelope for a coworker's birthday gift. You barely know them, but everyone seems to be contributing.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Contribute $200",
+        "name": "Contribute $200 (-$200) | 40%",
         "description": "<html><p>You add $200 to the envelope. Your manager notices and mentions it at the party. 'Such a generous team we have!' Good for office politics.</p></html>",
-        "chance": 1.0,
+        "chance": 0.4,
         "result": -200
       },
       "1": {
-        "name": "Add $50 and sign the card",
+        "name": "Add $50 and sign the card (-$50) | 50%",
         "description": "<html><p>You contribute a modest amount and write a nice message. Nobody judges - it's the thought that counts.</p></html>",
-        "chance": 1.0,
+        "chance": 0.5,
         "result": -50
       },
       "2": {
-        "name": "Just sign the card",
+        "name": "Just sign the card ($0) | 10%",
         "description": "<html><p>You write 'Happy Birthday!' and pass it along without contributing. A bit awkward but your budget is tight this month.</p></html>",
-        "chance": 1.0,
+        "chance": 0.1,
         "result": 0
       }
     }
@@ -180,21 +174,21 @@
     "description": "<html><p>The office vending machine just dispensed your $2 snack AND returned your money! It also seems to be stuck in a loop, ready to give more free items...</p></html>",
     "outcomes": {
       "0": {
-        "name": "Report it to maintenance",
+        "name": "Report it to maintenance ($100) | 30$",
         "description": "<html><p>You do the right thing and report the malfunction. The maintenance guy is grateful and gives you $100 from the petty cash as thanks for your honesty.</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 100
       },
       "1": {
-        "name": "Take a few extra snacks",
+        "name": "Take a few extra snacks ($80) | 50%",
         "description": "<html><p>You grab $80 worth of items before walking away. Free snacks! You feel a little guilty but hey, victimless crime right? </p></html>",
-        "chance": 1.0,
+        "chance": 0.5,
         "result": 80
       },
       "2": {
-        "name": "Just take your snack and leave",
+        "name": "Just take your snack and leave ($20) | 20%",
         "description": "<html><p>You got what you paid for (plus your money back). You walk away with your $20 snack and your conscience intact.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": 20
       }
     }
@@ -205,21 +199,21 @@
     "description": "<html><p>You receive an email claiming you've won $10,000 in a lottery you don't remember entering. To claim it, you need to pay a $500 'processing fee.'</p></html>",
     "outcomes": {
       "0": {
-        "name": "Pay the fee - could be real!",
+        "name": "Pay the fee - could be real! (-$500) | 20%",
         "description": "<html><p>You send the $500 and... nothing. The email address stops responding. Classic scam. You feel foolish and $50 poorer.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": -500
       },
       "1": {
-        "name": "Delete it immediately",
+        "name": "Delete it immediately ($0) | 20%",
         "description": "<html><p>You recognize the scam and delete the email. Good instincts - your bank account remains safe.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": 0
       },
       "2": {
-        "name": "Report it as phishing",
+        "name": "Report it as phishing ($250) | 60%",
         "description": "<html><p>You report the email to your IT department. They're impressed by your vigilance and award you a $250 gift card from the security awareness program!</p></html>",
-        "chance": 1.0,
+        "chance": 0.6,
         "result": 250
       }
     }
@@ -230,23 +224,17 @@
     "description": "<html><p>You notice someone on the roadside struggling with a flat tire. They look frustrated and keep checking their phone - probably waiting for roadside assistance.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Stop and help change it",
+        "name": "Stop and help change it ($400) | 30%",
         "description": "<html><p>You walk over and help change the tire. Turns out it's a local business owner who insists on giving you their card and $400 cash. 'Come by my shop anytime - first service is free!'</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 400
       },
       "1": {
-        "name": "Offer to call someone for them",
+        "name": "Offer to call someone for them ($0) | 70%",
         "description": "<html><p>You stop briefly to check if they need help calling someone. They already have help coming but appreciate you stopping. Good karma!</p></html>",
-        "chance": 1.0,
+        "chance": 0.7,
         "result": 0
       },
-      "2": {
-        "name": "Keep walking - they seem fine",
-        "description": "<html><p>You walk past. They probably have AAA or something. You've got places to be.</p></html>",
-        "chance": 1.0,
-        "result": 0
-      }
     }
   },
   {
@@ -255,21 +243,21 @@
     "description": "<html><p>The barista accidentally gives you a fancy $80 latte instead of your $30 regular coffee. They haven't noticed the mistake yet.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Point out the mistake",
+        "name": "Point out the mistake ($30) | 30%",
         "description": "<html><p>You let them know about the mix-up. The grateful barista says 'Keep it anyway! And here's a free $30 pastry for being honest.' Score!</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 30
       },
       "1": {
-        "name": "Quietly enjoy the upgrade",
+        "name": "Quietly enjoy the upgrade ($50) | 50%",
         "description": "<html><p>You take the fancy latte and find a seat. It IS delicious... but you feel a little guilty enjoying someone else's order.</p></html>",
-        "chance": 1.0,
+        "chance": 0.5,
         "result": 50
       },
       "2": {
-        "name": "Ask them to remake your original order",
+        "name": "Ask them to remake your original order ($0) | 20%",
         "description": "<html><p>You really wanted your regular coffee, not some fancy drink. They remake it and you get exactly what you wanted.</p></html>",
-        "chance": 1.0,
+        "chance": 0.2,
         "result": 0
       }
     }
@@ -280,21 +268,15 @@
     "description": "<html><p>A delivery driver accidentally left your neighbor's package at your door. It looks like something expensive based on the shipping label from an electronics store.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Bring it to your neighbor",
+        "name": "Bring it to your neighbor ($200) | 60%",
         "description": "<html><p>You walk it over to their house. Your neighbor is thrilled - it's a birthday gift they were worried about! They give you $200 and promise to watch your place next time you're away.</p></html>",
-        "chance": 1.0,
-        "result": 20
+        "chance": 0.6,
+        "result": 200
       },
       "1": {
-        "name": "Leave it on their porch",
-        "description": "<html><p>You place it on their doorstep and send them a quick text. Easy enough, and you've done your neighborly duty.</p></html>",
-        "chance": 1.0,
-        "result": 0
-      },
-      "2": {
-        "name": "Keep it - finder's keepers",
+        "name": "Keep it - finder's keepers ($0) | 40%",
         "description": "<html><p>You open it to find... a baby monitor. Not even useful to you. Now you feel bad AND have a useless item. Should have just returned it.</p></html>",
-        "chance": 1.0,
+        "chance": 0.4,
         "result": 0
       }
     }
@@ -305,21 +287,21 @@
     "description": "<html><p>Your coworkers are pooling money for lottery tickets. The jackpot is $500 million! They want $100 from each person to join the pool.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Join the pool ($100)",
+        "name": "Join the pool ($100) | 30%",
         "description": "<html><p>You chip in $100. The drawing happens and... nothing. Not even a single number matched. Oh well, it was fun to dream for a day!</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": -100
       },
       "1": {
-        "name": "Politely decline",
+        "name": "Politely decline ($0) | 40%",
         "description": "<html><p>You pass on this one. The next day your coworkers are all still at work - clearly they didn't win either. Smart financial choice!</p></html>",
-        "chance": 1.0,
+        "chance": 0.4,
         "result": 0
       },
       "2": {
-        "name": "Buy your own ticket instead",
+        "name": "Buy your own ticket instead ($80) | 30%",
         "description": "<html><p>You buy your own $20 ticket. You don't win the jackpot but you do match two numbers for a $100 prize! Better than the pool did.</p></html>",
-        "chance": 1.0,
+        "chance": 0.3,
         "result": 80
       }
     }
@@ -330,21 +312,15 @@
     "description": "<html><p>A gym promoter stops you on the street. 'Special offer TODAY ONLY! Annual membership for just $2000 - normally $6000!' They're very persistent.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Sign up for the deal",
+        "name": "Sign up for the deal (-$2000) | 90%",
         "description": "<html><p>You sign up, excited about your fitness journey! ...Three months later, you've been twice. Classic gym membership regret.</p></html>",
-        "chance": 1.0,
+        "chance": 0.9,
         "result": -2000
       },
       "1": {
-        "name": "Take their card and think about it",
-        "description": "<html><p>You take the information and escape the sales pitch. You never call them back, but at least you didn't waste money.</p></html>",
-        "chance": 1.0,
-        "result": 0
-      },
-      "2": {
-        "name": "Firmly say no thanks",
+        "name": "Firmly say no thanks ($0) | 10%",
         "description": "<html><p>'I already have a gym membership,' you lie confidently. They move on to the next target. Crisis averted!</p></html>",
-        "chance": 1.0,
+        "chance": 0.1,
         "result": 0
       }
     }
@@ -355,23 +331,17 @@
     "description": "<html><p>You find a crumpled $200 bill on the ground near an ATM. There's no one around who might have dropped it.</p></html>",
     "outcomes": {
       "0": {
-        "name": "Pocket it - lucky day!",
+        "name": "Pocket it - lucky day! ($200) | 60%",
         "description": "<html><p>You pocket the $200 with a smile. Free money! Sometimes the universe just gives you a little gift.</p></html>",
-        "chance": 1.0,
+        "chance": 0.6,
         "result": 200
       },
       "1": {
-        "name": "Turn it in to the bank",
+        "name": "Turn it in to the bank ($0) | 40%",
         "description": "<html><p>You give it to the bank teller in case someone comes looking. They seem surprised anyone would bother. Honesty doesn't always pay.</p></html>",
-        "chance": 1.0,
+        "chance": 0.4,
         "result": 0
       },
-      "2": {
-        "name": "Leave it - might be a prank",
-        "description": "<html><p>You've seen those YouTube videos. You walk away suspiciously. Later you wonder if it was actually real money...</p></html>",
-        "chance": 1.0,
-        "result": 0
-      }
     }
   }
 ]
