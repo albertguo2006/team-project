@@ -17,7 +17,6 @@ import interface_adapter.events.EventViewModel;
 import interface_adapter.ViewManagerModel;
 
 public class EventView extends JPanel implements ActionListener, PropertyChangeListener {
-    private final String viewName = "Event";
     private final EventViewModel eventViewModel;
     private final ViewManagerModel viewManagerModel;
 
@@ -30,7 +29,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
     private final JLabel eventName;
     private final JLabel eventDescription;
-    private final JPanel choicesPanel;
     private final JButton dismissButton;
     private final JButton nextButton;
     private final ArrayList<JButton> choiceButtons = new ArrayList<>();
@@ -74,7 +72,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         this.add(Box.createRigidArea(new Dimension(0, 40)));
 
         // Panel for choice buttons
-        choicesPanel = new JPanel();
+        JPanel choicesPanel = new JPanel();
         choicesPanel.setBackground(BACKGROUND_COLOUR);
         choicesPanel.setLayout(new BoxLayout(choicesPanel, BoxLayout.Y_AXIS));
         choicesPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -216,10 +214,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             dismissButton.setVisible(true);
             nextButton.setVisible(false);
         }
-    }
-
-    public String getViewName() {
-        return viewName;
     }
 
     public void setActivateRandomOutcomeController(EventOutcomeController eventOutcomeController) {
