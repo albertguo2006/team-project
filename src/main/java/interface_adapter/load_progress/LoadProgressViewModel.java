@@ -5,7 +5,8 @@ import interface_adapter.ViewModel;
 import java.util.Random;
 
 public class LoadProgressViewModel extends ViewModel {
-    String playerName;
+    private String playerName;
+    private String recentSaveDate;
 
     private String[] loadingMessages = {
             "Generating Global Recession...",
@@ -26,7 +27,19 @@ public class LoadProgressViewModel extends ViewModel {
     }
 
     public void setPlayerName(String playerName) {
-       this.playerName = playerName;
+        this.playerName = playerName;
+    }
+
+    public void setRecentSaveDate(String recentSaveDate) {
+        this.recentSaveDate = recentSaveDate;
+    }
+
+    public String getPlayerName() {
+        return playerName;
+    }
+
+    public String getRecentSaveDate() {
+        return recentSaveDate;
     }
 
 }

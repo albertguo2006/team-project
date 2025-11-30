@@ -12,7 +12,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.Timer;
-import javax.swing.table.DefaultTableModel;
 
 import api.AlphaStockDataAccessObject;
 import data_access.EventDataAccessObject;
@@ -21,7 +20,7 @@ import data_access.LoadFileUserDataAccessObject;
 import data_access.NPCDataAccessObject;
 import data_access.Paybill.PaybillDataAccessObject;
 import data_access.QuestDataAccessObject;
-import data_access.SaveFileUserDataObject;
+import data_access.SaveFileUserDataAccessObject;
 import data_access.SleepDataAccessObject;
 import data_access.WorldItemDataAccessObject;
 import entity.GameMap;
@@ -155,7 +154,7 @@ public class MainGameWindow extends JFrame {
         this.gameSettings = new GameSettings();
 
         // Initialize save/load system
-        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataObject();
+        SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataAccessObject();
         SaveProgressPresenter savePresenter = new SaveProgressPresenter();
         this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess, savePresenter);
 

@@ -20,7 +20,8 @@ public class LoadProgressInteractor implements LoadProgressInputBoundary{
         try{
             Player player = loadProgressDataAccessObject.load(loadProgressInputData.getGameMap(),
                     loadProgressInputData.getFileName());
-            LoadProgressOutputData outputData = new LoadProgressOutputData(player.getName());
+            LoadProgressOutputData outputData = new LoadProgressOutputData(player.getName(),
+                    loadProgressDataAccessObject.getRecentSaveDate());
             loadProgressPresenter.prepareSuccessView(outputData);
             return player;
         }
@@ -30,4 +31,3 @@ public class LoadProgressInteractor implements LoadProgressInputBoundary{
     }
 
 }
-

@@ -13,7 +13,7 @@ public class LoadProgressPresenter implements LoadProgressOutputBoundary {
     @Override
     public void prepareSuccessView(LoadProgressOutputData data) {
         loadProgressViewModel.setPlayerName(data.getName());
-
+        loadProgressViewModel.setRecentSaveDate(data.getRecentSaveDate());
     }
 
 }

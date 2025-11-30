@@ -10,7 +10,7 @@ public class LoadingGameView extends JPanel {
     private static final Color TITLE_COLOR = new Color(255, 215, 0);
     private static final Color SUBTITLE_COLOR = Color.WHITE;
 
-    private LoadProgressViewModel loadProgressViewModel;
+    private final LoadProgressViewModel loadProgressViewModel;
 
     public LoadingGameView(LoadProgressViewModel loadProgressViewModel) {
         this.loadProgressViewModel = loadProgressViewModel;
@@ -22,14 +22,14 @@ public class LoadingGameView extends JPanel {
 
         // Add Game Title
         JLabel title = new JLabel("Sims Knockoff (Recession Edition)", SwingConstants.CENTER);
-        title.setFont(new Font("Arial", Font.BOLD, 48));
+        title.setFont(new Font("Arial", Font.BOLD, 64));
         title.setForeground(TITLE_COLOR);
         title.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(title);
 
 
         // Loading in GIF from resources
-        ImageIcon gifIcon = new ImageIcon(getClass().getClassLoader().getResource("gifs/loading.gif"));
+        ImageIcon gifIcon = new ImageIcon(getClass().getClassLoader().getResource("view_images/loading.gif"));
         int gifWidth = 300;
         int gifHeight = 300;
         Image scaledImage = gifIcon.getImage().getScaledInstance(gifWidth, gifHeight, Image.SCALE_DEFAULT);
@@ -49,17 +49,4 @@ public class LoadingGameView extends JPanel {
         add(Box.createVerticalGlue());
     }
 
-    public static void main(String[] args) {
-
-        // Testing Splash Screen
-        JFrame frame = new JFrame("Loading Splash Screen Test");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(1280, 800);
-        frame.setLocationRelativeTo(null);
-
-        LoadProgressViewModel loadProgressViewModel = new LoadProgressViewModel();
-
-        frame.add(new LoadingGameView(loadProgressViewModel));
-        frame.setVisible(true);
-    }
 }
