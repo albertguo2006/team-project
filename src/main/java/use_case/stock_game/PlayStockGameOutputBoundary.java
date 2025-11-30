@@ -1,4 +1,4 @@
-package use_case.stock_game.play_stock_game;
+package use_case.stock_game;
 
 import entity.Portfolio;
 import entity.Stock;
@@ -24,13 +24,5 @@ public interface PlayStockGameOutputBoundary {
      * @param outputData the output data
      */
     void prepareSuccessView(PlayStockGameOutputData outputData);
-
-    /**
-     * Prepares the failure view for the stock game Use Case.
-     * for when the amount the player invests is invalid
-     * meaning it is not 0<x<=savings
-     * @param errorMessage the explanation of the failure
-     */
-    void prepareFailView(String errorMessage);
 
 }

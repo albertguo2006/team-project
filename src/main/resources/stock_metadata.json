@@ -12,7 +12,7 @@
       "riskLevel" : "LOW",
       "volatility" : 2.1001390850279966,
       "availableMonths" : [ "recent" ],
-      "playedPeriods" : [ "recent_day1-5" ]
+      "playedPeriods" : [ "recent_day1-5", "recent_day32-36", "recent_day41-45", "recent_day48-52", "recent_day14-18" ]
     },
     "AAPL" : {
       "name" : "Apple",
@@ -45,9 +45,9 @@
     "VTI" : {
       "name" : "Vanguard Total Stock Market ETF",
       "riskLevel" : "LOW",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "volatility" : 0.7412374276254448,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day95-99" ]
     },
     "COIN" : {
       "name" : "Coinbase",
@@ -82,7 +82,7 @@
       "riskLevel" : "LOW",
       "volatility" : 0.711877736708061,
       "availableMonths" : [ "recent" ],
-      "playedPeriods" : [ "recent_day53-57" ]
+      "playedPeriods" : [ "recent_day53-57", "recent_day35-39" ]
     },
     "AMD" : {
       "name" : "AMD",
@@ -94,9 +94,9 @@
     "BND" : {
       "name" : "Vanguard Total Bond Market ETF",
       "riskLevel" : "LOW",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "volatility" : 0.22182574528904273,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day69-73", "recent_day75-79" ]
     },
     "WMT" : {
       "name" : "Walmart",

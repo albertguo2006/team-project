@@ -1,6 +1,6 @@
 package view;
 
-import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
+import use_case.stock_game.PlayStockGameOutputData;
 
 import java.util.LinkedList;
 import java.util.Queue;

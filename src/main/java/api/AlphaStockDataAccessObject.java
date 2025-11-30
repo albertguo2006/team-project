@@ -1,6 +1,6 @@
 package api;
 
-import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
+import use_case.stock_game.PlayStockGameDataAccessInterface;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +16,6 @@ public class AlphaStockDataAccessObject implements PlayStockGameDataAccessInterf
      * @throws Exception if there is an error  (like day is not in 1-5, or symbol DNE)
      */
     @Override
-    @Deprecated
     public List<Double> getIntradayPrices(String symbol, int day) throws Exception {
         return AlphaStockDataBase.getIntradayOpensForGameDay(symbol, day);
     }

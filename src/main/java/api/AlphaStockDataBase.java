@@ -33,16 +33,6 @@ public class AlphaStockDataBase implements StockDataBase {
     }
 
     /**
-     * get stock prices from the alphavantage, store it in a json file
-     * @param symbol the symbol of the stock
-     * @throws Exception if something goes wrong (api call doesn't work)
-     */
-    @Override
-    public void getStockPrices(String symbol) throws Exception {
-        getStockPrices(symbol, null);
-    }
-
-    /**
      * get stock prices from the alphavantage for a specific month, store it in a json file
      * @param symbol the symbol of the stock
      * @param month the month in YYYY-MM format (e.g., "2024-11"), or null for recent data
@@ -239,7 +229,6 @@ public class AlphaStockDataBase implements StockDataBase {
      * @return list of stock prices (double)
      * @throws Exception if JSON data doesn't have enough for the given day
      */
-    @Deprecated
     public static List<Double> getIntradayOpensForGameDay(String symbol, int gameDay) throws Exception {
         // only 5 days in the game (for now)
         if (5 < gameDay || gameDay < 1)
@@ -341,26 +330,4 @@ public class AlphaStockDataBase implements StockDataBase {
         }
     }
 
-/**
-    public static void main(String[] args) throws Exception {
-        AlphaStockDataBase db = new AlphaStockDataBase("YOUR_API_KEY");
-
-        // db.getStockPrices("VOO");
-
-        System.out.println("Saved prices to VOO.json");
-
-        // gameday 1 = fifth most recent
-        List<Double> mostRecent = getIntradayOpensForGameDay("VOO", 1);
-        System.out.println("5th most recent prices for VOO: " + mostRecent);
-
-        // gameday 2 = fourth most recent
-        List<Double> secondMostRecent = getIntradayOpensForGameDay("VOO", 2);
-        System.out.println("4th most recent prices for VOO: " + secondMostRecent);
-
-        // gameday 5 = MOST recent day
-        List<Double> fifthMostRecent = getIntradayOpensForGameDay("VOO", 5);
-        System.out.println("MOST recent prices for VOO: " + fifthMostRecent);
-
-    }
- **/
 }

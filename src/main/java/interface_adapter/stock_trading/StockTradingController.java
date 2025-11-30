@@ -5,8 +5,8 @@ import javax.swing.JOptionPane;
 import api.StockDataManager;
 import entity.Player;
 import entity.StockInfo;
-import use_case.stock_game.play_stock_game.PlayStockGameInputBoundary;
-import use_case.stock_game.play_stock_game.PlayStockGameInputData;
+import use_case.stock_game.PlayStockGameInputBoundary;
+import use_case.stock_game.PlayStockGameInputData;
 import view.StockSelectionDialog;
 
 import java.util.List;

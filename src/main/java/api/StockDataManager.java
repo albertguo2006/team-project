@@ -123,13 +123,6 @@ public class StockDataManager {
     }
 
     /**
-     * Gets stock info by symbol.
-     */
-    public StockInfo getStockInfo(String symbol) {
-        return stockMetadata.get(symbol);
-    }
-
-    /**
      * Ensures stock has data available. Fetches data if needed.
      * @return true if data is available, false otherwise
      */

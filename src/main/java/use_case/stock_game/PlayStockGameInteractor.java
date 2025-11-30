@@ -1,11 +1,10 @@
-package use_case.stock_game.play_stock_game;
+package use_case.stock_game;
 
 import java.util.List;
 import java.util.Random;
 
 import javax.swing.Timer;
 
-import entity.Player;
 import entity.Portfolio;
 import entity.Stock;
 
@@ -15,8 +14,8 @@ import entity.Stock;
 
 public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
 
-    private final PlayStockGameDataAccessInterface dataAccess;
-    private final PlayStockGameOutputBoundary presenter;
+    final PlayStockGameDataAccessInterface dataAccess;
+    final PlayStockGameOutputBoundary presenter;
 
     // initialise
     public PlayStockGameInteractor(PlayStockGameDataAccessInterface dataAccess,
@@ -24,16 +23,13 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
         this.dataAccess = dataAccess;
         this.presenter = presenter;
     }
-
-    // TODO: subtract start amount from player balance, and then add total equity once done playing
-
     /**
      * play the game! until it ends
      * @param inputData
      */
     @Override
     public void execute(PlayStockGameInputData inputData) {
-
+        int timerInterval = 250;
         try {   // get the list of prices for that symbol and the corresponding day
             List<Double> realPrices;
 
@@ -66,36 +62,8 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             int[] ticks = {0}; // counter to eventually end game
             final int MAX_TICKS = 120; // 120 ticks * 250ms = 30 seconds
 
-            int timerInterval = inputData.timerIntervalMs > 0 ? inputData.timerIntervalMs : 250;
-            Timer timer = new Timer(timerInterval, e -> {
-                ticks[0]++;
 
-                // check to make sure it is not game over yet (limit to ~30 seconds or 120 ticks)
-                if (ticks[0] >= MAX_TICKS || ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
-                    ((Timer) e.getSource()).stop();
-
-                    // present game-over view
-                    presenter.presentGameOver(new PlayStockGameOutputData(portfolio.getCash(),portfolio.getShares(stock),
-                                    portfolio.getTotalEquity(),lastPrice[0]));
-                    return;
-                }
-
-                // move to next price in list of stock prices
-                realPrices.add(realPrices.remove(0));
-                double nextRealPrice = realPrices.get(0);
-                double diff = nextRealPrice - lastPrice[0];
-
-                Random random = new Random(); // make random object to use in algorithm for next price
-                double momentum = diff * 0.3;
-                double noise = random.nextGaussian() * 0.01 * nextRealPrice;
-
-                double price = nextRealPrice + diff * 0.04 + momentum + noise;
-
-                lastPrice[0] = price;
-                // update view with new price
-                presenter.presentPriceUpdate(new PlayStockGameOutputData(portfolio.getCash(),portfolio.getShares(stock),
-                                portfolio.getTotalEquity(),price));
-            });
+            Timer timer = createTimer(lastPrice, realPrices, ticks, MAX_TICKS, timerInterval, portfolio, stock);
 
             // present start game view
             presenter.presentGameStart(portfolio, stock, timer);
@@ -104,5 +72,35 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
         } catch (Exception ex) {
             presenter.presentError(ex.getMessage());
         }
+    }
+    // helper function
+    public Timer createTimer(double[] lastPrice, List<Double> realPrices, int[] ticks,
+                            int MAX_TICKS, int timerInterval,Portfolio portfolio, Stock stock){
+        return new Timer(timerInterval, e -> {
+            ticks[0]++;
+
+            // check to make sure it is not game over yet (limit to ~30 seconds or 120 ticks)
+            if (ticks[0] >= MAX_TICKS || ticks[0] >= realPrices.size() || portfolio.getTotalEquity() <= 0) {
+                ((Timer) e.getSource()).stop();
+
+                // present game-over view
+                presenter.presentGameOver(new PlayStockGameOutputData(portfolio.getCash(),portfolio.getShares(stock),
+                        portfolio.getTotalEquity(),lastPrice[0]));
+                return;
+            }
+
+            // move to next price in list of stock prices
+            realPrices.add(realPrices.remove(0));
+            double nextRealPrice = realPrices.get(0);
+            double diff = nextRealPrice - lastPrice[0];
+
+            Random random = new Random(); // make random object to use in algorithm for next price
+            double price = nextRealPrice + diff * 0.04 + diff * 0.3 + random.nextGaussian() * 0.01 * nextRealPrice;
+
+            lastPrice[0] = price;
+            // update view with new price
+            presenter.presentPriceUpdate(new PlayStockGameOutputData(portfolio.getCash(),portfolio.getShares(stock),
+                    portfolio.getTotalEquity(),price));
+        });
     }
 }
