@@ -22,19 +22,13 @@ public class Stock {
         this.stockPrice = stockPrice;
     }
 
-    // get and setter methods for the instance attributes
-    public void setStockPrice(Double stockPrice) {
-        this.stockPrice = stockPrice;
+    public double getStockPrice() {
+        return stockPrice;
     }
 
     public void setTicketSymbol(String ticketSymbol) {
         this.ticketSymbol = ticketSymbol;
     }
-
-    public double getStockPrice() {
-        return stockPrice;
-    }
-
     public String getTicketSymbol() {
         return ticketSymbol;
     }
@@ -66,10 +60,6 @@ public class Stock {
     }
     public String getCompanyName() {
         return companyName;
-    }
-
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
     }
 
 }
