@@ -30,7 +30,6 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
     @Override
     public void execute(PlayStockGameInputData inputData) {
         int timerInterval = 250;
-
         try {   // get the list of prices for that symbol and the corresponding day
             List<Double> realPrices;
 
