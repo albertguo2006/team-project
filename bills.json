@@ -1,90 +1,79 @@
 {
-  "credit_card_1_1_1764466135210": {
-    "id": "credit_card_1_1_1764466135210",
-    "originalAmount": 1741.51,
-    "currentAmount": 1741.51,
-    "name": "Credit Card Payment",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
-    "type": "CREDIT_CARD",
-    "daysOverdue": 0
-  },
-  "electricity_1_5_1764466135210": {
-    "id": "electricity_1_5_1764466135210",
-    "originalAmount": 140.61,
-    "currentAmount": 140.61,
-    "name": "Electricity Bill",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
-    "type": "ELECTRICITY",
-    "daysOverdue": 0
-  },
-  "electricity_1_0_1764466135187": {
-    "id": "electricity_1_0_1764466135187",
-    "originalAmount": 97.78,
-    "currentAmount": 97.78,
-    "name": "Electricity Bill",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
-    "type": "ELECTRICITY",
-    "daysOverdue": 0
-  },
-  "cellphone_1_6_1764466135210": {
-    "id": "cellphone_1_6_1764466135210",
-    "originalAmount": 95.09,
-    "currentAmount": 95.09,
-    "name": "Cell Phone Bill",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
-    "type": "CELLPHONE",
-    "daysOverdue": 0
-  },
-  "rent_1_2_1764466135210": {
-    "id": "rent_1_2_1764466135210",
+  "rent_1_1_1764483471225": {
+    "id": "rent_1_1_1764483471225",
     "originalAmount": 1300.0,
-    "currentAmount": 1300.0,
+    "currentAmount": 1326.0,
     "name": "Rent",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
     "type": "RENT",
-    "daysOverdue": 0
+    "daysOverdue": 1
   },
-  "rent_1_3_1764466135210": {
-    "id": "rent_1_3_1764466135210",
-    "originalAmount": 1300.0,
-    "currentAmount": 1300.0,
-    "name": "Rent",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
-    "type": "RENT",
-    "daysOverdue": 0
-  },
-  "subscription_1_7_1764466135210": {
-    "id": "subscription_1_7_1764466135210",
-    "originalAmount": 17.1,
-    "currentAmount": 17.1,
+  "subscription_1_5_1764483471225": {
+    "id": "subscription_1_5_1764483471225",
+    "originalAmount": 11.57,
+    "currentAmount": 11.801400000000001,
     "name": "Streaming Subscription",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
     "type": "SUBSCRIPTION",
-    "daysOverdue": 0
+    "daysOverdue": 1
   },
-  "insurance_1_4_1764466135210": {
-    "id": "insurance_1_4_1764466135210",
-    "originalAmount": 173.35,
-    "currentAmount": 173.35,
-    "name": "Insurance Premium",
-    "dueDate": "Dec 6, 2025, 8:28:55 PM",
-    "createdDate": "Nov 29, 2025, 8:28:55 PM",
-    "isPaid": true,
-    "type": "INSURANCE",
-    "daysOverdue": 0
+  "subscription_1_2_1764483471225": {
+    "id": "subscription_1_2_1764483471225",
+    "originalAmount": 12.17,
+    "currentAmount": 12.4134,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
+    "type": "SUBSCRIPTION",
+    "daysOverdue": 1
+  },
+  "electricity_1_6_1764483471225": {
+    "id": "electricity_1_6_1764483471225",
+    "originalAmount": 145.63,
+    "currentAmount": 148.5426,
+    "name": "Electricity Bill",
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
+    "type": "ELECTRICITY",
+    "daysOverdue": 1
+  },
+  "subscription_1_3_1764483471225": {
+    "id": "subscription_1_3_1764483471225",
+    "originalAmount": 17.26,
+    "currentAmount": 17.605200000000004,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
+    "type": "SUBSCRIPTION",
+    "daysOverdue": 1
+  },
+  "internet_1_4_1764483471225": {
+    "id": "internet_1_4_1764483471225",
+    "originalAmount": 61.54,
+    "currentAmount": 62.7708,
+    "name": "Internet Service",
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
+    "type": "INTERNET",
+    "daysOverdue": 1
+  },
+  "water_1_0_1764483471225": {
+    "id": "water_1_0_1764483471225",
+    "originalAmount": 36.71,
+    "currentAmount": 37.4442,
+    "name": "Water Bill",
+    "dueDate": "Dec 7, 2025, 1:17:51 AM",
+    "createdDate": "Nov 30, 2025, 1:17:51 AM",
+    "isPaid": false,
+    "type": "WATER",
+    "daysOverdue": 1
   }
 }
