@@ -6,6 +6,7 @@ import data_access.NPCDataAccessObject;
 import data_access.SaveFileUserDataAccessObject;
 import entity.*;
 import interface_adapter.save_progress.SaveProgressPresenter;
+import interface_adapter.save_progress.SaveProgressViewModel;
 import org.junit.jupiter.api.Test;
 import use_case.inventory.ItemDataAccessInterface;
 import use_case.npc_interactions.NpcInteractionsUserDataAccessInterface;
@@ -20,7 +21,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SaveProgressInteractorTest {
     SaveProgressDataAccessInterface saveFileUserDAO = new SaveFileUserDataAccessObject();
-    SaveProgressOutputBoundary saveProgressPresenter = new SaveProgressPresenter();
+    SaveProgressViewModel saveProgressViewModel = new SaveProgressViewModel();
+    SaveProgressOutputBoundary saveProgressPresenter = new SaveProgressPresenter(saveProgressViewModel);
     SaveProgressInteractor saveProgressInteractor = new SaveProgressInteractor(saveFileUserDAO, saveProgressPresenter);
     NpcInteractionsUserDataAccessInterface npcDAO = new NPCDataAccessObject();
     EventDataAccessObject eventDAO = new EventDataAccessObject();
