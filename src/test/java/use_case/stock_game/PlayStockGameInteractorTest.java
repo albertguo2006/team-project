@@ -205,9 +205,7 @@ class PlayStockGameInteractorTest {
 
                 fakeHolder[0] = fake;
                 savedTimer[0] = fake;
-
                 presenter.presentGameStart(p, s, null);
-
                 fake.start();
                 fake.fire();
                 fake.fire();
