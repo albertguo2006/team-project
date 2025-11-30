@@ -1,46 +1,90 @@
 {
-  "gas_1_3_1764477660480": {
-    "id": "gas_1_3_1764477660480",
-    "originalAmount": 82.6,
-    "currentAmount": 82.6,
-    "name": "Gas Bill",
-    "dueDate": "Dec 6, 2025, 11:41:00 PM",
-    "createdDate": "Nov 29, 2025, 11:41:00 PM",
-    "isPaid": true,
-    "type": "GAS",
-    "daysOverdue": 0
-  },
-  "insurance_1_2_1764477660480": {
-    "id": "insurance_1_2_1764477660480",
-    "originalAmount": 247.67,
-    "currentAmount": 247.67,
+  "insurance_1_3_1764483791313": {
+    "id": "insurance_1_3_1764483791313",
+    "originalAmount": 191.87,
+    "currentAmount": 191.87,
     "name": "Insurance Premium",
-    "dueDate": "Dec 6, 2025, 11:41:00 PM",
-    "createdDate": "Nov 29, 2025, 11:41:00 PM",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
     "isPaid": true,
     "type": "INSURANCE",
     "daysOverdue": 0
   },
-  "cellphone_1_0_1764477660455": {
-    "id": "cellphone_1_0_1764477660455",
-    "originalAmount": 87.6,
-    "currentAmount": 87.6,
+  "cellphone_1_4_1764483791313": {
+    "id": "cellphone_1_4_1764483791313",
+    "originalAmount": 88.28,
+    "currentAmount": 88.28,
     "name": "Cell Phone Bill",
-    "dueDate": "Dec 6, 2025, 11:41:00 PM",
-    "createdDate": "Nov 29, 2025, 11:41:00 PM",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
     "isPaid": true,
     "type": "CELLPHONE",
     "daysOverdue": 0
   },
-  "loan_1_1_1764477660480": {
-    "id": "loan_1_1_1764477660480",
-    "originalAmount": 1712.8,
-    "currentAmount": 1712.8,
-    "name": "Loan Payment",
-    "dueDate": "Dec 6, 2025, 11:41:00 PM",
-    "createdDate": "Nov 29, 2025, 11:41:00 PM",
+  "subscription_1_5_1764483791313": {
+    "id": "subscription_1_5_1764483791313",
+    "originalAmount": 15.77,
+    "currentAmount": 15.77,
+    "name": "Streaming Subscription",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
     "isPaid": true,
-    "type": "LOAN",
+    "type": "SUBSCRIPTION",
+    "daysOverdue": 0
+  },
+  "credit_card_1_1_1764483791313": {
+    "id": "credit_card_1_1_1764483791313",
+    "originalAmount": 1534.03,
+    "currentAmount": 1534.03,
+    "name": "Credit Card Payment",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
+    "isPaid": true,
+    "type": "CREDIT_CARD",
+    "daysOverdue": 0
+  },
+  "insurance_1_0_1764483791295": {
+    "id": "insurance_1_0_1764483791295",
+    "originalAmount": 248.56,
+    "currentAmount": 248.56,
+    "name": "Insurance Premium",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
+    "isPaid": true,
+    "type": "INSURANCE",
+    "daysOverdue": 0
+  },
+  "internet_1_2_1764483791313": {
+    "id": "internet_1_2_1764483791313",
+    "originalAmount": 68.48,
+    "currentAmount": 68.48,
+    "name": "Internet Service",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
+    "isPaid": true,
+    "type": "INTERNET",
+    "daysOverdue": 0
+  },
+  "electricity_1_7_1764483791313": {
+    "id": "electricity_1_7_1764483791313",
+    "originalAmount": 138.96,
+    "currentAmount": 138.96,
+    "name": "Electricity Bill",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
+    "isPaid": true,
+    "type": "ELECTRICITY",
+    "daysOverdue": 0
+  },
+  "cellphone_1_6_1764483791313": {
+    "id": "cellphone_1_6_1764483791313",
+    "originalAmount": 78.76,
+    "currentAmount": 78.76,
+    "name": "Cell Phone Bill",
+    "dueDate": "Dec 7, 2025, 1:23:11 AM",
+    "createdDate": "Nov 30, 2025, 1:23:11 AM",
+    "isPaid": true,
+    "type": "CELLPHONE",
     "daysOverdue": 0
   }
 }
