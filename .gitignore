@@ -47,6 +47,5 @@ build/
 src/main/resources/stock_data
 
 ### Saves ###
-savegame.json
-bills.json
-bills.json
+/savegame.json
+/bills.json
