@@ -90,7 +90,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         // Dismiss button (hidden initially, shown after outcome)
         dismissButton = new JButton("Exit");
         dismissButton.setFont(new Font("Arial", Font.BOLD, 20));
-        dismissButton.setForeground(Color.WHITE);
+        dismissButton.setForeground(Color.BLACK);
         dismissButton.setBackground(BUTTON_COLOUR);
         dismissButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         dismissButton.setMaximumSize(new Dimension(200, 50));
@@ -115,7 +115,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         // Next buttom (shown initially, hidden after outcome)
         nextButton = new JButton("Continue");
         nextButton.setFont(new Font("Arial", Font.BOLD, 20));
-        nextButton.setForeground(Color.WHITE);
+        nextButton.setForeground(Color.BLACK);
         nextButton.setBackground(BUTTON_COLOUR);
         nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         nextButton.setMaximumSize(new Dimension(200, 50));
