@@ -3,15 +3,7 @@ package view;
 import java.awt.CardLayout;
 import java.awt.Dimension;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.Timer;
+import javax.swing.*;
 
 import api.AlphaStockDataAccessObject;
 import data_access.EventDataAccessObject;
@@ -32,12 +24,15 @@ import entity.Quest;
 import entity.WorldItem;
 import interface_adapter.ViewManagerModel;
 import interface_adapter.events.*;
+import interface_adapter.load_progress.LoadProgressController;
 import interface_adapter.load_progress.LoadProgressPresenter;
 import interface_adapter.load_progress.LoadProgressViewModel;
 import interface_adapter.paybills.PaybillController;
 import interface_adapter.paybills.PaybillPresenter;
 import interface_adapter.paybills.PaybillViewModel;
+import interface_adapter.save_progress.SaveProgressController;
 import interface_adapter.save_progress.SaveProgressPresenter;
+import interface_adapter.save_progress.SaveProgressViewModel;
 import interface_adapter.sleep.SleepController;
 import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
@@ -51,9 +46,7 @@ import use_case.events.StartRandomEvent.StartRandomEventDataAccessInterface;
 import use_case.events.StartRandomEvent.StartRandomEventInputBoundary;
 import use_case.events.StartRandomEvent.StartRandomEventInteractor;
 import use_case.events.StartRandomEvent.StartRandomEventOutputBoundary;
-import use_case.load_progress.LoadProgressDataAccessInterface;
-import use_case.load_progress.LoadProgressInputData;
-import use_case.load_progress.LoadProgressInteractor;
+import use_case.load_progress.*;
 import use_case.paybills.PaybillDataAccessInterface;
 import use_case.paybills.PaybillInputBoundary;
 import use_case.paybills.PaybillInteractor;
@@ -83,19 +76,19 @@ import use_case.stock_game.play_stock_game.PlayStockGameInteractor;
  * that delegates game logic to the appropriate use cases and views.
  */
 public class MainGameWindow extends JFrame {
-    
+
     private final CardLayout cardLayout;
     private final JPanel cardPanel;
-    
+
     private final LoadingScreenPanel loadingScreenPanel;
     private final MainMenuPanel mainMenuPanel;
     private final SettingsPanel settingsPanel;
     private InGameMenuPanel inGameMenuPanel;
     private GamePanel gamePanel;
     private PlayerInputController playerInputController;
-    
+
     private final GameSettings gameSettings;
-    
+
     // Sleep system components
     private ViewManagerModel viewManagerModel;
     private SleepViewModel sleepViewModel;
@@ -109,14 +102,19 @@ public class MainGameWindow extends JFrame {
     private EventView eventView;
     private EventViewModel eventViewModel;
     private StartEventController startEventController;
-    
+
     // Stock trading system components
     private StockTradingController stockTradingController;
     private StockGameView stockGameView;
 
     // Save/Load system components
     private SaveProgressInteractor saveProgressInteractor;
+    private SaveProgressController saveProgressController;
+    private SaveProgressViewModel saveProgressViewModel;
+
     private LoadProgressInteractor loadProgressInteractor;
+    private LoadProgressController loadProgressController;
+    private LoadProgressViewModel loadProgressViewModel;
     private static final String SAVE_FILE = "src/main/resources/saveFile.json";
 
     // Quest system components
@@ -143,59 +141,63 @@ public class MainGameWindow extends JFrame {
         this.setTitle("California Prop. 65");
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setResizable(true);
-        
+
         // Set minimum size to maintain playability (maintains 16:10 aspect ratio)
         this.setMinimumSize(new Dimension(640, 400));  // 16:10 ratio minimum
-        
+
         // Set initial preferred size
         this.setPreferredSize(new Dimension(1280, 800));  // 16:10 ratio
-        
+
         // Initialize game settings
         this.gameSettings = new GameSettings();
 
         // Initialize save/load system
         SaveProgressDataAccessInterface saveDataAccess = new SaveFileUserDataAccessObject();
-        SaveProgressPresenter savePresenter = new SaveProgressPresenter();
+        this.saveProgressViewModel = new SaveProgressViewModel();
+        SaveProgressPresenter savePresenter = new SaveProgressPresenter(saveProgressViewModel);
         this.saveProgressInteractor = new SaveProgressInteractor(saveDataAccess, savePresenter);
+        this.saveProgressController = new SaveProgressController(saveProgressInteractor);
 
         LoadProgressDataAccessInterface loadDataAccess = new LoadFileUserDataAccessObject();
-        LoadProgressViewModel loadProgressViewModel = new LoadProgressViewModel();
+        this.loadProgressViewModel = new LoadProgressViewModel();
         LoadProgressPresenter loadPresenter = new LoadProgressPresenter(loadProgressViewModel);
         this.loadProgressInteractor = new LoadProgressInteractor(loadDataAccess, loadPresenter);
+        this.loadProgressController = new LoadProgressController(loadProgressInteractor);
+
 
         // Set up CardLayout for switching between views
         this.cardLayout = new CardLayout();
         this.cardPanel = new JPanel(cardLayout);
-        
+
         // Create loading screen panel
         this.loadingScreenPanel = new LoadingScreenPanel();
         this.loadingScreenPanel.setOnComplete(() -> showMainMenu());
-        
+
         // Create menu and settings panels
         this.mainMenuPanel = new MainMenuPanel();
         this.settingsPanel = new SettingsPanel(gameSettings);
-        
+
         // Add menu action listeners
         setupMenuListeners();
-        
+
         // Add panels to card layout
         cardPanel.add(loadingScreenPanel, LOADING_CARD);
         cardPanel.add(mainMenuPanel, MENU_CARD);
         cardPanel.add(settingsPanel, SETTINGS_CARD);
-        
+
         // Add card panel to frame
         this.add(cardPanel);
-        
+
         // Pack the frame to fit the preferred size
         this.pack();
-        
+
         // Center on screen after packing
         this.setLocationRelativeTo(null);
-        
+
         // Show loading screen initially (will be started when window becomes visible)
         cardLayout.show(cardPanel, LOADING_CARD);
     }
-    
+
     @Override
     public void setVisible(boolean visible) {
         super.setVisible(visible);
@@ -205,7 +207,7 @@ public class MainGameWindow extends JFrame {
             loadingScreenPanel.start();
         }
     }
-    
+
     /**
      * Sets up action listeners for menu buttons.
      */
@@ -215,12 +217,12 @@ public class MainGameWindow extends JFrame {
         mainMenuPanel.addLoadGameListener(e -> loadGame());
         mainMenuPanel.addSettingsListener(e -> showSettings());
         mainMenuPanel.addExitListener(e -> exitGame());
-        
+
         // Settings listeners
         settingsPanel.addSaveListener(e -> saveSettings());
         settingsPanel.addCancelListener(e -> cancelSettings());
     }
-    
+
     /**
      * Sets up action listeners for in-game menu buttons.
      */
@@ -232,7 +234,7 @@ public class MainGameWindow extends JFrame {
             inGameMenuPanel.addSaveAndExitListener(e -> saveAndExit());
         }
     }
-    
+
     /**
      * Shows the loading screen and starts the loading sequence.
      */
@@ -240,7 +242,7 @@ public class MainGameWindow extends JFrame {
         cardLayout.show(cardPanel, LOADING_CARD);
         loadingScreenPanel.start();
     }
-    
+
     /**
      * Shows the main menu.
      */
@@ -252,7 +254,7 @@ public class MainGameWindow extends JFrame {
         cardLayout.show(cardPanel, MENU_CARD);
         mainMenuPanel.requestFocusInWindow();
     }
-    
+
     /**
      * Shows the settings panel.
      */
@@ -260,7 +262,7 @@ public class MainGameWindow extends JFrame {
         cardLayout.show(cardPanel, SETTINGS_CARD);
         settingsPanel.requestFocusInWindow();
     }
-    
+
     /**
      * Starts a new game.
      */
@@ -294,7 +296,7 @@ public class MainGameWindow extends JFrame {
         // Start the game
         startGame();
     }
-    
+
     /**
      * Initializes the game panel with all required dependencies.
      */
@@ -312,29 +314,29 @@ public class MainGameWindow extends JFrame {
         // Create sleep system components (following Clean Architecture)
         // 1. View Model
         this.sleepViewModel = new SleepViewModel();
-        
+
         // 2. Data Access
         SleepDataAccessInterface sleepDataAccess = new SleepDataAccessObject();
-        
+
         // 3. Presenter (output boundary)
         SleepPresenter sleepPresenter = new SleepPresenter(viewManagerModel, sleepViewModel);
-        
+
         // 4. Interactor (input boundary)
         SleepInputBoundary sleepInteractor = new SleepInteractor(sleepPresenter, sleepDataAccess);
-        
+
         // 5. Controller
         this.sleepController = new SleepController(sleepInteractor);
-        
+
         // Initialize Stock Trading system
         initializeStockTradingSystem();
 
         // Create use case
         PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(player);
-        
+
         // Create controller
         this.playerInputController = new PlayerInputController(playerMovementUseCase);
         playerInputController.setParentFrame(this);
-        
+
         // Set up pause menu listener
         playerInputController.setPauseMenuListener(() -> showInGameMenu());
 
@@ -347,7 +349,7 @@ public class MainGameWindow extends JFrame {
         // Set up sleep system callbacks
         playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
         playerInputController.setSleepActionListener(() -> sleepController.sleep(player));
-        
+
         // Set up stock trading system callbacks
         playerInputController.setStockTradingZoneChecker(() -> gamePanel.isInStockTradingZone());
         playerInputController.setStockTradingActionListener(() -> {
@@ -357,7 +359,7 @@ public class MainGameWindow extends JFrame {
 
         // Set up Event system
         initializeEventSystem();
-        
+
         // Set up mailbox system callbacks
         playerInputController.setMailboxZoneChecker(() -> gamePanel.isInMailboxZone());
         playerInputController.setMailboxActionListener(() -> {
@@ -518,7 +520,7 @@ public class MainGameWindow extends JFrame {
         // Add to card panel
         cardPanel.add(paybillView, PAYBILL_CARD);
     }
-    
+
     /**
      * Initializes the stock trading game system.
      */
@@ -549,8 +551,8 @@ public class MainGameWindow extends JFrame {
 
         // Create Stock Game Interactor
         PlayStockGameInputBoundary stockGameInteractor = new PlayStockGameInteractor(
-            stockDataAccess,
-            stockGameView
+                stockDataAccess,
+                stockGameView
         );
 
         // Create Stock Trading Controller with API key
@@ -572,7 +574,7 @@ public class MainGameWindow extends JFrame {
 
         // Create Event Presenter
         StartRandomEventOutputBoundary startRandomEventPresenter= new StartEventPresenter(eventViewModel,
-                                                                        viewManagerModel);
+                viewManagerModel);
         // Create Event Interactor
         StartRandomEventInputBoundary startRandomEventInteractor = new StartRandomEventInteractor(eventDataAccess,
                 startRandomEventPresenter);
@@ -601,7 +603,7 @@ public class MainGameWindow extends JFrame {
         cardPanel.add(eventView, EVENT_CARD);
 
     }
-    
+
     /**
      * Shows the in-game pause menu and pauses the game.
      */
@@ -612,7 +614,7 @@ public class MainGameWindow extends JFrame {
             inGameMenuPanel.requestFocusInWindow();
         }
     }
-    
+
     /**
      * Resumes the game from the pause menu.
      */
@@ -623,17 +625,37 @@ public class MainGameWindow extends JFrame {
             gamePanel.requestFocusInWindow();
         }
     }
-    
+
     /**
      * Saves the current game state to file.
      */
     private void saveGame() {
+        SaveGameView saveGameView = new SaveGameView(saveProgressViewModel);
+
+        JFrame frame = new JFrame("Saving...");
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(1280, 800);
+        frame.setLocationRelativeTo(null);
+        frame.add(saveGameView);
+        frame.setVisible(true);
+
+        SwingUtilities.invokeLater(() -> {
+            new Timer(2550, e -> {
+                frame.dispose();
+                saveGameData();
+            }) {{
+                setRepeats(false);
+            }}.start();
+        });
+    }
+
+    private void saveGameData(){
         if (gamePanel == null || player == null) {
             JOptionPane.showMessageDialog(
-                this,
-                "No game in progress to save!",
-                "Cannot Save",
-                JOptionPane.WARNING_MESSAGE
+                    this,
+                    "No game in progress to save!",
+                    "Cannot Save",
+                    JOptionPane.WARNING_MESSAGE
             );
             return;
         }
@@ -643,26 +665,27 @@ public class MainGameWindow extends JFrame {
             String currentZone = gamePanel.getGameMap().getCurrentZone().getName();
 
             // Create input data and save the game using the interactor
-            SaveProgressInputData inputData = new SaveProgressInputData(player, SAVE_FILE, currentZone);
-            saveProgressInteractor.saveGame(inputData);
+            saveProgressController.saveGame(player, SAVE_FILE, currentZone);
 
             JOptionPane.showMessageDialog(
-                this,
-                "Game saved successfully to " + SAVE_FILE + "!",
-                "Game Saved",
-                JOptionPane.INFORMATION_MESSAGE
+                    this,
+                    "Game saved successfully, " + saveProgressViewModel.getPlayerName() + "!" +
+                            "\n Save Day: " + saveProgressViewModel.getCurrentDay() +
+                            "\n Last Save: " + saveProgressViewModel.getSaveDate(),
+                    "Game Saved",
+                    JOptionPane.INFORMATION_MESSAGE
             );
         } catch (Exception e) {
             JOptionPane.showMessageDialog(
-                this,
-                "Failed to save game: " + e.getMessage(),
-                "Save Error",
-                JOptionPane.ERROR_MESSAGE
+                    this,
+                    "Failed to save game: " + e.getMessage(),
+                    "Save Error",
+                    JOptionPane.ERROR_MESSAGE
             );
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Shows settings from in-game menu.
      */
@@ -848,12 +871,12 @@ public class MainGameWindow extends JFrame {
      */
     private void saveAndExit() {
         int choice = JOptionPane.showConfirmDialog(
-            this,
-            "Save and return to main menu?",
-            "Save & Exit",
-            JOptionPane.YES_NO_OPTION
+                this,
+                "Save and return to main menu?",
+                "Save & Exit",
+                JOptionPane.YES_NO_OPTION
         );
-        
+
         if (choice == JOptionPane.YES_OPTION) {
             saveGame();
             if (gamePanel != null) {
@@ -880,15 +903,37 @@ public class MainGameWindow extends JFrame {
      * Loads a saved game from file.
      */
     private void loadGame() {
+
+        SwingUtilities.invokeLater(() -> {
+            LoadingGameView loadingGameView = new LoadingGameView(loadProgressViewModel);
+
+            JFrame frame = new JFrame("Loading...");
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            frame.setSize(1280, 800);
+            frame.setLocationRelativeTo(null);
+            frame.add(loadingGameView);
+            frame.setVisible(true);
+
+            SwingUtilities.invokeLater(() -> {
+                new Timer(2550, e -> {
+                    frame.dispose();
+                    loadGameData();
+                }) {{
+                    setRepeats(false);
+                }}.start();
+            });
+        });
+    }
+
+    private void loadGameData() {
         // Check if save file exists
         java.io.File saveFile = new java.io.File(SAVE_FILE);
         if (!saveFile.exists()) {
             JOptionPane.showMessageDialog(
-                this,
-                "No saved game found!\n" +
-                "Save file: " + SAVE_FILE,
-                "Cannot Load",
-                JOptionPane.WARNING_MESSAGE
+                    this,
+                    "No saved game found!",
+                    "Cannot Load",
+                    JOptionPane.WARNING_MESSAGE
             );
             return;
         }
@@ -897,9 +942,7 @@ public class MainGameWindow extends JFrame {
             // Create a temporary GameMap for loading
             GameMap tempGameMap = new GameMap();
 
-            // Create input data and load the player using the interactor
-            LoadProgressInputData inputData = new LoadProgressInputData(tempGameMap, SAVE_FILE);
-            Player loadedPlayer = loadProgressInteractor.loadGame(inputData);
+            Player loadedPlayer = loadProgressController.loadGame(tempGameMap, SAVE_FILE);
 
             // If we haven't initialized the game panel yet, do it now
             if (gamePanel == null) {
@@ -926,50 +969,51 @@ public class MainGameWindow extends JFrame {
             startGame();
 
             JOptionPane.showMessageDialog(
-                this,
-                "Game loaded successfully from " + SAVE_FILE + "!",
-                "Game Loaded",
-                JOptionPane.INFORMATION_MESSAGE
+                    this,
+                    "Game loaded successfully! Welcome back, " + loadProgressViewModel.getPlayerName() + "!" +
+                            "\n Last Save: " + loadProgressViewModel.getRecentSaveDate(),
+                    "Game Loaded",
+                    JOptionPane.INFORMATION_MESSAGE
             );
         } catch (Exception e) {
             JOptionPane.showMessageDialog(
-                this,
-                "Failed to load game: " + e.getMessage(),
-                "Load Error",
-                JOptionPane.ERROR_MESSAGE
+                    this,
+                    "Failed to load game: " + e.getMessage(),
+                    "Load Error",
+                    JOptionPane.ERROR_MESSAGE
             );
             e.printStackTrace();
         }
     }
-    
+
     /**
      * Saves settings and returns to main menu.
      */
     private void saveSettings() {
         settingsPanel.applySettings();
-        
+
         // Apply resolution to window if needed
         Dimension newSize = new Dimension(
-            gameSettings.getRenderWidth(),
-            gameSettings.getRenderHeight()
+                gameSettings.getRenderWidth(),
+                gameSettings.getRenderHeight()
         );
-        
+
         // Only update if different and reasonable
         if (newSize.width >= 640 && newSize.height >= 400) {
             setPreferredSize(newSize);
             pack();
             setLocationRelativeTo(null);  // Re-center
         }
-        
+
         showMainMenu();
     }
-    
+
     /**
      * Cancels settings changes and returns to appropriate view.
      */
     private void cancelSettings() {
         settingsPanel.revertSettings();
-        
+
         // Return to game if it was running, otherwise main menu
         if (gamePanel != null && inGameMenuPanel != null) {
             showInGameMenu();
@@ -977,23 +1021,23 @@ public class MainGameWindow extends JFrame {
             showMainMenu();
         }
     }
-    
+
     /**
      * Exits the game application.
      */
     private void exitGame() {
         int choice = JOptionPane.showConfirmDialog(
-            this,
-            "Are you sure you want to exit?",
-            "Exit Game",
-            JOptionPane.YES_NO_OPTION
+                this,
+                "Are you sure you want to exit?",
+                "Exit Game",
+                JOptionPane.YES_NO_OPTION
         );
-        
+
         if (choice == JOptionPane.YES_OPTION) {
             System.exit(0);
         }
     }
-    
+
     /**
      * Starts the game loop.
      * Should be called when switching to game view.
@@ -1004,7 +1048,7 @@ public class MainGameWindow extends JFrame {
             gamePanel.requestFocus();
         }
     }
-    
+
     /**
      * Stops the game loop (e.g., for pausing).
      */
@@ -1013,7 +1057,7 @@ public class MainGameWindow extends JFrame {
             gamePanel.stopGameLoop();
         }
     }
-    
+
     /**
      * Gets the game settings.
      * @return the current game settings
