@@ -5,13 +5,7 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.io.BufferedInputStream;
-import java.io.InputStream;
 
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
-import javax.sound.sampled.LineEvent;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -32,9 +26,9 @@ public class LoadingScreenPanel extends JPanel {
     private static final Color BACKGROUND_COLOR = new Color(20, 20, 30);
     private static final Color TEXT_COLOR = new Color(255, 255, 255);
     private static final Color HIGHLIGHT_COLOR = new Color(255, 50, 50);  // Red for warning
-    private static final int DISPLAY_DURATION_MS = 5000;  // 3 seconds
-    
-    private Clip audioClip;
+    private static final int DISPLAY_DURATION_MS = 5000;  // 5 seconds
+
+    private final AudioManager audioManager;
     private Runnable onComplete;
     private Timer transitionTimer;
     
@@ -43,6 +37,7 @@ public class LoadingScreenPanel extends JPanel {
      */
     public LoadingScreenPanel() {
         setBackground(BACKGROUND_COLOR);
+        this.audioManager = AudioManager.getInstance();
     }
     
     /**
@@ -72,42 +67,10 @@ public class LoadingScreenPanel extends JPanel {
      * Audio playback is optional and will fail gracefully if not available.
      */
     private void playWarningAudio() {
-        // Run audio loading in a separate thread to avoid blocking UI
-        new Thread(() -> {
-            try {
-                // Load audio file from resources using class loader (WAV format for Java AudioSystem compatibility)
-                InputStream audioStream = getClass().getResourceAsStream("/audio/siren_cropped.wav");
-                
-                if (audioStream != null) {
-                    // Wrap in BufferedInputStream for better performance
-                    BufferedInputStream bufferedStream = new BufferedInputStream(audioStream);
-                    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
-                    
-                    // Check if audio system is available
-                    if (AudioSystem.getMixer(null) != null) {
-                        audioClip = AudioSystem.getClip();
-                        audioClip.open(audioInputStream);
-                        
-                        // Add listener for when audio finishes
-                        audioClip.addLineListener(event -> {
-                            if (event.getType() == LineEvent.Type.STOP) {
-                                audioClip.close();
-                            }
-                        });
-                        
-                        audioClip.start();
-                        System.out.println("Audio playback started successfully");
-                    } else {
-                        System.err.println("Warning: Audio mixer not available on this system");
-                    }
-                } else {
-                    System.err.println("Warning: Audio file not found in resources: /audio/siren_cropped.wav");
-                }
-            } catch (Exception e) {
-                // Audio is optional, so just log the error and continue
-                System.err.println("Note: Audio playback unavailable (this is OK): " + e.getMessage());
-            }
-        }, "AudioLoader").start();
+        // Use AudioManager to play the siren sound effect
+        // Try MP3 first (JavaFX supports it natively), fall back to WAV
+        audioManager.playSoundEffect("/audio/siren_cropped.mp3");
+        System.out.println("Warning audio playback requested");
     }
     
     /**
@@ -122,8 +85,8 @@ public class LoadingScreenPanel extends JPanel {
             long actualDuration = endTime - startTime;
             System.out.println("Timer fired at: " + endTime + " (actual duration: " + actualDuration + "ms)");
             System.out.println("onComplete is: " + (onComplete != null ? "NOT NULL" : "NULL"));
-            
-            stopAudio();
+
+            // Audio will stop on its own when the sound effect ends
             if (onComplete != null) {
                 System.out.println("Calling onComplete callback");
                 SwingUtilities.invokeLater(() -> {
@@ -138,23 +101,13 @@ public class LoadingScreenPanel extends JPanel {
     }
     
     /**
-     * Stops the audio playback.
-     */
-    private void stopAudio() {
-        if (audioClip != null && audioClip.isRunning()) {
-            audioClip.stop();
-            audioClip.close();
-        }
-    }
-    
-    /**
      * Cleans up resources when panel is no longer needed.
      */
     public void cleanup() {
         if (transitionTimer != null) {
             transitionTimer.stop();
         }
-        stopAudio();
+        // AudioManager handles its own cleanup
     }
     
     @Override

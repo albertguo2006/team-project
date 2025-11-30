@@ -16,34 +16,39 @@ public class ActivateRandomOutcomeInteractor implements ActivateRandomOutcomeInp
     }
 
     public void execute(ActivateRandomOutcomeInputData activateRandomOutcomeInputData) {
-        /// Creates a list of weights from the chances of each eventOutcome
-        Random random = new Random();
-        double totalWeights = 0.0; // The current total weight of all seen outcomes (should always == 1.0 by the end)
-        ArrayList<Double> cumulativeWeights = new ArrayList<Double>(); // An ordered list of the cumulative weights of
-                                                                       // all outcomes
         HashMap<Integer, EventOutcome> outcomes = activateRandomOutcomeInputData.getOutcomes();
+        int selectedIndex;
 
-        for (EventOutcome outcome : outcomes.values()) {
-            totalWeights += outcome.getOutcomeChance();
-            cumulativeWeights.add(totalWeights);
-        }
-        double randomNumber = random.nextDouble(); //Gets a random double from 0 to 1.0
+        // Check if a specific outcome was selected by the player
+        if (activateRandomOutcomeInputData.hasSelectedOutcome()) {
+            selectedIndex = activateRandomOutcomeInputData.getSelectedOutcomeIndex();
+        } else {
+            // Fall back to random selection based on weights
+            Random random = new Random();
+            double totalWeights = 0.0;
+            ArrayList<Double> cumulativeWeights = new ArrayList<Double>();
 
-        /// If the cumulative weight of the ith outcome is greater than the random number, select it,
-        /// otherwise move to the next outcome in the list.
+            for (EventOutcome outcome : outcomes.values()) {
+                totalWeights += outcome.getOutcomeChance();
+                cumulativeWeights.add(totalWeights);
+            }
+            double randomNumber = random.nextDouble();
 
-        /// Since the final totalWeight should always == 1.0, the final cumulativeWeight == 1.0, so this
-        /// will always return an outcome.
-        for (int i = 0; i < cumulativeWeights.size(); i++) {
-            if (randomNumber < cumulativeWeights.get(i)) {
-                /// Adds the outcome's result to the player's balance
-                activateRandomOutcomeDataAccess.setBalance(activateRandomOutcomeDataAccess.getBalance() +
-                        outcomes.get(i).getOutcomeResult());
-                ActivateRandomOutcomeOutputData activateRandomOutcomeOutputData =
-                        new ActivateRandomOutcomeOutputData(outcomes.get(i), i);
-                activateOutcomePresenter.prepareSuccessView(activateRandomOutcomeOutputData);
-                break; /// Break the loop when an outcome is picked
+            selectedIndex = 0;
+            for (int i = 0; i < cumulativeWeights.size(); i++) {
+                if (randomNumber < cumulativeWeights.get(i)) {
+                    selectedIndex = i;
+                    break;
+                }
             }
         }
+
+        // Apply the selected outcome
+        EventOutcome selectedOutcome = outcomes.get(selectedIndex);
+        activateRandomOutcomeDataAccess.setBalance(activateRandomOutcomeDataAccess.getBalance() +
+                selectedOutcome.getOutcomeResult());
+        ActivateRandomOutcomeOutputData activateRandomOutcomeOutputData =
+                new ActivateRandomOutcomeOutputData(selectedOutcome, selectedIndex);
+        activateOutcomePresenter.prepareSuccessView(activateRandomOutcomeOutputData);
     }
 }

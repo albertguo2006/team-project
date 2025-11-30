@@ -10,15 +10,11 @@ import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
-import javax.sound.sampled.Clip;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -51,10 +47,8 @@ public class GamePanel extends JPanel implements ActionListener {
     // Item sprite cache
     private final Map<String, BufferedImage> itemSpriteCache = new java.util.concurrent.ConcurrentHashMap<>();
     
-    // Background music
-    private volatile Clip backgroundMusicClip;
-    private volatile String currentMusicPath;
-    private final Object musicLock = new Object();
+    // Audio manager (JavaFX-based for better Linux integration)
+    private final AudioManager audioManager;
     
     // Virtual (internal) resolution - game logic operates in this space
     private static final int VIRTUAL_WIDTH = 1920;
@@ -132,6 +126,9 @@ public class GamePanel extends JPanel implements ActionListener {
         this.gameMap = gameMap;
         this.npcDataAccess = npcDataAccess;
 
+        // Initialize audio manager
+        this.audioManager = AudioManager.getInstance();
+
         // Set panel properties - no preferred size since we're resizable
         this.setBackground(Color.BLACK);  // Black for letterbox bars
         this.setFocusable(true);
@@ -142,7 +139,7 @@ public class GamePanel extends JPanel implements ActionListener {
         // Initialize the game loop timer
         this.gameTimer = new Timer(FRAME_DELAY_MS, this);
         this.lastUpdateTime = System.currentTimeMillis();
-        
+
         // Initialize viewport
         calculateViewport();
 
@@ -150,7 +147,7 @@ public class GamePanel extends JPanel implements ActionListener {
         preloadAllBackgroundImages();
 
         // Start background music for initial zone
-        playBackgroundMusic(gameMap.getCurrentZone().getBackgroundMusicPath());
+        audioManager.playBackgroundMusic(gameMap.getCurrentZone().getBackgroundMusicPath());
     }
     
     /**
@@ -201,7 +198,7 @@ public class GamePanel extends JPanel implements ActionListener {
      */
     public void stopGameLoop() {
         gameTimer.stop();
-        stopBackgroundMusic();
+        audioManager.stopBackgroundMusic();
     }
     
     /**
@@ -395,7 +392,7 @@ public class GamePanel extends JPanel implements ActionListener {
             if (newZone != null) {
                 System.out.println("Successfully transitioned to zone: " + newZone.getName());
                 setBackground(newZone.getBackgroundColor());
-                playBackgroundMusic(newZone.getBackgroundMusicPath());
+                audioManager.playBackgroundMusic(newZone.getBackgroundMusicPath());
                 // Attempt to start a random event
                 startEventController.execute();
             } else {
@@ -1233,157 +1230,6 @@ public class GamePanel extends JPanel implements ActionListener {
             case "Mystery Box": return "/items/box.png";
             default: return null;
         }
-    }
-
-    /**
-     * Plays background music for the current zone.
-     * Completely non-blocking and fault-tolerant for Linux audio issues.
-     * Includes format conversion for compatibility.
-     * If music is already playing and matches the requested path, does nothing.
-     * Otherwise, stops current music and starts the new track.
-     *
-     * @param musicPath the path to the music file (WAV format)
-     */
-    private void playBackgroundMusic(String musicPath) {
-        // Everything happens in background - never block game thread
-        new Thread(() -> {
-            try {
-                if (musicPath == null || musicPath.isEmpty()) {
-                    System.out.println("No music path provided, stopping background music");
-                    synchronized (musicLock) {
-                        stopBackgroundMusic();
-                    }
-                    return;
-                }
-                
-                // Check if same music is already playing
-                synchronized (musicLock) {
-                    if (musicPath.equals(currentMusicPath) && backgroundMusicClip != null && backgroundMusicClip.isRunning()) {
-                        System.out.println("Music already playing: " + musicPath);
-                        return;
-                    }
-                }
-                
-                System.out.println("Initiating music change to: " + musicPath);
-                
-                // Stop old music
-                synchronized (musicLock) {
-                    stopBackgroundMusic();
-                    currentMusicPath = musicPath;
-                }
-                
-                // Small delay to let audio system stabilize
-                Thread.sleep(200);
-                
-                // Load new music
-                System.out.println("Loading new music: " + musicPath);
-                InputStream musicStream = getClass().getResourceAsStream(musicPath);
-                
-                if (musicStream == null) {
-                    System.err.println("Warning: Music file not found: " + musicPath);
-                    return;
-                }
-                
-                BufferedInputStream bufferedStream = new BufferedInputStream(musicStream);
-                AudioInputStream originalStream = AudioSystem.getAudioInputStream(bufferedStream);
-                
-                synchronized (musicLock) {
-                    // Check if music path changed during load
-                    if (!musicPath.equals(currentMusicPath)) {
-                        System.out.println("Music path changed during load, aborting: " + musicPath);
-                        originalStream.close();
-                        return;
-                    }
-                    
-                    try {
-                        // Convert to a format that's more likely to be supported on Linux
-                        javax.sound.sampled.AudioFormat originalFormat = originalStream.getFormat();
-                        System.out.println("Original format: " + originalFormat);
-                        
-                        // Try to get a compatible format for the system
-                        javax.sound.sampled.AudioFormat.Encoding encoding = javax.sound.sampled.AudioFormat.Encoding.PCM_SIGNED;
-                        javax.sound.sampled.AudioFormat targetFormat = new javax.sound.sampled.AudioFormat(
-                            encoding,
-                            originalFormat.getSampleRate(),
-                            16, // 16-bit
-                            originalFormat.getChannels(),
-                            originalFormat.getChannels() * 2, // frame size
-                            originalFormat.getSampleRate(),
-                            false // little-endian
-                        );
-                        
-                        AudioInputStream convertedStream = originalStream;
-                        if (!AudioSystem.isConversionSupported(targetFormat, originalFormat)) {
-                            System.out.println("Direct conversion not supported, trying AudioSystem conversion");
-                            // If direct conversion isn't supported, try to convert
-                            convertedStream = AudioSystem.getAudioInputStream(targetFormat, originalStream);
-                        } else {
-                            convertedStream = AudioSystem.getAudioInputStream(targetFormat, originalStream);
-                        }
-                        
-                        System.out.println("Target format: " + targetFormat);
-                        
-                        // Get a line that supports this format
-                        javax.sound.sampled.DataLine.Info info = new javax.sound.sampled.DataLine.Info(Clip.class, convertedStream.getFormat());
-                        
-                        if (!AudioSystem.isLineSupported(info)) {
-                            System.err.println("Line not supported for format: " + convertedStream.getFormat());
-                            System.err.println("Audio playback disabled (game continues silently)");
-                            convertedStream.close();
-                            return;
-                        }
-                        
-                        Clip newClip = (Clip) AudioSystem.getLine(info);
-                        newClip.open(convertedStream);
-                        
-                        backgroundMusicClip = newClip;
-                        backgroundMusicClip.loop(Clip.LOOP_CONTINUOUSLY);
-                        backgroundMusicClip.start();
-                        
-                        System.out.println("Background music started successfully: " + musicPath);
-                    } catch (Exception e) {
-                        System.err.println("Failed to start music (game continues silently): " + e.getMessage());
-                        System.err.println("Your audio system may not support the required format.");
-                        System.err.println("Game will continue without background music.");
-                    }
-                }
-            } catch (Exception e) {
-                System.err.println("Music system error (non-fatal, game continues silently): " + e.getMessage());
-            }
-        }, "MusicManager").start();
-    }
-    
-    /**
-     * Stops the currently playing background music.
-     * Must be called from within synchronized(musicLock) block.
-     * Non-blocking with daemon thread for cleanup.
-     */
-    private void stopBackgroundMusic() {
-        if (backgroundMusicClip != null) {
-            try {
-                System.out.println("Stopping background music...");
-                final Clip clipToStop = backgroundMusicClip;
-                backgroundMusicClip = null; // Clear immediately
-                
-                // Stop in daemon thread to avoid blocking
-                Thread stopThread = new Thread(() -> {
-                    try {
-                        if (clipToStop.isRunning()) {
-                            clipToStop.stop();
-                        }
-                        clipToStop.close();
-                        System.out.println("Background music stopped successfully");
-                    } catch (Exception e) {
-                        System.err.println("Error stopping music (non-fatal): " + e.getMessage());
-                    }
-                }, "MusicStopper");
-                stopThread.setDaemon(true);
-                stopThread.start();
-            } catch (Exception e) {
-                System.err.println("Error initiating music stop (non-fatal): " + e.getMessage());
-            }
-        }
-        currentMusicPath = null;
     }
 
     /**

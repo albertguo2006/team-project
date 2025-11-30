@@ -22,8 +22,8 @@ import org.knowm.xchart.style.Styler;
 
 import entity.Portfolio;
 import entity.Stock;
-import use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary;
-import use_case.stock_game.play_stock_game.PlayStockGameOutputData;
+import use_case.stock_game.PlayStockGameOutputBoundary;
+import use_case.stock_game.PlayStockGameOutputData;
 
 /**
  * view for the stock game
@@ -87,11 +87,16 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         viewModel.update(data);
         viewModel.addPriceToHistory(data.price);
 
+        // Update stock price so equity calculation uses current price
+        stock.stockPrice = data.price;
+
         // set text
         priceLabel.setText("Price: " + String.format("%.2f", viewModel.price));
         cashLabel.setText("Cash: " + String.format("%.2f", viewModel.cash));
         sharesLabel.setText("Shares: " + String.format("%.2f", viewModel.shares));
-        equityLabel.setText("Total Equity: " + String.format("%.2f", viewModel.equity));
+        // Calculate equity live using current stock price
+        double liveEquity = portfolio.getTotalEquity();
+        equityLabel.setText("Total Equity: " + String.format("%.2f", liveEquity));
 
         // update chart with price history
         updateChartData();
@@ -132,8 +137,15 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     // end of game view
     @Override
     public void presentGameOver(PlayStockGameOutputData data) {
-        double finalEquity = data.totalEquity;
-        
+        // Auto-sell all shares at current price before calculating final equity
+        stock.stockPrice = data.price;
+        if (portfolio.getShares(stock) > 0) {
+            portfolio.sell(stock);
+        }
+
+        // Final equity is now all in cash after selling
+        double finalEquity = portfolio.getCash();
+
         // Credit player balance with final equity
         if (player != null) {
             player.setBalance(player.getBalance() + finalEquity);
@@ -178,12 +190,6 @@ public class StockGameView implements PlayStockGameOutputBoundary {
     public void prepareSuccessView(PlayStockGameOutputData outputData) {
         // Present success view for valid investment
         presentPriceUpdate(outputData);
-    }
-
-    @Override
-    public void prepareFailView(String errorMessage) {
-        // Present failure view for invalid investment
-        presentError(errorMessage);
     }
 
     // details for making the panels, buttons etc.
@@ -252,29 +258,35 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         east.add(sharesLabel);
         east.add(equityLabel);
 
-        // buy and sell buttons
-        buyButton = new JButton("BUY (All In)");
-        sellButton = new JButton("SELL (All Out)");
+        // buy and sell buttons - both always visible
+        buyButton = new JButton("BUY");
+        sellButton = new JButton("SELL");
 
-        // at the start, only buy button is visible (must start by buying)
-        sellButton.setVisible(false);
+        // Update button states based on current holdings
+        updateButtonStates(buyButton, sellButton);
 
         buyButton.addActionListener(e -> {
-            stock.stockPrice = viewModel.price;
-            portfolio.buy(stock);
-
-            // switch which buttons are visible (so only 1 button at a time)
-            buyButton.setVisible(false);
-            sellButton.setVisible(true);
+            if (portfolio.getCash() > 0) {
+                stock.stockPrice = viewModel.price;
+                portfolio.buy(stock);
+                // Update labels immediately after buy
+                cashLabel.setText("Cash: " + String.format("%.2f", portfolio.getCash()));
+                sharesLabel.setText("Shares: " + String.format("%.2f", portfolio.getShares(stock)));
+                equityLabel.setText("Total Equity: " + String.format("%.2f", portfolio.getTotalEquity()));
+                updateButtonStates(buyButton, sellButton);
+            }
         });
 
         sellButton.addActionListener(e -> {
-            stock.stockPrice = viewModel.price;
-            portfolio.sell(stock);
-
-            // switch which buttons are visible (so only 1 button at a time)
-            sellButton.setVisible(false);
-            buyButton.setVisible(true);
+            if (portfolio.getShares(stock) > 0) {
+                stock.stockPrice = viewModel.price;
+                portfolio.sell(stock);
+                // Update labels immediately after sell
+                cashLabel.setText("Cash: " + String.format("%.2f", portfolio.getCash()));
+                sharesLabel.setText("Shares: " + String.format("%.2f", portfolio.getShares(stock)));
+                equityLabel.setText("Total Equity: " + String.format("%.2f", portfolio.getTotalEquity()));
+                updateButtonStates(buyButton, sellButton);
+            }
         });
 
         JPanel buttonPanel = new JPanel();
@@ -287,5 +299,13 @@ public class StockGameView implements PlayStockGameOutputBoundary {
         frame.add(east, BorderLayout.EAST);
 
         frame.setVisible(true);
+    }
+
+    /**
+     * Updates the enabled state of buy/sell buttons based on current holdings.
+     */
+    private void updateButtonStates(JButton buyButton, JButton sellButton) {
+        buyButton.setEnabled(portfolio.getCash() > 0);
+        sellButton.setEnabled(portfolio.getShares(stock) > 0);
     }
 }

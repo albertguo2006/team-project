@@ -57,9 +57,9 @@ import use_case.save_progress.SaveProgressInteractor;
 import use_case.sleep.SleepDataAccessInterface;
 import use_case.sleep.SleepInputBoundary;
 import use_case.sleep.SleepInteractor;
-import use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface;
-import use_case.stock_game.play_stock_game.PlayStockGameInputBoundary;
-import use_case.stock_game.play_stock_game.PlayStockGameInteractor;
+import use_case.stock_game.PlayStockGameDataAccessInterface;
+import use_case.stock_game.PlayStockGameInputBoundary;
+import use_case.stock_game.PlayStockGameInteractor;
 
 /**
  * MainGameWindow is the top-level JFrame for the application.
@@ -99,6 +99,7 @@ public class MainGameWindow extends JFrame {
     private PaybillView paybillView;
     private PaybillViewModel paybillViewModel;
     PaybillController paybillController;
+    private PaybillDataAccessInterface paybillDataAccess;
     private EventView eventView;
     private EventViewModel eventViewModel;
     private StartEventController startEventController;
@@ -287,6 +288,13 @@ public class MainGameWindow extends JFrame {
             cardPanel.remove(paybillView);
         }
 
+        // Delete bills.json to ensure fresh bills are generated for new game
+        java.io.File billsFile = new java.io.File("bills.json");
+        if (billsFile.exists()) {
+            billsFile.delete();
+            System.out.println("Deleted bills.json for new game");
+        }
+
         // Always create a fresh game with a new player and map
         initializeGamePanel(new Player("Player"), new GameMap());
 
@@ -320,10 +328,11 @@ public class MainGameWindow extends JFrame {
 
         // 3. Presenter (output boundary)
         SleepPresenter sleepPresenter = new SleepPresenter(viewManagerModel, sleepViewModel);
-
-        // 4. Interactor (input boundary)
-        SleepInputBoundary sleepInteractor = new SleepInteractor(sleepPresenter, sleepDataAccess);
-
+        
+        // 4. Interactor (input boundary) - use shared paybillDataAccess for accurate debt calculation
+        SleepInputBoundary sleepInteractor = new SleepInteractor(sleepPresenter, sleepDataAccess,
+                (data_access.Paybill.PaybillDataAccessObject) paybillDataAccess);
+        
         // 5. Controller
         this.sleepController = new SleepController(sleepInteractor);
 
@@ -457,17 +466,17 @@ public class MainGameWindow extends JFrame {
         // Create sleep views
         this.daySummaryView = new DaySummaryView(sleepViewModel, viewManagerModel, cardPanel);
         this.endGameView = new EndGameView(sleepViewModel, viewManagerModel, cardPanel);
-        
+
         // Create in-game menu panel
         this.inGameMenuPanel = new InGameMenuPanel();
         setupInGameMenuListeners();
-        
+
         // Add to card panel
         cardPanel.add(gamePanel, GAME_CARD);
         cardPanel.add(inGameMenuPanel, IN_GAME_MENU_CARD);
         cardPanel.add(daySummaryView, DAY_SUMMARY_CARD);
         cardPanel.add(endGameView, END_GAME_CARD);
-        cardPanel.add(paybillView, PAYBILL_CARD);
+        // Note: paybillView is already added in initializePaybillSystem()
 
         // Connect ViewManagerModel to CardLayout
         viewManagerModel.addPropertyChangeListener(evt -> {
@@ -502,8 +511,8 @@ public class MainGameWindow extends JFrame {
         // Create Paybill ViewModel
         this.paybillViewModel = new PaybillViewModel();
 
-        // Create Paybill Data Access
-        PaybillDataAccessInterface paybillDataAccess = new PaybillDataAccessObject();
+        // Create Paybill Data Access (stored as field for sharing with SleepInteractor)
+        this.paybillDataAccess = new PaybillDataAccessObject();
 
         // Create Paybill Presenter
         PaybillOutputBoundary paybillPresenter = new PaybillPresenter(paybillViewModel, viewManagerModel);
@@ -891,11 +900,9 @@ public class MainGameWindow extends JFrame {
      */
     public void showPaybillView(){
         if (paybillView != null) {
-            cardLayout.show(cardPanel, PAYBILL_CARD);
-            paybillView.requestFocusInWindow();
-
-            // Refresh bills data
-            paybillView.loadInitialBills();
+            // Update view manager state so ESC can properly switch back to game
+            viewManagerModel.setState(PAYBILL_CARD);
+            viewManagerModel.firePropertyChange();
         }
     }
 

@@ -1,4 +1,4 @@
-package use_case.stock_game.play_stock_game;
+package use_case.stock_game;
 
 /**
  * input data for START stock game use case
@@ -31,7 +31,8 @@ public class PlayStockGameInputData {
     }
 
     // Constructor with timer interval for buff effects
-    public PlayStockGameInputData(String symbol, double startAmount, String month, int startDayIndex, String periodId, int timerIntervalMs) {
+    public PlayStockGameInputData(String symbol, double startAmount,
+                                  String month, int startDayIndex, String periodId, int timerIntervalMs) {
         this.symbol = symbol;
         this.startAmount = startAmount;
         this.days = 5;  // Stock game always spans 5 days

@@ -1,0 +1,22 @@
+[
+    {
+        "xLocation": 960,
+        "balance": 10000,
+        "currentDay": "MONDAY",
+        "stats": {
+            "Hunger": 100,
+            "Mood": 100,
+            "Energy": 100
+        },
+        "name": "Player",
+        "yLocation": 600
+    },
+    {},
+    {},
+    {},
+    {
+        "totalEquity": 0,
+        "investments": {}
+    },
+    "Home"
+]
