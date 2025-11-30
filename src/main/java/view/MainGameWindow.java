@@ -1066,3 +1066,4 @@ public class MainGameWindow extends JFrame {
         return gameSettings;
     }
 }
+
