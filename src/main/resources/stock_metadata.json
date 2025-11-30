@@ -26,7 +26,7 @@
       "riskLevel" : "LOW",
       "volatility" : 0.9712996224105298,
       "availableMonths" : [ "recent" ],
-      "playedPeriods" : [ "recent_day8-12" ]
+      "playedPeriods" : [ "recent_day8-12", "recent_day61-65" ]
     },
     "JPM" : {
       "name" : "JPMorgan Chase",
@@ -38,9 +38,9 @@
     "JNJ" : {
       "name" : "Johnson & Johnson",
       "riskLevel" : "LOW",
-      "volatility" : 0.0,
-      "availableMonths" : [ ],
-      "playedPeriods" : [ ]
+      "volatility" : 1.0266294571019996,
+      "availableMonths" : [ "recent" ],
+      "playedPeriods" : [ "recent_day3-7" ]
     },
     "VTI" : {
       "name" : "Vanguard Total Stock Market ETF",

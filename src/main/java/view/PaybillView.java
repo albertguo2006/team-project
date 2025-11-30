@@ -14,19 +14,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.InputMap;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 
 import entity.Bill;
@@ -88,6 +76,8 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         // Add keyboard support for returning to game - use WHEN_IN_FOCUSED_WINDOW for global escape
         InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
         inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "goBack");
+        inputMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_Q, 0), "goBack");
+
 
         ActionMap actionMap = this.getActionMap();
         actionMap.put("goBack", new AbstractAction() {
@@ -144,7 +134,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         payAllButton.setFont(new Font("Segoe UI", Font.BOLD, 20));
         payAllButton.setBackground(new Color(76, 175, 80)); // Green
-        payAllButton.setForeground(Color.WHITE);
+        payAllButton.setForeground(Color.BLACK);
         payAllButton.setPreferredSize(new Dimension(172, 40));
         buttonPanel.add(payAllButton);
 
@@ -181,7 +171,7 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
 
         // Style the button
         button.setBackground(new Color(70, 130, 180)); // Steel blue
-        button.setForeground(Color.WHITE);
+        button.setForeground(Color.BLACK);
         button.setFocusPainted(false);
 
         return button;
@@ -233,7 +223,6 @@ public class PaybillView extends JPanel implements ActionListener, PropertyChang
     private void refreshBillsFromDataSource(){
         List<Bill> updatedBills = paybillDataAccessObject.getAllBills();
         loadBills(updatedBills);
-
     }
 
     public void loadBills(List<Bill> bills){

@@ -34,6 +34,7 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             List<Double> realPrices;
 
             // Use new method if month and startDayIndex are provided
+            // get five day prices
             if (inputData.month != null) {
                 var fiveDayPrices = dataAccess.getFiveDayPrices(
                         inputData.symbol,
@@ -61,7 +62,6 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             double[] lastPrice = {startingPrice};
             int[] ticks = {0}; // counter to eventually end game
             final int MAX_TICKS = 120; // 120 ticks * 250ms = 30 seconds
-
 
             Timer timer = createTimer(lastPrice, realPrices, ticks, MAX_TICKS, timerInterval, portfolio, stock);
 

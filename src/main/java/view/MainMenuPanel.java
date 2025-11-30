@@ -33,7 +33,7 @@ public class MainMenuPanel extends JPanel {
     private static final Color TITLE_COLOR = new Color(255, 215, 0);  // Gold
     private static final Color BUTTON_COLOR = new Color(60, 60, 80);
     private static final Color BUTTON_HOVER_COLOR = new Color(80, 80, 120);
-    private static final Color BUTTON_TEXT_COLOR = Color.WHITE;
+    private static final Color BUTTON_TEXT_COLOR = Color.BLACK;
     
     private final JButton newGameButton;
     private final JButton loadGameButton;
