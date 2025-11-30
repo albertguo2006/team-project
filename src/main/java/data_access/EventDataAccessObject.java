@@ -84,6 +84,10 @@ public class EventDataAccessObject implements StartRandomEventDataAccessInterfac
     public double getBalance() {
         return player.getBalance();
     }
+
+    public void addDailySpending(double spending){player.addDailySpending(spending);}
+
+    public void addDailyEarnings(double earnings){player.addDailyEarnings(earnings);}
 }
 
 

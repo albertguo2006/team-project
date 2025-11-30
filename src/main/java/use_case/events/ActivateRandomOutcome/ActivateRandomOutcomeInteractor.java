@@ -45,6 +45,12 @@ public class ActivateRandomOutcomeInteractor implements ActivateRandomOutcomeInp
 
         // Apply the selected outcome
         EventOutcome selectedOutcome = outcomes.get(selectedIndex);
+        if (selectedOutcome.getOutcomeResult() > 0){
+            activateRandomOutcomeDataAccess.addDailyEarnings(selectedOutcome.getOutcomeResult());
+        }
+        else if (selectedOutcome.getOutcomeResult() < 0){
+            activateRandomOutcomeDataAccess.addDailySpending(selectedOutcome.getOutcomeResult() * -1);
+        }
         activateRandomOutcomeDataAccess.setBalance(activateRandomOutcomeDataAccess.getBalance() +
                 selectedOutcome.getOutcomeResult());
         ActivateRandomOutcomeOutputData activateRandomOutcomeOutputData =
