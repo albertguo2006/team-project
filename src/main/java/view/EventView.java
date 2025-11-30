@@ -31,7 +31,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     private final JLabel eventDescription;
     private final JButton dismissButton;
     private final JButton nextButton;
-    private final ArrayList<JButton> choiceButtons = new ArrayList<>();
     private final ArrayList<JLabel> choiceLabels = new ArrayList<>();
 
     private GamePanel gamePanel;
@@ -79,7 +78,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
         // Create 3 choice labels (max outcomes)
         for (int i = 0; i < 3; i++) {
-            JLabel choiceLabel = createChoiceLabel(i);
+            JLabel choiceLabel = createChoiceLabel();
             choiceLabels.add(choiceLabel);
             choicesPanel.add(choiceLabel);
             choicesPanel.add(Box.createRigidArea(new Dimension(0, 15)));
@@ -136,7 +135,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         nextButton.addActionListener(e -> {
             final EventState state = eventViewModel.getState();
             eventOutcomeController.execute(state.getOutcomes());
-            selectChoice();
+//            selectChoice();
         });
 
         this.add(dismissButton);
@@ -155,7 +154,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         });
     }
 
-    private JLabel createChoiceLabel(int index) {
+    private JLabel createChoiceLabel() {
         JLabel label = new JLabel();
         label.setFont(new Font("Arial", Font.PLAIN, 18));
         label.setForeground(Color.WHITE);
@@ -168,12 +167,12 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
         return label;
     }
-    private void selectChoice() {
-        for (JLabel label: choiceLabels) {
-            label.setVisible(false);
-        }
-        showingOutcome = true;
-    }
+//    private void selectChoice() {
+//        for (JLabel label: choiceLabels) {
+//            label.setVisible(false);
+//        }
+//        showingOutcome = true;
+//    }
 
     @Override
     public void actionPerformed(ActionEvent evt) {
@@ -209,10 +208,11 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             // Outcome has been applied - show the result
             final EventState state = (EventState) evt.getNewValue();
             eventDescription.setText(state.getDescription());
+            choiceLabels.get(state.getIndex()).setBorder(BorderFactory.createLineBorder(Color.WHITE, 5));
 
             // Show dismiss button
-            dismissButton.setVisible(true);
             nextButton.setVisible(false);
+            dismissButton.setVisible(true);
         }
     }
 
@@ -236,6 +236,7 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             label.setText("");
             label.setVisible(false);
             label.setBackground(BUTTON_COLOUR);
+            label.setBorder(new EmptyBorder(0, 10, 0, 0));
         }
         eventName.setText(null);
         eventDescription.setText(null);
