@@ -29,6 +29,7 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
      */
     @Override
     public void execute(PlayStockGameInputData inputData) {
+        int timerInterval = 250;
 
         try {   // get the list of prices for that symbol and the corresponding day
             List<Double> realPrices;
@@ -62,7 +63,6 @@ public class PlayStockGameInteractor implements PlayStockGameInputBoundary {
             int[] ticks = {0}; // counter to eventually end game
             final int MAX_TICKS = 120; // 120 ticks * 250ms = 30 seconds
 
-            int timerInterval = inputData.timerIntervalMs > 0 ? inputData.timerIntervalMs : 250;
 
             Timer timer = createTimer(lastPrice, realPrices, ticks, MAX_TICKS, timerInterval, portfolio, stock);
 

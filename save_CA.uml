@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>entity.StockInfo</OriginalElement>
+  <nodes>
+    <node x="793.1666666666667" y="-484.9239239239238">entity.Stock</node>
+    <node x="468.75" y="-669.7847847847848">interface_adapter.stock_trading.StockTradingController</node>
+    <node x="164.0" y="-484.9239239239238">use_case.stock_game.play_stock_game.PlayStockGameInputBoundary</node>
+    <node x="271.8533533533534" y="-271.5265265265268">view.StockGameViewModel</node>
+    <node x="1092.1666666666667" y="-524.9239239239238">api.AlphaStockDataBase</node>
+    <node x="889.1666666666667" y="-669.7847847847848">api.StockDataManager</node>
+    <node x="295.3533533533534" y="-213.50050050050095">view.StockGameView</node>
+    <node x="791.1666666666667" y="-633.0">entity.Player</node>
+    <node x="1113.6666666666667" y="-633.0">api.StockDataBase</node>
+    <node x="782.6666666666667" y="-556.1751751751751">entity.Portfolio</node>
+    <node x="157.0" y="-421.0">use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary</node>
+    <node x="747.3813813813813" y="-441.0">use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface</node>
+    <node x="975.6666666666667" y="-584.9239239239238">entity.StockInfo</node>
+    <node x="182.5" y="-556.1751751751751">use_case.stock_game.play_stock_game.PlayStockGameInputData</node>
+    <node x="253.85335335335338" y="-357.0760760760762">use_case.stock_game.play_stock_game.PlayStockGameOutputData</node>
+    <node x="747.3813813813813" y="-377.8458202362542">api.AlphaStockDataAccessObject</node>
+    <node x="468.75" y="-469.0">use_case.stock_game.play_stock_game.PlayStockGameInteractor</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="api.AlphaStockDataAccessObject" target="use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface" relationship="REALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="887.3813813813813" y="-413.0" />
+      <point x="83.0" y="14.0" />
+    </edge>
+    <edge source="use_case.stock_game.play_stock_game.PlayStockGameInteractor" target="use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary" relationship="TO_ONE">
+      <point x="-82.33333333333334" y="-14.0" />
+      <point x="509.91666666666663" y="-407.0" />
+      <point x="380.5" y="-407.0" />
+      <point x="74.5" y="14.0" />
+    </edge>
+    <edge source="view.StockGameView" target="use_case.stock_game.play_stock_game.PlayStockGameOutputBoundary" relationship="REALIZATION">
+      <point x="59.0" y="-14.0" />
+      <point x="231.5" y="-213.50050050050095" />
+      <point x="-74.5" y="14.0" />
+    </edge>
+    <edge source="use_case.stock_game.play_stock_game.PlayStockGameInteractor" target="use_case.stock_game.play_stock_game.PlayStockGameInputBoundary" relationship="REALIZATION">
+      <point x="82.33333333333334" y="-14.0" />
+      <point x="674.5833333333334" y="-299.0" />
+      <point x="235.0" y="-299.0" />
+      <point x="-71.0" y="14.0" />
+    </edge>
+    <edge source="api.StockDataManager" target="api.AlphaStockDataBase" relationship="TO_ONE">
+      <point x="49.5" y="-14.0" />
+      <point x="1037.6666666666667" y="-655.7847847847848" />
+      <point x="1298.2712712712714" y="-655.7847847847848" />
+      <point x="1298.2712712712714" y="-510.9239239239238" />
+      <point x="1250.4166666666667" y="-510.9239239239238" />
+      <point x="52.75" y="14.0" />
+    </edge>
+    <edge source="use_case.stock_game.play_stock_game.PlayStockGameInteractor" target="entity.Stock" relationship="CREATE">
+      <point x="0.0" y="-14.0" />
+      <point x="816.6666666666667" y="-469.0" />
+      <point x="-23.5" y="14.0" />
+    </edge>
+    <edge source="interface_adapter.stock_trading.StockTradingController" target="api.StockDataManager" relationship="TO_ONE">
+      <point x="-57.25" y="-14.0" />
+      <point x="526.0" y="-712.4574574574575" />
+      <point x="1037.6666666666667" y="-712.4574574574575" />
+      <point x="49.5" y="-14.0" />
+    </edge>
+    <edge source="view.StockGameView" target="view.StockGameViewModel" relationship="TO_ONE">
+      <point x="0.0" y="-14.0" />
+      <point x="439.8533533533534" y="-213.50050050050095" />
+      <point x="56.0" y="14.0" />
+    </edge>
+    <edge source="entity.Player" target="entity.Portfolio" relationship="TO_ONE">
+      <point x="24.5" y="-14.0" />
+      <point x="864.6666666666667" y="-556.1751751751751" />
+      <point x="0.0" y="-14.0" />
+    </edge>
+    <edge source="interface_adapter.stock_trading.StockTradingController" target="use_case.stock_game.play_stock_game.PlayStockGameInputData" relationship="CREATE">
+      <point x="57.25" y="-14.0" />
+      <point x="640.5" y="-739.0" />
+      <point x="306.0" y="-739.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="api.StockDataManager" target="api.AlphaStockDataBase" relationship="CREATE">
+      <point x="-49.5" y="-14.0" />
+      <point x="938.6666666666667" y="-510.9239239239238" />
+      <point x="1144.9166666666667" y="-510.9239239239238" />
+      <point x="-52.75" y="14.0" />
+    </edge>
+    <edge source="interface_adapter.stock_trading.StockTradingController" target="use_case.stock_game.play_stock_game.PlayStockGameInputBoundary" relationship="TO_ONE">
+      <point x="-57.25" y="-14.0" />
+      <point x="526.0" y="-506.54954954954945" />
+      <point x="377.0" y="-506.54954954954945" />
+      <point x="71.0" y="14.0" />
+    </edge>
+    <edge source="api.StockDataManager" target="entity.StockInfo" relationship="CREATE">
+      <point x="-49.5" y="-14.0" />
+      <point x="938.6666666666667" y="-570.9239239239238" />
+      <point x="1006.6666666666667" y="-570.9239239239238" />
+      <point x="-31.0" y="14.0" />
+    </edge>
+    <edge source="entity.Portfolio" target="entity.Stock" relationship="TO_MANY">
+      <point x="0.0" y="-14.0" />
+      <point x="840.1666666666667" y="-510.9239239239238" />
+      <point x="863.6666666666667" y="-510.9239239239238" />
+      <point x="23.5" y="14.0" />
+    </edge>
+    <edge source="api.AlphaStockDataBase" target="api.StockDataBase" relationship="REALIZATION">
+      <point x="0.0" y="-14.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="use_case.stock_game.play_stock_game.PlayStockGameInteractor" target="use_case.stock_game.play_stock_game.PlayStockGameDataAccessInterface" relationship="TO_ONE">
+      <point x="-82.33333333333334" y="-14.0" />
+      <point x="509.91666666666663" y="-413.0" />
+      <point x="-83.0" y="14.0" />
+    </edge>
+    <edge source="use_case.stock_game.play_stock_game.PlayStockGameInteractor" target="use_case.stock_game.play_stock_game.PlayStockGameOutputData" relationship="CREATE">
+      <point x="0.0" y="-14.0" />
+      <point x="592.25" y="-309.0" />
+      <point x="383.8533533533534" y="-309.0" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="interface_adapter.stock_trading.StockTradingController" target="api.StockDataManager" relationship="CREATE">
+      <point x="57.25" y="-14.0" />
+      <point x="640.5" y="-655.7847847847848" />
+      <point x="938.6666666666667" y="-655.7847847847848" />
+      <point x="-49.5" y="-14.0" />
+    </edge>
+    <edge source="view.StockGameView" target="view.StockGameViewModel" relationship="CREATE">
+      <point x="-59.0" y="-14.0" />
+      <point x="324.8533533533534" y="-219.0" />
+      <point x="327.8533533533534" y="-219.0" />
+      <point x="-56.0" y="14.0" />
+    </edge>
+    <edge source="api.StockDataManager" target="entity.StockInfo" relationship="TO_MANY">
+      <point x="49.5" y="-14.0" />
+      <point x="1037.6666666666667" y="-613.3543543543543" />
+      <point x="1068.6666666666667" y="-613.3543543543543" />
+      <point x="31.0" y="14.0" />
+    </edge>
+    <edge source="entity.Player" target="entity.Portfolio" relationship="CREATE">
+      <point x="-24.5" y="-14.0" />
+      <point x="815.6666666666667" y="-619.0" />
+      <point x="826.4049049049049" y="-619.0" />
+      <point x="826.4049049049049" y="-542.1751751751751" />
+      <point x="840.1666666666667" y="-542.1751751751751" />
+      <point x="0.0" y="14.0" />
+    </edge>
+    <edge source="use_case.stock_game.play_stock_game.PlayStockGameInteractor" target="entity.Portfolio" relationship="CREATE">
+      <point x="0.0" y="-14.0" />
+      <point x="592.25" y="-542.1751751751751" />
+      <point x="840.1666666666667" y="-542.1751751751751" />
+      <point x="0.0" y="14.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Compact" zoom="0.7703513281919452" showDependencies="true" x="730.5" y="-462.0000000000001" />
+  <SelectedNodes>
+    <node>use_case.stock_game.play_stock_game.PlayStockGameInteractor</node>
+  </SelectedNodes>
+  <Categories>
+    <Category>Inner Classes</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
