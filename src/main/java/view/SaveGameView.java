@@ -66,25 +66,5 @@ public class SaveGameView extends JPanel {
 
         add(Box.createVerticalGlue());
     }
-
-    public static void main(String[] args) {
-        SaveGameView saveFileView = new SaveGameView(new SaveProgressViewModel());
-
-        JFrame frame = new JFrame("Saving...");
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        frame.setSize(1280, 800);
-        frame.setLocationRelativeTo(null);
-        frame.add(saveFileView);
-        frame.setVisible(true);
-
-        SwingUtilities.invokeLater(() -> {
-            new Timer(2550, e -> {
-                frame.dispose();
-            }) {{
-                setRepeats(false);
-            }}.start();
-        });
-    }
-
 }
 
