@@ -358,7 +358,11 @@ public class MainGameWindow extends JFrame {
 
         // Set up sleep system callbacks
         playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
-        playerInputController.setSleepActionListener(() -> sleepController.sleep(player));
+        playerInputController.setSleepZoneChecker(() -> gamePanel.isInSleepZone());
+        playerInputController.setSleepActionListener(() -> {
+            sleepController.sleep(player);
+            saveGameData();
+        });
 
         // Set up stock trading system callbacks
         playerInputController.setStockTradingZoneChecker(() -> gamePanel.isInStockTradingZone());
