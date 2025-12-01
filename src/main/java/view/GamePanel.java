@@ -28,13 +28,14 @@ import entity.Player;
 import entity.Transition;
 import entity.WorldItem;
 import entity.Zone;
-import interface_adapter.events.PlayerInputController;
 import interface_adapter.events.StartEventController;
 import use_case.Direction;
-import use_case.PlayerMovementUseCase;
+import use_case.movement.PlayerMovementInputBoundary;
+
+import java.awt.event.KeyListener;
 
 public class GamePanel extends JPanel implements ActionListener {
-    private final PlayerMovementUseCase playerMovementUseCase;
+    private final PlayerMovementInputBoundary playerMovementUseCase;
     private final Timer gameTimer;
     private final GameMap gameMap;
     private final NPCDataAccessObject npcDataAccess;
@@ -114,13 +115,13 @@ public class GamePanel extends JPanel implements ActionListener {
      * Constructs a GamePanel with the given use case and input controller.
      * Initializes the game loop timer and sets up the panel.
      *
-     * @param playerMovementUseCase the use case managing player movement
-     * @param playerInputController the controller handling keyboard input
+     * @param playerMovementUseCase the use case input boundary managing player movement
+     * @param inputController the KeyListener handling keyboard input (abstraction, not concrete class)
      * @param gameMap the game map containing zones
      * @param npcDataAccess the NPC data access object
      */
-    public GamePanel(PlayerMovementUseCase playerMovementUseCase,
-                     PlayerInputController playerInputController, GameMap gameMap,
+    public GamePanel(PlayerMovementInputBoundary playerMovementUseCase,
+                     KeyListener inputController, GameMap gameMap,
                      NPCDataAccessObject npcDataAccess) {
         this.playerMovementUseCase = playerMovementUseCase;
         this.gameMap = gameMap;
@@ -134,7 +135,7 @@ public class GamePanel extends JPanel implements ActionListener {
         this.setFocusable(true);
 
         // Attach the input controller as a KeyListener
-        this.addKeyListener(playerInputController);
+        this.addKeyListener(inputController);
 
         // Initialize the game loop timer
         this.gameTimer = new Timer(FRAME_DELAY_MS, this);
@@ -1440,10 +1441,10 @@ public class GamePanel extends JPanel implements ActionListener {
      * Note: Due to final fields, this method has limited ability to update state.
      * For proper game loading, the panel should be recreated with new data.
      *
-     * @param playerMovementUseCase the player movement use case (not used due to final field)
+     * @param playerMovementUseCase the player movement use case input boundary (not used due to final field)
      * @param newGameMap the new game map (not used due to final field)
      */
-    public void loadGameState(PlayerMovementUseCase playerMovementUseCase, GameMap newGameMap) {
+    public void loadGameState(PlayerMovementInputBoundary playerMovementUseCase, GameMap newGameMap) {
         // Note: Since playerMovementUseCase and gameMap are final fields,
         // we cannot replace them. The proper way to load a game is to
         // recreate the entire GamePanel with the new data.
