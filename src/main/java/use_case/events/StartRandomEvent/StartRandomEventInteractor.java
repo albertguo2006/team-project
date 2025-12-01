@@ -32,7 +32,7 @@ public class StartRandomEventInteractor implements StartRandomEventInputBoundary
         int randInt =  random.nextInt(101);
         if (eventPity >= randInt && eventLimit == 0) {
             eventPity = 0;
-            eventLimit = 4;
+            eventLimit = 3;
             /// Selects a random event
             int randomIndex = random.nextInt(startRandomEventDataAccessObject.getSize());
             Event selectedEvent = startRandomEventDataAccessObject.getEvent(randomIndex);
