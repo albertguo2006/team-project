@@ -301,9 +301,8 @@ All dependencies point **inward** toward entities. Outer layers depend on inner 
 **Responsible**: Jayden  
 **Status**: Backend complete, UI integration pending
 
-- Google Gemini API for dynamic dialogue
-- NPC prompts from [`npc_prompts.json`](src/main/resources/npc_prompts.json)
-- Relationship tracking
+- Google Gemini API for dynamic dialogue via guided prompting
+- NPC prompts and names from [`npc_prompts.json`](src/main/resources/npc_prompts.json)
 - Context-aware responses
 
 **Files**: [`NPC.java`](src/main/java/entity/NPC.java), [`NpcInteractionsInteractor.java`](src/main/java/use_case/npc_interactions/NpcInteractionsInteractor.java), [`NPCDataAccessObject.java`](src/main/java/data_access/NPCDataAccessObject.java)
