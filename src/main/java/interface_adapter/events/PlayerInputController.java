@@ -26,7 +26,7 @@ import use_case.movement.PlayerMovementInputBoundary;
  * This controller follows Clean Architecture by keeping presentation concerns
  * (KeyListener) separate from business logic (PlayerMovementUseCase).
  */
-public class PlayerInputController extends PlayerMovementUseCase implements KeyListener {
+public class PlayerInputController implements KeyListener {
     
     /**
      * Callback interface for pause menu events.
