@@ -60,11 +60,12 @@ public class LoadProgressInteractorTest {
         investments.put(stock2, 6.32);
 
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
-        List<Event> eventsTest= testPlayer.getEvents();
+        List<Event> eventsTest = testPlayer.getEvents();
 
+        assert(player.equals(testPlayer));
         assert(gameMap.getCurrentZone().getName().equals("Subway Station 1"));
-        assert(eventsTest.get(0).getEventName().equals("Found Money!"));
-        assert(eventsTest.get(1).getEventName().equals("Vending Machine Glitch"));
+        assert(eventsTest.get(0).getEventName().equals("Subway Busker"));
+        assert(eventsTest.get(1).getEventName().equals("Fallen Groceries"));
         assert(loadProgressViewModel.getRecentSaveDate().equals("2025-10-30"));
     }
 

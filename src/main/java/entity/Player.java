@@ -377,6 +377,12 @@ public class Player {
         if (this == obj) return true;
         if (!(obj instanceof Player)) return false;
         Player player = (Player) obj;
+
+        for (int i = 0; i < events.size(); i++) {
+            Event event = events.get(i);
+            if (!event.equals(events.get(i))) return false;
+        }
+
         return Double.compare(player.balance, balance) == 0 &&
                Double.compare(player.x, x) == 0 &&
                Double.compare(player.y, y) == 0 &&
@@ -389,7 +395,6 @@ public class Player {
                Objects.equals(name, player.name) &&
                Objects.equals(stats, player.stats) &&
                Objects.equals(relationships, player.relationships) &&
-               Objects.equals(events, player.events) &&
                Objects.equals(portfolio, player.portfolio) &&
                Objects.equals(inventory, player.inventory) &&
                currentDay == player.currentDay;
