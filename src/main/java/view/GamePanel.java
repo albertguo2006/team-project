@@ -28,13 +28,14 @@ import entity.Player;
 import entity.Transition;
 import entity.WorldItem;
 import entity.Zone;
+import interface_adapter.events.PlayerInputController;
 import interface_adapter.events.StartEventController;
 import use_case.Direction;
 import use_case.movement.PlayerMovementInputBoundary;
 
 import java.awt.event.KeyListener;
 
-public class GamePanel extends JPanel implements ActionListener {
+public class GamePanel extends PlayerInputController implements ActionListener {
     private final PlayerMovementInputBoundary playerMovementUseCase;
     private final Timer gameTimer;
     private final GameMap gameMap;

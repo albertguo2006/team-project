@@ -10,6 +10,7 @@ import entity.NPC;
 import entity.Player;
 import entity.WorldItem;
 import use_case.Direction;
+import use_case.PlayerMovementUseCase;
 import use_case.movement.PlayerMovementInputBoundary;
 
 /**
@@ -25,7 +26,7 @@ import use_case.movement.PlayerMovementInputBoundary;
  * This controller follows Clean Architecture by keeping presentation concerns
  * (KeyListener) separate from business logic (PlayerMovementUseCase).
  */
-public class PlayerInputController implements KeyListener {
+public class PlayerInputController extends PlayerMovementUseCase implements KeyListener {
     
     /**
      * Callback interface for pause menu events.
