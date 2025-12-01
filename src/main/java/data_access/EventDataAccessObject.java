@@ -88,10 +88,6 @@ public class EventDataAccessObject implements StartRandomEventDataAccessInterfac
         return eventList.get(index);
     }
 
-    public ArrayList<Event> getEventList() {
-        return eventList;
-    }
-
     public int getSize() {
         return eventList.size();
     }

@@ -9,6 +9,5 @@ public interface StartRandomEventDataAccessInterface {
     Event getEvent(int index);
     int getSize();
     ArrayList<Event> createEventList();
-    ArrayList<Event> getEventList();
     void setPlayer(Player player);
 }
