@@ -16,7 +16,7 @@ import use_case.movement.PlayerMovementInputBoundary;
  * any framework or presentation layer concerns. It implements PlayerMovementInputBoundary
  * to allow interface adapters to depend on an abstraction rather than this concrete class.
  */
-public class PlayerMovementUseCase implements PlayerMovementInputBoundary {
+public class PlayerMovementUseCase extends Player implements PlayerMovementInputBoundary {
     
     private final Player player;
     
