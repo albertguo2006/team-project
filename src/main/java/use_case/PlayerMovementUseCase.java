@@ -1,20 +1,22 @@
 package use_case;
 
 import entity.Player;
+import use_case.movement.PlayerMovementInputBoundary;
 
 /**
  * PlayerMovementUseCase handles the business logic for player character movement.
- * 
+ *
  * Responsibilities:
  * - Maintains the state of which directions the player is currently moving
  * - Updates the player's position based on elapsed time and movement velocity
  * - Performs collision detection and boundary checking
  * - Completely decoupled from Swing and GUI rendering
- * 
+ *
  * This use case follows Clean Architecture principles by being independent of
- * any framework or presentation layer concerns.
+ * any framework or presentation layer concerns. It implements PlayerMovementInputBoundary
+ * to allow interface adapters to depend on an abstraction rather than this concrete class.
  */
-public class PlayerMovementUseCase {
+public class PlayerMovementUseCase implements PlayerMovementInputBoundary {
     
     private final Player player;
     
@@ -44,10 +46,11 @@ public class PlayerMovementUseCase {
     /**
      * Sets or clears a movement state for a given direction.
      * This is called by PlayerInputController whenever a key is pressed or released.
-     * 
+     *
      * @param direction the Direction to update
      * @param isMoving true to start moving in that direction, false to stop
      */
+    @Override
     public void setMovementState(Direction direction, boolean isMoving) {
         if (direction == null) {
             throw new IllegalArgumentException("Direction cannot be null");
@@ -68,15 +71,16 @@ public class PlayerMovementUseCase {
     /**
      * Updates the player's position based on current movement state and elapsed time.
      * Called once per game loop tick (approximately every 16ms at 60 FPS).
-     * 
+     *
      * This method:
      * 1. Calculates velocity based on active movement directions
      * 2. Computes new position: newPos = currentPos + (velocity * deltaTime)
      * 3. Checks for collisions and boundary violations (but allows edge crossing for zone transitions)
      * 4. Updates the player's x and y coordinates
-     * 
+     *
      * @param deltaTime the time elapsed since the last update, in seconds
      */
+    @Override
     public void updatePosition(double deltaTime) {
         // Calculate velocity components based on movement state
         double velocityX = 0.0;
@@ -133,9 +137,10 @@ public class PlayerMovementUseCase {
     /**
      * Returns the player entity managed by this use case.
      * Needed by the presentation layer for rendering and other operations.
-     * 
+     *
      * @return the Player entity
      */
+    @Override
     public Player getPlayer() {
         return player;
     }
@@ -143,9 +148,10 @@ public class PlayerMovementUseCase {
     /**
      * Returns whether the player is currently moving in any direction.
      * Useful for animation state management.
-     * 
+     *
      * @return true if any movement direction is active
      */
+    @Override
     public boolean isMoving() {
         return movingUp || movingDown || movingLeft || movingRight;
     }
@@ -153,9 +159,10 @@ public class PlayerMovementUseCase {
     /**
      * Gets the current movement direction (for animation purposes).
      * If multiple keys are pressed, returns the primary active direction.
-     * 
+     *
      * @return the primary active Direction, or null if not moving
      */
+    @Override
     public Direction getCurrentDirection() {
         // Prioritize: Down > Up > Right > Left (arbitrary but consistent)
         if (movingDown) return Direction.DOWN;
@@ -165,7 +172,10 @@ public class PlayerMovementUseCase {
         return null;
     }
 
-    /// Stops the player's movement in all directions
+    /**
+     * Stops all movement in all directions.
+     */
+    @Override
     public void stopMovement() {
         movingUp = false;
         movingDown = false;

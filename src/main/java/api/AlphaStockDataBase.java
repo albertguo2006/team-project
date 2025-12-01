@@ -125,9 +125,9 @@ public class AlphaStockDataBase implements StockDataBase {
             timeSeries = rootNode.get("Time Series (Daily)");
         }
 
-        //if (timeSeries == null) { // if time series data not found
-          //  throw new RuntimeException("No 'Time Series (5min)' or 'Time Series (Daily)' found.");
-        //}
+        if (timeSeries == null) { // if time series data not found
+            throw new RuntimeException("No 'Time Series (5min)' or 'Time Series (Daily)' found.");
+        }
 
         // Check if we have daily or intraday data
         boolean isDailyData = rootNode.get("Time Series (Daily)") != null;
@@ -259,7 +259,10 @@ public class AlphaStockDataBase implements StockDataBase {
         // If 5min data not found, try daily data
         if (timeSeries == null) {
             timeSeries = rootNode.get("Time Series (Daily)");
-             // if time series data not found
+        }
+
+        // if time series data not found
+        if (timeSeries == null) {
             throw new RuntimeException("No 'Time Series (5min)' or 'Time Series (Daily)' found.");
         }
 

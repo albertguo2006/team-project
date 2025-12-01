@@ -10,7 +10,7 @@ import entity.NPC;
 import entity.Player;
 import entity.WorldItem;
 import use_case.Direction;
-import use_case.PlayerMovementUseCase;
+import use_case.movement.PlayerMovementInputBoundary;
 
 /**
  * PlayerInputController translates raw keyboard input into movement commands.
@@ -126,7 +126,7 @@ public class PlayerInputController implements KeyListener {
         void onInventoryItemDropped(int slotIndex);
     }
 
-    private final PlayerMovementUseCase playerMovementUseCase;
+    private final PlayerMovementInputBoundary playerMovementUseCase;
     private JFrame parentFrame;  // Optional: for frame reference
     private PauseMenuListener pauseMenuListener;
     private SleepZoneChecker sleepZoneChecker;
@@ -145,10 +145,10 @@ public class PlayerInputController implements KeyListener {
 
     /**
      * Constructs a PlayerInputController with the given use case.
-     * 
-     * @param playerMovementUseCase the use case to delegate movement commands to
+     *
+     * @param playerMovementUseCase the use case input boundary to delegate movement commands to
      */
-    public PlayerInputController(PlayerMovementUseCase playerMovementUseCase) {
+    public PlayerInputController(PlayerMovementInputBoundary playerMovementUseCase) {
         this.playerMovementUseCase = playerMovementUseCase;
     }
     
@@ -451,9 +451,9 @@ public class PlayerInputController implements KeyListener {
      * within the existing use case would be preferred, but this provides a workaround
      * for the load game feature.
      *
-     * @param newPlayerMovementUseCase the new player movement use case
+     * @param newPlayerMovementUseCase the new player movement use case input boundary
      */
-    public void updatePlayerMovementUseCase(PlayerMovementUseCase newPlayerMovementUseCase) {
+    public void updatePlayerMovementUseCase(PlayerMovementInputBoundary newPlayerMovementUseCase) {
         // Note: Since playerMovementUseCase is final, we can't replace it.
         // The load game feature should instead update the player within the existing use case.
         // This method is here to satisfy the interface but won't work with the current design.

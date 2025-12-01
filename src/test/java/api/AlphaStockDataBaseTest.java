@@ -162,7 +162,8 @@ class AlphaStockDataBaseTest {
     }
 
     @Test
-    void testGameDay5minFail() throws Exception {
+    void testGameDay5minFallbackToDaily() throws Exception {
+        // Test that daily data is used as fallback when 5min data is not available
         String json = """
         {
           "Time Series (Daily)": {
@@ -175,9 +176,9 @@ class AlphaStockDataBaseTest {
         }
         """;
         writeJson("GTEST", json);
-        Exception ex = assertThrows(RuntimeException.class,
-                () -> AlphaStockDataBase.getIntradayOpensForGameDay("GTEST", 1));
-        assertTrue(ex.getMessage().contains("No 'Time Series (5min)'"));
+        // Should now successfully fall back to daily data and return simulated intraday prices
+        List<Double> prices = AlphaStockDataBase.getIntradayOpensForGameDay("GTEST", 1);
+        assertEquals(78, prices.size()); // 78 simulated 5-minute intervals
     }
 
     @Test

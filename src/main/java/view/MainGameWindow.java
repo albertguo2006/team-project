@@ -38,6 +38,7 @@ import interface_adapter.sleep.SleepPresenter;
 import interface_adapter.sleep.SleepViewModel;
 import interface_adapter.stock_trading.StockTradingController;
 import use_case.PlayerMovementUseCase;
+import use_case.movement.PlayerMovementInputBoundary;
 import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeDataAccessInterface;
 import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInputBoundary;
 import use_case.events.ActivateRandomOutcome.ActivateRandomOutcomeInteractor;
@@ -959,7 +960,7 @@ public class MainGameWindow extends JFrame {
                 this.player = loadedPlayer;
 
                 // Update the player movement use case with the loaded player
-                PlayerMovementUseCase playerMovementUseCase = new PlayerMovementUseCase(loadedPlayer);
+                PlayerMovementInputBoundary playerMovementUseCase = new PlayerMovementUseCase(loadedPlayer);
                 playerInputController.updatePlayerMovementUseCase(playerMovementUseCase);
 
                 // Update the game panel with the loaded game state
