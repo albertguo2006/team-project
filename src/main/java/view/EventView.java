@@ -6,6 +6,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -16,7 +17,6 @@ import interface_adapter.events.EventViewModel;
 import interface_adapter.ViewManagerModel;
 
 public class EventView extends JPanel implements ActionListener, PropertyChangeListener {
-    private final String viewName = "Event";
     private final EventViewModel eventViewModel;
     private final ViewManagerModel viewManagerModel;
 
@@ -29,11 +29,11 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
     private final JLabel eventName;
     private final JLabel eventDescription;
-    private final JButton nextButton;
     private final JButton dismissButton;
+    private final JButton nextButton;
+    private final ArrayList<JLabel> choiceLabels = new ArrayList<>();
 
     private GamePanel gamePanel;
-    private boolean showingOutcome = false;  // Track if we're showing outcome vs initial event
 
     public EventView(EventViewModel eventviewModel, ViewManagerModel viewManagerModel) {
         this.eventViewModel = eventviewModel;
@@ -56,7 +56,6 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         eventName = new JLabel();
         eventName.setFont(new Font("Arial", Font.BOLD, 48));
         eventName.setAlignmentX(Component.CENTER_ALIGNMENT);
-        eventName.setHorizontalAlignment(SwingConstants.CENTER);
         eventName.setForeground(Color.WHITE);
 
         this.add(eventName);
@@ -66,45 +65,29 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         eventDescription.setFont(new Font("Arial", Font.PLAIN, 20));
         eventDescription.setForeground(Color.WHITE);
         eventDescription.setAlignmentX(Component.CENTER_ALIGNMENT);
-        eventDescription.setHorizontalAlignment(SwingConstants.CENTER);
 
         this.add(eventDescription);
         this.add(Box.createRigidArea(new Dimension(0, 40)));
 
-        // Next button - shown initially to proceed to outcome
-        nextButton = new JButton("Next");
-        nextButton.setFont(new Font("Arial", Font.BOLD, 20));
-        nextButton.setForeground(Color.BLACK);
-        nextButton.setBackground(BUTTON_COLOUR);
-        nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        nextButton.setMaximumSize(new Dimension(200, 50));
-        nextButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        nextButton.setVisible(false);
+        // Panel for choice buttons
+        JPanel choicesPanel = new JPanel();
+        choicesPanel.setBackground(BACKGROUND_COLOUR);
+        choicesPanel.setLayout(new BoxLayout(choicesPanel, BoxLayout.Y_AXIS));
+        choicesPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                if (nextButton.isVisible()) {
-                    nextButton.setBackground(BUTTON_HOVER_COLOUR);
-                }
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                nextButton.setBackground(BUTTON_COLOUR);
-            }
-        });
+        // Create 3 choice labels (max outcomes)
+        for (int i = 0; i < 3; i++) {
+            JLabel choiceLabel = createChoiceLabel();
+            choiceLabels.add(choiceLabel);
+            choicesPanel.add(choiceLabel);
+            choicesPanel.add(Box.createRigidArea(new Dimension(0, 15)));
+        }
 
-        nextButton.addActionListener(e -> {
-            if (!showingOutcome) {
-                triggerRandomOutcome();
-            }
-        });
-
-        this.add(nextButton);
+        this.add(choicesPanel);
         this.add(Box.createRigidArea(new Dimension(0, 30)));
 
         // Dismiss button (hidden initially, shown after outcome)
-        dismissButton = new JButton("Continue");
+        dismissButton = new JButton("Exit");
         dismissButton.setFont(new Font("Arial", Font.BOLD, 20));
         dismissButton.setForeground(Color.BLACK);
         dismissButton.setBackground(BUTTON_COLOUR);
@@ -128,7 +111,33 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
             returnToGame();
         });
 
+        // Next buttom (shown initially, hidden after outcome)
+        nextButton = new JButton("Continue");
+        nextButton.setFont(new Font("Arial", Font.BOLD, 20));
+        nextButton.setForeground(Color.BLACK);
+        nextButton.setBackground(BUTTON_COLOUR);
+        nextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        nextButton.setMaximumSize(new Dimension(200, 50));
+        nextButton.setVisible(true);
+
+        nextButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                nextButton.setBackground(BUTTON_HOVER_COLOUR);
+            }
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                nextButton.setBackground(BUTTON_COLOUR);
+            }
+        });
+
+        nextButton.addActionListener(e -> {
+            final EventState state = eventViewModel.getState();
+            eventOutcomeController.execute(state.getOutcomes());
+        });
+
         this.add(dismissButton);
+        this.add(nextButton);
 
         // Add escape key binding to exit the event
         InputMap inputMap = this.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
@@ -143,15 +152,18 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
         });
     }
 
-    private void triggerRandomOutcome() {
-        // Hide the next button
-        nextButton.setVisible(false);
+    private JLabel createChoiceLabel() {
+        JLabel label = new JLabel();
+        label.setFont(new Font("Arial", Font.PLAIN, 18));
+        label.setForeground(Color.WHITE);
+        label.setBackground(BUTTON_COLOUR);
+        label.setAlignmentX(Component.CENTER_ALIGNMENT);
+        label.setBorder(new EmptyBorder(0, 10, 0, 0));
+        label.setMaximumSize(new Dimension(600, 50));
+        label.setVisible(false);
+        label.setOpaque(true);
 
-        // Execute random outcome selection (no user choice)
-        final EventState state = eventViewModel.getState();
-        eventOutcomeController.execute(state.getOutcomes());
-
-        showingOutcome = true;
+        return label;
     }
 
     @Override
@@ -168,35 +180,31 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
 
             final EventState state = (EventState) evt.getNewValue();
             eventName.setText(state.getName());
-            eventDescription.setText(centerHtmlText(state.getDescription()));
+            eventDescription.setText(state.getDescription());
 
-            // Show the next button to proceed
-            showingOutcome = false;
+            // Show choice buttons based on number of outcomes
             dismissButton.setVisible(false);
             nextButton.setVisible(true);
+
+            for (int i = 0; i < choiceLabels.size(); i++) {
+                if (i < state.getOutcomeCount()) {
+                    choiceLabels.get(i).setText(state.getOutcomeName(i));
+                    choiceLabels.get(i).setVisible(true);
+                } else {
+                    choiceLabels.get(i).setVisible(false);
+                }
+            }
         }
         else if (evt.getPropertyName().equals("Outcome")) {
             // Outcome has been applied - show the result
             final EventState state = (EventState) evt.getNewValue();
-            eventDescription.setText(centerHtmlText(state.getDescription()));
+            eventDescription.setText(state.getDescription());
+            choiceLabels.get(state.getIndex()).setBorder(BorderFactory.createLineBorder(Color.WHITE, 5));
 
-            // Hide next button, show dismiss button
+            // Show dismiss button
             nextButton.setVisible(false);
             dismissButton.setVisible(true);
         }
-    }
-
-    private String centerHtmlText(String htmlText) {
-        if (htmlText == null) {
-            return null;
-        }
-        // Add centering style to HTML content
-        return htmlText.replace("<html>", "<html><div style='text-align:center;'>")
-                       .replace("</html>", "</div></html>");
-    }
-
-    public String getViewName() {
-        return viewName;
     }
 
     public void setActivateRandomOutcomeController(EventOutcomeController eventOutcomeController) {
@@ -215,12 +223,15 @@ public class EventView extends JPanel implements ActionListener, PropertyChangeL
     }
 
     private void clearAll() {
+        for (JLabel label : choiceLabels) {
+            label.setText("");
+            label.setVisible(false);
+            label.setBackground(BUTTON_COLOUR);
+            label.setBorder(new EmptyBorder(0, 10, 0, 0));
+        }
         eventName.setText(null);
         eventDescription.setText(null);
-        nextButton.setVisible(false);
-        nextButton.setBackground(BUTTON_COLOUR);
         dismissButton.setVisible(false);
-        showingOutcome = false;
     }
 
     public void setGamePanel(GamePanel gamePanel) {

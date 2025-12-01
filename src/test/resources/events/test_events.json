@@ -1,0 +1,105 @@
+[{
+  "id": 1,
+  "name": "Fallen Groceries",
+  "description": "<html><p>An elderly person's grocery bag just ripped open, sending oranges and cans rolling across the sidewalk. They look overwhelmed trying to pick everything up.</p></html>",
+  "probability": 0.1,
+  "outcomes": {
+    "0": {
+      "name": "Help them out ($150) | 60%",
+      "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $150 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
+      "chance": 0.6,
+      "result": 150
+    },
+    "1": {
+      "name": "Pick up a few items nearby ($0) | 30%",
+      "description": "<html><p>You grab a couple of rolling oranges and hand them back with a smile. They thank you warmly as you continue on your way.</p></html>",
+      "chance": 0.3,
+      "result": 0
+    },
+    "2": {
+      "name": "You're running late, keep moving (-$50) | 10%",
+      "description": "<html><p>You hurry past, avoiding eye contact. While running, you don't notice $50 falling out of your pocket. Guess this is karma...</p></html>",
+      "chance": 0.1,
+      "result": -50
+    }
+  }
+},
+  {
+    "id": 2,
+    "name": "Fallen Groceries",
+    "description": "<html><p>An elderly person's grocery bag just ripped open, sending oranges and cans rolling across the sidewalk. They look overwhelmed trying to pick everything up.</p></html>",
+    "probability": 0.2,
+    "outcomes": {
+      "0": {
+        "name": "Help them out ($150) | 60%",
+        "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $150 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
+        "chance": 0.6,
+        "result": 150
+      },
+      "1": {
+        "name": "Pick up a few items nearby ($0) | 30%",
+        "description": "<html><p>You grab a couple of rolling oranges and hand them back with a smile. They thank you warmly as you continue on your way.</p></html>",
+        "chance": 0.3,
+        "result": 0
+      },
+      "2": {
+        "name": "You're running late, keep moving (-$50) | 10%",
+        "description": "<html><p>You hurry past, avoiding eye contact. While running, you don't notice $50 falling out of your pocket. Guess this is karma...</p></html>",
+        "chance": 0.1,
+        "result": -50
+      }
+    }
+  },
+  {
+    "id": 3,
+    "name": "Fallen Groceries",
+    "description": "<html><p>An elderly person's grocery bag just ripped open, sending oranges and cans rolling across the sidewalk. They look overwhelmed trying to pick everything up.</p></html>",
+    "probability": 0.3,
+    "outcomes": {
+      "0": {
+        "name": "Help them out ($150) | 60%",
+        "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $150 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
+        "chance": 0.6,
+        "result": 150
+      },
+      "1": {
+        "name": "Pick up a few items nearby ($0) | 30%",
+        "description": "<html><p>You grab a couple of rolling oranges and hand them back with a smile. They thank you warmly as you continue on your way.</p></html>",
+        "chance": 0.3,
+        "result": 0
+      },
+      "2": {
+        "name": "You're running late, keep moving (-$50) | 10%",
+        "description": "<html><p>You hurry past, avoiding eye contact. While running, you don't notice $50 falling out of your pocket. Guess this is karma...</p></html>",
+        "chance": 0.1,
+        "result": -50
+      }
+    }
+  },
+  {
+    "id": 4,
+    "name": "Fallen Groceries",
+    "description": "<html><p>An elderly person's grocery bag just ripped open, sending oranges and cans rolling across the sidewalk. They look overwhelmed trying to pick everything up.</p></html>",
+    "probability": 0.4,
+    "outcomes": {
+      "0": {
+        "name": "Help them out ($150) | 60%",
+        "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $150 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
+        "chance": 0.6,
+        "result": 150
+      },
+      "1": {
+        "name": "Pick up a few items nearby ($0) | 30%",
+        "description": "<html><p>You grab a couple of rolling oranges and hand them back with a smile. They thank you warmly as you continue on your way.</p></html>",
+        "chance": 0.3,
+        "result": 0
+      },
+      "2": {
+        "name": "You're running late, keep moving (-$50) | 10%",
+        "description": "<html><p>You hurry past, avoiding eye contact. While running, you don't notice $50 falling out of your pocket. Guess this is karma...</p></html>",
+        "chance": 0.1,
+        "result": -50
+      }
+    }
+  }
+]

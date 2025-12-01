@@ -17,10 +17,4 @@ public class StartRandomEventOutputData {
     public HashMap<Integer, EventOutcome> getOutcomes() {
         return event.getOutcomes();
     }
-    public int getOutcomeCount(){
-        return event.getOutcomes().size();
-    }
-    public Event getEvent() {
-        return event;
-    }
 }

@@ -18,7 +18,7 @@
         "result": -50
       },
       "2": {
-        "name": "Keep walking ($0) | 30",
+        "name": "Keep walking ($0) | 30%",
         "description": "<html><p>You're in a hurry and walk past without stopping. The music fades as you head toward your destination. Maybe next time.</p></html>",
         "chance": 0.3,
         "result": 0
@@ -32,10 +32,10 @@
     "probability": 1.0,
     "outcomes": {
       "0": {
-        "name": "Help them out ($150) | 60%",
-        "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $150 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
+        "name": "Help them out ($300) | 60%",
+        "description": "<html><p>You help gather all the groceries and even offer to carry them to their car. The grateful stranger insists you take $300 for your kindness. 'Young people like you restore my faith in humanity!'</p></html>",
         "chance": 0.6,
-        "result": 150
+        "result": 300
       },
       "1": {
         "name": "Pick up a few items nearby ($0) | 30%",
@@ -110,10 +110,10 @@
         "result": -150
       },
       "1": {
-        "name": "Order from the regular menu (-$120) | 10%",
-        "description": "<html><p>You play it safe and order a regular chicken wrap for $120. It's delicious and filling - no regrets!</p></html>",
+        "name": "Order from the regular menu (-$60) | 10%",
+        "description": "<html><p>You play it safe and order a regular chicken wrap for $60. It's delicious and filling - no regrets!</p></html>",
         "chance": 0.1,
-        "result": -120
+        "result": -60
       },
       "2": {
         "name": "You already ate, pass ($0) | 10%",
@@ -182,16 +182,16 @@
     "probability": 1.0,
     "outcomes": {
       "0": {
-        "name": "Report it to maintenance ($100) | 30$",
+        "name": "Report it to maintenance ($100) | 30%",
         "description": "<html><p>You do the right thing and report the malfunction. The maintenance guy is grateful and gives you $100 from the petty cash as thanks for your honesty.</p></html>",
         "chance": 0.3,
         "result": 100
       },
       "1": {
-        "name": "Take a few extra snacks ($80) | 50%",
-        "description": "<html><p>You grab $80 worth of items before walking away. Free snacks! You feel a little guilty but hey, victimless crime right? </p></html>",
+        "name": "Take as many snacks as you can ($800) | 50%",
+        "description": "<html><p>You grab $800 worth of items before walking away. Free snacks! You feel a little guilty but hey, victimless crime right? </p></html>",
         "chance": 0.5,
-        "result": 80
+        "result": 800
       },
       "2": {
         "name": "Just take your snack and leave ($20) | 20%",
@@ -312,10 +312,10 @@
         "result": 0
       },
       "2": {
-        "name": "Buy your own ticket instead ($80) | 30%",
-        "description": "<html><p>You buy your own $20 ticket. You don't win the jackpot but you do match two numbers for a $100 prize! Better than the pool did.</p></html>",
+        "name": "Buy your own ticket instead ($980) | 30%",
+        "description": "<html><p>You buy your own $20 ticket. You don't win the jackpot but you do match four numbers for a $1000 prize! Better than the pool did.</p></html>",
         "chance": 0.3,
-        "result": 80
+        "result": 980
       }
     }
   },
@@ -342,18 +342,18 @@
   {
     "id": 14,
     "name": "Found Money",
-    "description": "<html><p>You find a crumpled $200 bill on the ground near an ATM. There's no one around who might have dropped it.</p></html>",
+    "description": "<html><p>You find 3 crumpled a $200 bills on the ground near an ATM. There's no one around who might have dropped it.</p></html>",
     "probability": 1.0,
     "outcomes": {
       "0": {
-        "name": "Pocket it - lucky day! ($200) | 60%",
-        "description": "<html><p>You pocket the $200 with a smile. Free money! Sometimes the universe just gives you a little gift.</p></html>",
+        "name": "Pocket them - lucky day! ($600) | 60%",
+        "description": "<html><p>You pocket the $600 with a smile. Free money! Sometimes the universe just gives you a little gift.</p></html>",
         "chance": 0.6,
-        "result": 200
+        "result": 600
       },
       "1": {
-        "name": "Turn it in to the bank ($0) | 40%",
-        "description": "<html><p>You give it to the bank teller in case someone comes looking. They seem surprised anyone would bother. Honesty doesn't always pay.</p></html>",
+        "name": "Turn them in to the bank ($0) | 40%",
+        "description": "<html><p>You give them to the bank teller in case someone comes looking. They seem surprised anyone would bother. Honesty doesn't always pay.</p></html>",
         "chance": 0.4,
         "result": 0
       },

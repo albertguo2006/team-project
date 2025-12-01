@@ -15,10 +15,11 @@ public class ActivateRandomOutcomeOutputData{
     public String getDescription(){
         return outcome.getOutcomeDescription();
     }
+    public double getResult() {return outcome.getOutcomeResult();}
     public int getIndex(){
         return index;
     }
-    public EventOutcome getOutcome(){
-        return outcome;
-    }
+//    public EventOutcome getOutcome(){
+//        return outcome;
+//    }
 }
