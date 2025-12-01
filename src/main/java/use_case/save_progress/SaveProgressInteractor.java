@@ -3,6 +3,7 @@ package use_case.save_progress;
 import entity.Player;
 import use_case.load_progress.LoadProgressOutputData;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class SaveProgressInteractor implements SaveProgressInputBoundary{
@@ -27,7 +28,7 @@ public class SaveProgressInteractor implements SaveProgressInputBoundary{
             saveProgressPresenter.prepareSuccessView(saveProgressOutputData);
         }
         catch (IOException e) {
-            throw e;
+            throw new FileNotFoundException(e.getMessage());
         }
     }
 }
