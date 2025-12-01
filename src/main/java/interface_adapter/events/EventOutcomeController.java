@@ -17,9 +17,4 @@ public class EventOutcomeController{
         ActivateRandomOutcomeInputData  input = new ActivateRandomOutcomeInputData(outcomes);
         activateRandomOutcomeInteractor.execute(input);
     }
-
-    public void execute(HashMap<Integer, EventOutcome> outcomes, int selectedOutcomeIndex){
-        ActivateRandomOutcomeInputData  input = new ActivateRandomOutcomeInputData(outcomes, selectedOutcomeIndex);
-        activateRandomOutcomeInteractor.execute(input);
-    }
 }
