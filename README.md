@@ -1,9 +1,8 @@
 
-# California Prop. 65 - Game Documentation
+# Game Documentation
 
-**Team:** TUT0401-14 (CSC207 LEC0201 Group 14)  
-**Domain:** Stock Market and Life Simulator Game  
-**Architecture:** Clean Architecture with Java Swing
+**Team:** TUT0401-14 (LEC0201 Group 14)  
+**Domain:** Financial Sims Knock-Off
 
 ---
 
@@ -24,22 +23,20 @@
 
 ## Project Overview
 
-California Prop. 65 is a 2D simulation game that provides satirical commentary on the financial pressures of modern life. Players navigate an exaggerated capitalistic world, managing a 9-5 job, paying bills, and handling unexpected life events. The core gameplay loop involves surviving a work week (Monday-Friday), managing money, and attempting to build wealth through a simulated stock market.
+Financial Sims Knock-Off is a simulation game where players attempt to survive in an increasingly demanding captialistic world. They must work a pointless 9-5 job that provides a meager and unstable source of income at best, all while needing to pay countless bills and manage unexpected events. The goal is to try to survive from Monday to Friday, and maybe have some fun and learn about stocks along the way! On a deeper level, our game provides satirical commentary on the modern day, and serves as a humourous outlet to release frustrations about financial pressures of today's world. 
 
 ### Key Features
 
 - **2D Environment Navigation**: Move through multiple interconnected zones (home, streets, subway, office)
-- **Day-Based Progression**: Experience a full work week from Monday to Friday
-- **Stock Trading Minigame**: Earn money by playing the stock market
-- **Random Events**: Encounter unpredictable life challenges
-- **NPC Interactions**: Talk to characters with AI-generated dialogue
-- **Bill Payment System**: Manage recurring expenses
-- **Save/Load System**: Persist game progress
-- **Resizable Window**: 16:10 aspect ratio with automatic scaling (1920x1200 virtual resolution)
+- **Daily Tasks**: Pay your growing stack of bills, and save the game by sleeping to end each day. 
+- **Stock Trading Minigame**: Invest your money, buy low and sell high during a live mini-game to earn a profit. 
+- **Random Events**: Test your chances when faced with unpredictable life events. 
+- **NPC Interactions**: Talk to characters with AI-generated dialogue that you find along the way.
+- **Save/Load System**: Maintain your progress by saving and loading the game.
 
 ### Technology Stack
 
-- **Language**: Java 11+
+- **Language**: Java 16+
 - **GUI Framework**: Java Swing
 - **Build Tool**: Maven
 - **APIs**: Alpha Vantage (stock data), Google Gemini (NPC dialogue)
@@ -53,32 +50,14 @@ California Prop. 65 is a 2D simulation game that provides satirical commentary o
 
 ### Prerequisites
 
-- Java 11 or higher
+- Java 16 or higher
 - Maven (recommended) or `javac`
 
 ### Running the Game
 
-#### Option 1: Using Maven (Recommended)
-
-```bash
-cd /path/to/team-project
-mvn clean compile exec:java -Dexec.mainClass="app.Main"
-```
-
-#### Option 2: Using IntelliJ IDEA
-
 1. Open project in IntelliJ IDEA
 2. Build → Build Project (Ctrl+F9 / Cmd+F9)
 3. Right-click on [`Main.java`](src/main/java/app/Main.java) → Run 'Main.main()'
-
-#### Option 3: Manual Compilation
-
-```bash
-cd src/main/java
-javac -d ../../../target/classes app/Main.java
-cd ../../../target/classes
-java app.Main
-```
 
 ### Controls
 
