@@ -16,27 +16,27 @@ public class ActivateRandomOutcomeInteractorTest {
     public void successActivateRandomOutcomeTest(){
         String source = "src/test/resources/events/test_events.json";
         EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
-        eventDataAccessObject.createEventList(source);
+        /// select a single event for testing
+        Event testEvent = eventDataAccessObject.createEventList(source).get(0);
 
         Player player = new Player("Test Player");
         oldBalance = player.getBalance();
 
         eventDataAccessObject.setPlayer(player);
 
-        /// select a single event for testing
-        Event testEvent = eventDataAccessObject.getEventList().get(0);
-
         ActivateRandomOutcomeInputData inputData = new ActivateRandomOutcomeInputData(testEvent.getOutcomes());
 
         ActivateRandomOutcomeOutputBoundary activateRandomOutcomePresenter = new ActivateRandomOutcomeOutputBoundary() {
             @Override
             public void prepareSuccessView(ActivateRandomOutcomeOutputData activateRandomOutcomeOutputData) {
-                //Test that the random outcome is one of the events from the input Event (check if name and description match)
+                //Test that the random outcome is one of the events from the input Event
+                // (check if name and description match)
                 assertSame(inputData.getOutcomes().get(activateRandomOutcomeOutputData.getIndex()).getOutcomeName(),
                         activateRandomOutcomeOutputData.getName());
-                assertSame(inputData.getOutcomes().get(activateRandomOutcomeOutputData.getIndex()).getOutcomeDescription(),
-                        activateRandomOutcomeOutputData.getDescription());
-                //Test that the player's current balance == the players old balance + whatever value was stored in the outcome
+                assertSame(inputData.getOutcomes().get(activateRandomOutcomeOutputData.getIndex()).
+                                getOutcomeDescription(), activateRandomOutcomeOutputData.getDescription());
+                //Test that the player's current balance == the players old balance +
+                // whatever value was stored in the outcome
                 assertEquals(player.getBalance(),
                         oldBalance + activateRandomOutcomeOutputData.getResult());
             }
@@ -49,6 +49,6 @@ public class ActivateRandomOutcomeInteractorTest {
         for (int i = 0; i < 50; i++) {
             activateRandomOutcomeInteractor.execute(inputData);
             oldBalance = player.getBalance();
-        };
+        }
     }
 }

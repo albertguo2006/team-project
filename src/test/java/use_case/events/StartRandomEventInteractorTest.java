@@ -16,7 +16,7 @@ public class StartRandomEventInteractorTest {
     public void successStartRandomEventTest() {
         /// Test that the event chosen is in the DataAccessObject
         EventDataAccessObject eventDataAccessObject = new EventDataAccessObject();
-        eventDataAccessObject.createEventList();
+        ArrayList<Event> eventList = eventDataAccessObject.createEventList();
 
         // Success Presenter
         StartRandomEventOutputBoundary startRandomEventPresenter = new StartRandomEventOutputBoundary() {
@@ -25,7 +25,7 @@ public class StartRandomEventInteractorTest {
                 // Test that the random event chosen was one of the events in the DAO
                 // Two events are the same if their name, description, and outcomes are the same
                 boolean anyPassed = false;
-                for (Event event: eventDataAccessObject.getEventList()){
+                for (Event event: eventList) {
                     if (event.getEventName().equals(outputData.getEventName())
                     && event.getEventDescription().equals(outputData.getEventDescription())
                     && event.getOutcomes().equals(outputData.getOutcomes())){
