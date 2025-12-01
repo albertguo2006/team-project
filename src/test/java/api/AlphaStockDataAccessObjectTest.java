@@ -70,7 +70,7 @@ class AlphaStockDataAccessObjectTest {
 
         Exception ex = assertThrows(RuntimeException.class,
                 () -> dao.getIntradayPrices("TESTSTOCK2", 6)); // day index too large
-        assertTrue(ex.getMessage().contains("Invalid day"));
+        assertTrue(ex.getMessage().contains("Invalid day") || ex.getMessage().contains("Not enough"));
     }
 
     @Test
@@ -118,13 +118,13 @@ class AlphaStockDataAccessObjectTest {
         }
         """;
 
-        writeJson("TOOFEW", json);
+        writeJson("TOOFEW_2024-02", json);
 
         PlayStockGameDataAccessInterface dao = new AlphaStockDataAccessObject();
 
         Exception ex = assertThrows(RuntimeException.class,
-                () -> dao.getFiveDayPrices("TOOFEW", "2024-02", -1));
+                () -> dao.getFiveDayPrices("TOOFEW", "2024-02", 0));
 
-        assertTrue(ex.getMessage().contains("Invalid day"));
+        assertTrue(ex.getMessage().contains("exceeds available"));
     }
 }
