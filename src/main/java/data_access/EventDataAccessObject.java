@@ -47,6 +47,28 @@ public class EventDataAccessObject implements StartRandomEventDataAccessInterfac
             throw new RuntimeException();
         }
     }
+    public ArrayList<Event> createEventList(String eventSource) {
+        ArrayList<Event> events = new ArrayList<>();
+        try {
+            String jsonString = Files.readString(Paths.get(eventSource));
+            JSONArray jsonArray = new JSONArray(jsonString);
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                JSONObject newEvent = jsonArray.getJSONObject(i);
+                int eventID = newEvent.getInt("id");
+                String eventName = newEvent.getString("name");
+                String eventDescription = newEvent.getString("description");
+                double probability = newEvent.optDouble("probability", 1.0);
+                JSONObject eventOutcomes = newEvent.getJSONObject("outcomes");
+                HashMap<Integer, EventOutcome> OutcomeMap = createEventOutcomeList(eventOutcomes);
+                events.add(new Event(eventID, eventName, eventDescription, OutcomeMap, probability));
+            }
+            this.eventList = events;
+            return events;
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
 
     public HashMap<Integer, EventOutcome> createEventOutcomeList(JSONObject eventOutcomes) {
         HashMap<Integer, EventOutcome> outcomeMap = new HashMap<>();
@@ -66,10 +88,6 @@ public class EventDataAccessObject implements StartRandomEventDataAccessInterfac
         return eventList.get(index);
     }
 
-    public ArrayList<Event> getEventList() {
-        return eventList;
-    }
-
     public int getSize() {
         return eventList.size();
     }
@@ -81,6 +99,10 @@ public class EventDataAccessObject implements StartRandomEventDataAccessInterfac
     public void setBalance(double balance) {
         player.setBalance(balance);
     }
+
+    public void addDailyEarnings(double earnings) {player.addDailyEarnings(earnings);}
+
+    public void addDailySpending(double spendings) {player.addDailySpending(spendings);}
 
     public double getBalance() {
         return player.getBalance();

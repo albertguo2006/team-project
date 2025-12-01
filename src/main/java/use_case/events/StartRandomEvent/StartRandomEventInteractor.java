@@ -15,25 +15,27 @@ public class StartRandomEventInteractor implements StartRandomEventInputBoundary
         this.startRandomEventDataAccessObject = startRandomEventDataAccessObject;
         this.startRandomEventPresenter = startRandomEventOutputBoundary;
         this.eventPity = 0; //Chance to start a random event. Defaults to 0 and increases by 5% every time an event
-                            // is not triggered.
-        this.eventLimit = 0;
+                            // is not triggeredd
     }
 
     /// Can manually set pity for testing purposes
     public StartRandomEventInteractor(StartRandomEventDataAccessInterface startRandomEventDataAccessObject,
-                                      StartRandomEventOutputBoundary startRandomEventOutputBoundary, int eventPity){
+                                      StartRandomEventOutputBoundary startRandomEventOutputBoundary, int eventPity,
+                                      int eventLimit){
         this.startRandomEventDataAccessObject = startRandomEventDataAccessObject;
         this.startRandomEventPresenter = startRandomEventOutputBoundary;
         this.eventPity = eventPity;
+        this.eventLimit = eventLimit;
     }
 
     public void execute(){
         int randInt =  random.nextInt(101);
         if (eventPity >= randInt && eventLimit == 0) {
             eventPity = 0;
-            eventLimit = 4;
-            /// Selects a random event based on probability weights
-            Event selectedEvent = selectEventByProbability();
+            eventLimit = 3;
+            /// Selects a random event
+            int randomIndex = random.nextInt(startRandomEventDataAccessObject.getSize());
+            Event selectedEvent = startRandomEventDataAccessObject.getEvent(randomIndex);
             StartRandomEventOutputData reod = new StartRandomEventOutputData(selectedEvent);
             startRandomEventPresenter.prepareSuccessView(reod);
         }
@@ -42,30 +44,8 @@ public class StartRandomEventInteractor implements StartRandomEventInputBoundary
             if (eventLimit > 0){
                 eventLimit -= 1;
             }
-            /// somehow needs to communicate with whatever called the controller that an event was not triggered.
         }
     }
-
-    private Event selectEventByProbability() {
-        java.util.ArrayList<Event> events = startRandomEventDataAccessObject.getEventList();
-        double totalWeight = 0.0;
-        for (Event event : events) {
-            totalWeight += event.getProbability();
-        }
-
-        double randomValue = random.nextDouble() * totalWeight;
-        double cumulativeWeight = 0.0;
-
-        for (Event event : events) {
-            cumulativeWeight += event.getProbability();
-            if (randomValue < cumulativeWeight) {
-                return event;
-            }
-        }
-        // Fallback to last event if rounding issues occur
-        return events.get(events.size() - 1);
-    }
-
 }
 
 
