@@ -18,15 +18,10 @@ public class ActivateRandomOutcomeInteractor implements ActivateRandomOutcomeInp
     public void execute(ActivateRandomOutcomeInputData activateRandomOutcomeInputData) {
         HashMap<Integer, EventOutcome> outcomes = activateRandomOutcomeInputData.getOutcomes();
         int selectedIndex;
-
-        // Check if a specific outcome was selected by the player
-        if (activateRandomOutcomeInputData.hasSelectedOutcome()) {
-            selectedIndex = activateRandomOutcomeInputData.getSelectedOutcomeIndex();
-        } else {
             // Fall back to random selection based on weights
             Random random = new Random();
             double totalWeights = 0.0;
-            ArrayList<Double> cumulativeWeights = new ArrayList<Double>();
+            ArrayList<Double> cumulativeWeights = new ArrayList<>();
 
             for (EventOutcome outcome : outcomes.values()) {
                 totalWeights += outcome.getOutcomeChance();
@@ -41,10 +36,14 @@ public class ActivateRandomOutcomeInteractor implements ActivateRandomOutcomeInp
                     break;
                 }
             }
-        }
-
         // Apply the selected outcome
         EventOutcome selectedOutcome = outcomes.get(selectedIndex);
+        if (selectedOutcome.getOutcomeResult() > 0){
+            activateRandomOutcomeDataAccess.addDailyEarnings(selectedOutcome.getOutcomeResult());
+        }
+        else if (selectedOutcome.getOutcomeResult() < 0){
+            activateRandomOutcomeDataAccess.addDailySpending(selectedOutcome.getOutcomeResult() * -1);
+        }
         activateRandomOutcomeDataAccess.setBalance(activateRandomOutcomeDataAccess.getBalance() +
                 selectedOutcome.getOutcomeResult());
         ActivateRandomOutcomeOutputData activateRandomOutcomeOutputData =
