@@ -49,3 +49,5 @@ src/main/resources/stock_data
 ### Saves ###
 /savegame.json
 /bills.json
+src/main/resources/saveFile.json
+src/main/resources/stock_metadata.json
