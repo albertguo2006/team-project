@@ -63,7 +63,7 @@ public class SaveProgressInteractorTest {
         testPlayer.setPortfolio(new Portfolio(803.21, investments));
         testPlayer.setCurrentDay(Day.WEDNESDAY);
 
-        String SAVE_FILE_PATH = "src/main/resources/testSuccessSaveFile.json";
+        String SAVE_FILE_PATH = "src/main/resources/test_JSON_files/testSuccessSaveFile.json";
 
         SaveProgressInputData inputData = new SaveProgressInputData(testPlayer,
                 SAVE_FILE_PATH, gameMap.getCurrentZone().getName());
@@ -79,7 +79,7 @@ public class SaveProgressInteractorTest {
         Player player = new Player("Armand");
         GameMap gameMap = new GameMap();
 
-        String SAVE_FILE_PATH = "src/main/resources/testSuccessSaveFile.json";
+        String SAVE_FILE_PATH = "src/main/resources/test_JSON_files/testSuccessSaveFile.json";
         SaveProgressInputData inputData = new SaveProgressInputData(player,
                 SAVE_FILE_PATH, gameMap.getCurrentZone().getName());
 
