@@ -3,22 +3,6 @@
 
 **Team:** TUT0401-14 (LEC0201 Group 14)  
 **Domain:** Financial Sims Knock-Off
-
----
-
-## Table of Contents
-
-1. [Project Overview](#project-overview)
-2. [Quick Start](#quick-start)
-3. [Architecture](#architecture)
-4. [Implemented Features](#implemented-features)
-5. [Game Systems](#game-systems)
-6. [Package Structure](#package-structure)
-7. [How to Play](#how-to-play)
-8. [Testing](#testing)
-9. [Future Features](#future-features)
-10. [Team Members](#team-members)
-
 ---
 
 ## Project Overview
